@@ -1,0 +1,7 @@
+/.*\.pyc$
+/.*\.o$
+/.*\.so$
+/.*\.bldh$
+/logs/
+/remote_logs/
+.idea
