@@ -1,8 +1,9 @@
-/.*\.pyc$
-/.*\.o$
-/.*\.so$
-/.*\.bldh$
-/logs/
-/remote_logs/
+syntax: glob
+*.pyc
+*.o
+*.so
+*.bldh
+logs
+remote_logs
 .idea
 brewery/web/cgi-bin/index.cgi
