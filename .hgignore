@@ -5,3 +5,4 @@
 /logs/
 /remote_logs/
 .idea
+brewery/web/cgi-bin/index.cgi
