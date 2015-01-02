@@ -23,10 +23,10 @@ class MainBar(QWidget, MainBar_Ui):
         self.set_icon(self.reload, "refresh")
         self.set_icon(self.start_pause, "start")
         self.set_icon(self.stop, "stop")
-        self.set_color_icon(self.main_yellow_robot, TEAM_COLOR_YELLOW)
-        self.set_color_icon(self.secondary_yellow_robot, TEAM_COLOR_YELLOW)
-        self.set_color_icon(self.main_red_robot, TEAM_COLOR_RED)
-        self.set_color_icon(self.secondary_red_robot, TEAM_COLOR_RED)
+        self.set_color_icon(self.main_yellow_robot, TEAM_RIGHT_COLOR)
+        self.set_color_icon(self.secondary_yellow_robot, TEAM_RIGHT_COLOR)
+        self.set_color_icon(self.main_red_robot, TEAM_LEFT_COLOR)
+        self.set_color_icon(self.secondary_red_robot, TEAM_LEFT_COLOR)
 
         self.main_yellow_robot.setChecked(True)
         self.main_red_robot.setChecked(True)
@@ -84,7 +84,7 @@ class MainBar(QWidget, MainBar_Ui):
     def get_expected_robots(self):
         expected = []
         buttons = [ self.main_yellow_robot, self.secondary_yellow_robot, self.main_red_robot, self.secondary_red_robot ]
-        teams = [ TEAM_YELLOW, TEAM_YELLOW, TEAM_RED, TEAM_RED ]
+        teams = [ TEAM_RIGHT, TEAM_RIGHT, TEAM_LEFT, TEAM_LEFT ]
         robot_type = [ True, False, True, False ]
 
         for button, team, is_main in zip(buttons, teams, robot_type):

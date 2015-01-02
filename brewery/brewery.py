@@ -25,7 +25,7 @@ if __name__ == "__main__":
     import definitions
 
     parser = argparse.ArgumentParser(description = "BH Team's main strategy program.", add_help = True)
-    parser.add_argument("--webserver-port", action = "store", type = int, default = definitions.WEB_SERVER_PORT, metavar = "PORT", help = "Internal web server port")
+    parser.add_argument("--webserver-port", action = "store", type = int, default = 8080, metavar = "PORT", help = "Internal web server port")
     parser.add_argument("--pydev-debug", nargs=2)
     parser.add_argument("--disable-interbot", action="store_true", default=False)
     parser.add_argument("--hostname", action = "store", default = socket.gethostname())
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 |  / /  '.' '. \\   #   #  #  #   #      # # #  #      #  #     #
 |  \\ \\ @   @ / /   ####   #   #  #####   # #   #####  #   #    #
 |   '---------'
-|    _______|                       = 2014 =
+|    _______|                       = 2015 =
 |  .'-+-+-+|
 |  '.-+-+-+|
 |    """""" |

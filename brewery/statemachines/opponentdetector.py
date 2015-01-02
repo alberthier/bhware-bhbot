@@ -13,6 +13,8 @@ from definitions import *
 
 class Main(statemachine.Timer):
 
+    OPPONENT_DETECTION_DISAPPEARING_MS = 800
+
     MAIN_IN_FRONT_IDS = [  3,  4,  5,  6 ]
     MAIN_IN_BACK_IDS  = [ 12, 13, 14, 15 ]
     MAIN_ANGLES = [ 90, 70, 50, 30, 10, -10, -30, -50, -70, -90, -110, -130, -150, -170, 170, 150, 130, 110 ]
@@ -24,7 +26,7 @@ class Main(statemachine.Timer):
     PACKET_BUFFER_SIZE = 6
 
     def __init__(self):
-        super().__init__(OPPONENT_DETECTION_DISAPPEARING_MS, False)
+        super().__init__(self.OPPONENT_DETECTION_DISAPPEARING_MS, False)
         self.detections = collections.deque()
         self.in_front_ids = self.MAIN_IN_FRONT_IDS if IS_MAIN_ROBOT else self.SECONDARY_IN_FRONT_IDS
         self.in_back_ids  = self.MAIN_IN_BACK_IDS  if IS_MAIN_ROBOT else self.SECONDARY_IN_BACK_IDS

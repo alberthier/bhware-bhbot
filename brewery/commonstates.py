@@ -564,18 +564,6 @@ class FollowPath(statemachine.State):
 
 
 
-class StopAll(statemachine.State):
-
-    def on_enter(self):
-        self.send_packet(packets.StopAll())
-
-
-    def on_stop_all(self, packet):
-        yield None
-
-
-
-
 class Navigate(statemachine.State):
 
     def __init__(self, x, y, direction = DIRECTION_FORWARD):
@@ -607,7 +595,7 @@ class Navigate(statemachine.State):
 class GotoHome(Navigate):
 
     def __init__(self):
-        Navigate.__init__(self, YELLOW_START_X, YELLOW_START_Y)
+        Navigate.__init__(self, LEFT_START_X, LEFT_START_Y)
 
 
 
@@ -629,7 +617,7 @@ class Trigger(statemachine.State):
             a list of tuples (actuator_type, id, args...) for multiple motor control
             ex:
                 Trigger(ACTUATOR_TYPE_SERVO_AX, 1, 154, 1000)
-                Trigger((ACTUATOR_TYPE_SERVO_AX, 1, 154, 1000), (ACTUATOR_TYPE_RELAY, 2, ACTION_ON))
+                Trigger((ACTUATOR_TYPE_SERVO_AX, 1, 154, 1000), (ACTUATOR_TYPE_ON_OFF, 2, ACTION_ON))
         """
         if len(args) > 0:
             if type(args[0]) == tuple:
@@ -650,7 +638,7 @@ class Trigger(statemachine.State):
             actuator_type = cmd[self.TYPE]
             if actuator_type in [ ACTUATOR_TYPE_SERVO_AX, ACTUATOR_TYPE_SERVO_RX ]:
                 self.send_packet(packets.ServoControl(*cmd))
-            elif actuator_type == ACTUATOR_TYPE_RELAY:
+            elif actuator_type == ACTUATOR_TYPE_ON_OFF:
                 self.send_packet(packets.RelayControl(id = cmd[self.ID], action = cmd[self.RELAY_ACTION]))
             elif actuator_type == ACTUATOR_TYPE_PWM:
                 self.send_packet(packets.PwmControl(id = cmd[self.ID], value = cmd[self.PWM_VALUE]))
@@ -669,7 +657,7 @@ class Trigger(statemachine.State):
     def on_relay_control(self, packet):
         self.exit_reason = SERVO_STATUS_SUCCESS
         self.statuses[packet.id] = SERVO_STATUS_SUCCESS
-        yield from self.cleanup(ACTUATOR_TYPE_RELAY, packet.id)
+        yield from self.cleanup(ACTUATOR_TYPE_ON_OFF, packet.id)
 
 
     def on_pwm_control(self, packet):

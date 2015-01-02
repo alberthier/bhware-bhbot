@@ -68,12 +68,12 @@ class RobotController(object):
             self.team = team
             self.is_main = is_main
 
-            if team == TEAM_YELLOW:
-                self.team_name = "yellow"
-                self.team_color = TEAM_COLOR_YELLOW
+            if team == TEAM_RIGHT:
+                self.team_name = "green"
+                self.team_color = TEAM_RIGHT_COLOR
             else:
-                self.team_name = "red"
-                self.team_color = TEAM_COLOR_RED
+                self.team_name = "yellow"
+                self.team_color = TEAM_LEFT_COLOR
             if is_main:
                 self.team_name = "Main " + self.team_name
             else:
@@ -93,10 +93,10 @@ class RobotController(object):
 
             if self.is_main:
                 args.append("--hostname")
-                args.append("doc")
+                args.append("main")
             else:
                 args.append("--hostname")
-                args.append("marty")
+                args.append("secondary")
 
             if self.offset == 0 and self.game_controller.args.pydev_debug is not None:
                 args.append("--pydev-debug")
@@ -106,12 +106,12 @@ class RobotController(object):
                 if self.game_controller.args.main_fsm is not None:
                     args.append(self.game_controller.args.main_fsm)
                 else:
-                    args.append("doc")
+                    args.append("main")
             else :
                 if self.game_controller.args.secondary_fsm is not None:
                     args.append(self.game_controller.args.secondary_fsm)
                 else:
-                    args.append("marty")
+                    args.append("secondary")
 
             self.process.start(brewery, args)
 
@@ -132,6 +132,7 @@ class RobotController(object):
         self.socket.setSocketOption(QAbstractSocket.LowDelayOption, 1)
         self.socket.disconnected.connect(self.shutdown)
         self.socket.readyRead.connect(self.read_packet)
+        self.try_device_ready()
 
 
     def read_output(self):
@@ -163,10 +164,6 @@ class RobotController(object):
         self.send_packet(packet)
 
 
-    def on_controller_ready(self, packet):
-        self.try_device_ready()
-
-
     def on_position_control_config(self, packet):
         self.send_packet(packet)
 
@@ -183,22 +180,28 @@ class RobotController(object):
             self.game_controller.try_start()
 
 
-    def on_stop_all(self, packet):
-        self.stop()
-        self.send_packet(packet)
-
-
     def on_servo_control(self, packet):
         packet.status = SERVO_STATUS_SUCCESS
         self.send_packet(packet)
 
 
-    def on_relay_control(self, packet):
+    def on_output_control(self, packet):
         self.send_packet(packet)
 
 
     def on_pwm_control(self, packet):
         self.send_packet(packet)
+
+
+    def on_input_status_request(self, packet):
+        status = packets.InputStatus()
+        status.id = packet.id
+        if packet.id == INPUT_TEAM:
+            status.value = self.team
+        else:
+            status.value = random.choice([0, 1])
+        self.send_packet(status)
+
 
     def on_simulator_data(self, packet):
         self.output_view.handle_led(packet.leds)
@@ -212,18 +215,16 @@ class RobotController(object):
     def try_device_ready(self):
         if random.choice([True, False]):
             # OK, ready
-            self.send_ready()
+            self.send_status()
         else:
             # Still busy
-            packet = packets.DeviceBusy()
-            packet.remote_device = REMOTE_DEVICE_SIMULATOR
-            self.send_packet(packet)
-            QTimer.singleShot(500, self.send_ready)
+            self.send_status(True)
+            QTimer.singleShot(500, self.send_status)
 
 
-    def send_ready(self):
-        packet = packets.DeviceReady()
-        packet.team = self.team
+    def send_status(self, busy = None):
+        packet = packets.ControllerStatus()
+        packet.status = CONTROLLER_STATUS_BUSY if busy else CONTROLLER_STATUS_READY
         packet.remote_device = REMOTE_DEVICE_SIMULATOR
         self.send_packet(packet)
 
@@ -232,14 +233,15 @@ class RobotController(object):
         if self.robot_layer.robot.item is not None:
             packet = packets.KeepAlive()
             packet.current_pose = self.robot_layer.get_pose()
-            packet.match_started = self.game_controller.started
-            packet.match_time = self.game_controller.time
+            packet.left_battery_voltage = 14.9
+            packet.right_battery_voltage = 14.8
             self.send_packet(packet)
 
 
     def send_start_signal(self):
-        packet = packets.Start()
-        packet.team = self.team
+        packet = packets.InputStatus()
+        packet.id = INPUT_START
+        packet.value = 1
         self.send_packet(packet)
 
 

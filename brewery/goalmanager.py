@@ -98,6 +98,8 @@ class Goal:
 
 class GoalManager:
 
+    GOAL_EVALUATION_USES_PATHFINDING = True
+
     def __init__(self, event_loop):
         self.event_loop = event_loop
         self.goals = []
@@ -150,7 +152,7 @@ class GoalManager:
         for goal in candidates:
             pose = position.Pose(goal.x, goal.y, virtual = True)
             logger.log("Evaluate goal {}".format(goal.uid))
-            if GOAL_EVALUATION_USES_PATHFINDING:
+            if GoalManager.GOAL_EVALUATION_USES_PATHFINDING:
                 goal.navigation_cost = self.event_loop.map.evaluate(self.event_loop.robot.pose, pose)
             else:
                 goal.navigation_cost = tools.distance(self.event_loop.robot.pose.x, self.event_loop.robot.pose.y, pose.x, pose.y)
@@ -217,7 +219,7 @@ class GoalManager:
         for goal in available_goals:
             pose = position.Pose(goal.x, goal.y, virtual=True)
             logger.log("Evaluate goal {}".format(goal.identifier))
-            if GOAL_EVALUATION_USES_PATHFINDING:
+            if GoalManager.GOAL_EVALUATION_USES_PATHFINDING:
                 goal.navigation_cost = self.event_loop.map.evaluate(self.event_loop.robot.pose, pose)
             else:
                 goal.navigation_cost = tools.distance(self.event_loop.robot.pose.x, self.event_loop.robot.pose.y, pose.x, pose.y)
@@ -312,4 +314,3 @@ class GoalManager:
     def on_interbot_goal_status(self, packet):
         logger.log('Got goal status : {} = {}'.format(packet.goal_identifier, packet.goal_status))
         self.internal_goal_update(packet.goal_identifier, packet.goal_status)
-

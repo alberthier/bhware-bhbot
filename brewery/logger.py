@@ -75,10 +75,10 @@ def initialize(args = None):
 
 def set_team(team):
     global term_color
-    if team == TEAM_YELLOW:
-        term_color = TERM_YELLOW
+    if team == TEAM_RIGHT:
+        term_color = TERM_GREEN
     else:
-        term_color = TERM_RED
+        term_color = TERM_YELLOW
 
 
 def close():
@@ -141,7 +141,7 @@ def log_packet(packet, sender = "ARM"):
     delta = datetime.datetime.now() - start_time
     time = "'{:=0.02f}'".format(delta.total_seconds())
     text = "'" + sender + "'," + type(packet).__name__ + ",\"" + packet.to_dump() + "\"]"
-    ignore = type(packet).__name__ == "KeepAlive" and (packet.match_time <= 0 or packet.match_time >= 100000)
+    ignore = False
     if not ignore and log_file is not None:
         try:
             log_file.write("l([" + time + "," + text + ")\n")

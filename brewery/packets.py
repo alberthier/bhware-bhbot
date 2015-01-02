@@ -232,9 +232,9 @@ class BasePacket(object):
 ################################################################################
 # Packet type ranges
 
-COLORDET_RANGE_START  = 1
-COLORDET_RANGE_END    = 32
-TURRET_RANGE_START    = COLORDET_RANGE_END
+PROCESS_RANGE_START   = 1
+PROCESS_RANGE_END     = 32
+TURRET_RANGE_START    = PROCESS_RANGE_END
 TURRET_RANGE_END      = 50
 PIC32_RANGE_START     = TURRET_RANGE_END
 PIC32_RANGE_END       = 150
@@ -251,37 +251,8 @@ INTERNAL_RANGE_END    = 256
 
 # Process packets
 
-
-class DisableScan(BasePacket):
-
-    TYPE = 1
-
-
-
-
-class SetLogPrefix(BasePacket):
-
-    TYPE = 2
-    DEFINITION = (
-        ('prefix', String(128)),
-    )
-
-
-
-
-class ColorDetected(BasePacket):
-
-    TYPE = 3
-    DEFINITION = (
-        ('color' , UEnum8(COLOR, COLOR_NONE)),
-    )
-
-
-class EnableScan(BasePacket):
-
-    TYPE = 4
-
-
+# Start at 0
+# None this year
 
 # Turret packets
 
@@ -340,40 +311,13 @@ class Reinitialize(BasePacket):
 
 
 
-class ControllerReady(BasePacket):
+class ControllerStatus(BasePacket):
 
     TYPE = 51
     LOGVIEW_DEFAULT_ENABLED = True
-
-
-
-
-class DeviceBusy(BasePacket):
-
-    TYPE = 52
     DEFINITION = (
         ('remote_device', UEnum8(REMOTE_DEVICE, REMOTE_DEVICE_PIC)),
-    )
-
-
-
-
-class DeviceReady(BasePacket):
-
-    TYPE = 53
-    DEFINITION = (
-        ('team',          UEnum8(TEAM         , TEAM_UNKNOWN     )),
-        ('remote_device', UEnum8(REMOTE_DEVICE, REMOTE_DEVICE_PIC)),
-    )
-
-
-
-
-class Start(BasePacket):
-
-    TYPE = 54
-    DEFINITION = (
-        ('team', UEnum8(TEAM, TEAM_UNKNOWN)),
+        ('status',        UEnum8(CONTROLLER_STATUS, CONTROLLER_STATUS_BUSY))
     )
 
 
@@ -381,7 +325,7 @@ class Start(BasePacket):
 
 class Rotate(BasePacket):
 
-    TYPE = 55
+    TYPE = 52
     DEFINITION = (
         ('direction', Enum8(DIRECTION, DIRECTION_AUTO)),
         ('angle'    , Float(0.0, "Destination angle")),
@@ -392,11 +336,11 @@ class Rotate(BasePacket):
 
 class MoveCurve(BasePacket):
 
-    TYPE = 56
+    TYPE = 53
     DEFINITION = (
         ('direction', Enum8        (DIRECTION, DIRECTION_FORWARD)),
         ('angle'    , OptionalAngle(None, "Destination angle")),
-        ('points'   , List         (62, Point(), [], "List of points to follow")),
+        ('points'   , List         (61, Point(), [], "List of points to follow")),
     )
 
 
@@ -404,7 +348,7 @@ class MoveCurve(BasePacket):
 
 class MoveLine(BasePacket):
 
-    TYPE = 57
+    TYPE = 54
     DEFINITION = (
         ('direction', Enum8(DIRECTION, DIRECTION_FORWARD)),
         ('points'   , List (63, Point(), [], "List of points to follow")),
@@ -415,7 +359,7 @@ class MoveLine(BasePacket):
 
 class MoveArc(BasePacket):
 
-    TYPE = 58
+    TYPE = 55
     DEFINITION = (
         ('direction', Enum8(DIRECTION, DIRECTION_FORWARD)),
         ('center'   , Point()),
@@ -428,14 +372,14 @@ class MoveArc(BasePacket):
 
 class GotoStarted(BasePacket):
 
-    TYPE = 59
+    TYPE = 56
 
 
 
 
 class WaypointReached(BasePacket):
 
-    TYPE = 60
+    TYPE = 57
 
     DEFINITION = (
         ('current_point_index', UInt8(0, "Reached waypoint index")),
@@ -447,7 +391,7 @@ class WaypointReached(BasePacket):
 
 class GotoFinished(BasePacket):
 
-    TYPE = 61
+    TYPE = 58
     DEFINITION = (
         ('reason'             , UEnum8(REASON, REASON_DESTINATION_REACHED)),
         ('current_pose'       , Pose  ("Robot pose at the end of the movement")),
@@ -459,26 +403,26 @@ class GotoFinished(BasePacket):
 
 class EnableAntiBlocking(BasePacket):
 
-    TYPE = 62
+    TYPE = 59
 
 
 
 
 class DisableAntiBlocking(BasePacket):
 
-    TYPE = 63
+    TYPE = 60
 
 
 
 
 class KeepAlive(BasePacket):
 
-    TYPE = 64
+    TYPE = 61
     LOGVIEW_DEFAULT_ENABLED = False
     DEFINITION = (
-        ('current_pose' , Pose  ("Current robot pose")),
-        ('match_started', Bool  (False, "Flag defining if the match has already started")),
-        ('match_time'   , UInt32(0, "Time elapsed since the start of the match")),
+        ('current_pose' ,         Pose  ("Current robot pose")),
+        ('right_battery_voltage', Float(0.0, "Right battery voltage")),
+        ('left_battery_voltage',  Float(0.0, "Left battery voltage")),
     )
 
 
@@ -486,7 +430,7 @@ class KeepAlive(BasePacket):
 
 class PositionControlConfig(BasePacket):
 
-    TYPE = 65
+    TYPE = 62
     DEFINITION = (
         ('ratio_acc'     , Float(0.0)),
         ('ratio_decc'    , Float(0.0)),
@@ -500,14 +444,14 @@ class PositionControlConfig(BasePacket):
 
 class Stop(BasePacket):
 
-    TYPE = 66
+    TYPE = 63
 
 
 
 
 class Resettle(BasePacket):
 
-    TYPE = 67
+    TYPE = 64
     DEFINITION = (
         ('axis'    , UEnum8     (AXIS, AXIS_X)),
         ('position', Float      (0.0, "Robot position on the given axis")),
@@ -517,21 +461,14 @@ class Resettle(BasePacket):
 
 
 
-class StopAll(BasePacket):
-
-    TYPE = 68
-
-
-
-
 class ServoControl(BasePacket):
 
-    TYPE = 69
+    TYPE = 65
     DEFINITION = (
         ('type',    UEnum8(ACTUATOR_TYPE, ACTUATOR_TYPE_SERVO_AX)),
         ('id',      UInt8 (0, "Servo identifier")),
         ('command', UEnum8(SERVO_COMMAND, SERVO_COMMAND_MOVE)),
-        ('value',   UInt16(0, "Destination angle [0, 300]")),
+        ('value',   UInt16(0, "Servo command value")),
         ('timeout', UInt32(0, "Timeout in ms")),
         ('status',  UEnum8(SERVO_STATUS, SERVO_STATUS_TIMED_OUT)),
     )
@@ -539,11 +476,11 @@ class ServoControl(BasePacket):
 
 
 
-class RelayControl(BasePacket):
+class OutputControl(BasePacket):
 
-    TYPE = 70
+    TYPE = 66
     DEFINITION = (
-        ('id',     UInt8 (0, "Relay identifier")),
+        ('id',     UInt8 (0, "Output identifier")),
         ('action', UEnum8(ACTION, ACTION_OFF)),
     )
 
@@ -552,7 +489,7 @@ class RelayControl(BasePacket):
 
 class PwmControl(BasePacket):
 
-    TYPE = 71
+    TYPE = 67
     DEFINITION = (
         ('id',    UInt8 (0, "PWM identifier")),
         ('value', UInt16(0, "Value [0x0 - 0x3FF - 0x7FF]")),
@@ -561,9 +498,29 @@ class PwmControl(BasePacket):
 
 
 
-class RobotInit(BasePacket):
+class InputStatusRequest(BasePacket):
 
-    TYPE = 72
+    TYPE = 68
+    DEFINITION = (
+        ('id',    UInt8(0, "Input identifier")),
+    )
+
+
+
+
+class InputStatus(BasePacket):
+
+    TYPE = 69
+    DEFINITION = (
+        ('id',    UInt8(0, "PWM identifier")),
+        ('value', UInt8(0, "Value")),
+    )
+
+    def handler_methods(self):
+        yield from BasePacket.handler_methods(self)
+        name = INPUT.lookup_by_value[self.id]
+        name = "on" + name[5:].lower()
+        yield name
 
 
 # Simulator
@@ -739,19 +696,6 @@ class OpponentDisappeared(BasePacket):
     DEFINITION = (
         ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
         ('direction', UEnum8(DIRECTION, DIRECTION_FORWARD)),
-    )
-
-
-
-
-class RelayToggle(BasePacket):
-
-    TYPE = 235
-
-    DEFINITION = (
-        ('id'          , UInt8 (0, "Relay ID")),
-        ('action'      , UEnum8(ACTION, ACTION_OFF)),
-        ('toggle_count', Int8  (0, "Number of toggles before 'action'. 0 = release")),
     )
 
 

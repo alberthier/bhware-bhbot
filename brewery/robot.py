@@ -23,7 +23,6 @@ class Robot(object):
         self.main_opponent_direction = None
         self.secondary_opponent_direction = None
         self.goal_manager = goalmanager.GoalManager(event_loop)
-        self.mammoth_sparrow_loaded = True
 
 
     def is_looking_at(self, pose):
@@ -42,12 +41,8 @@ class Robot(object):
         return abs(current_angle - angle) < (math.pi / 32.0)
 
 
-    def on_device_ready(self, packet):
-        self.team = packet.team
-
-
-    def on_start(self, packet):
-        self.team = packet.team
+    def on_team(self, packet):
+        self.team = packet.value
 
 
     def on_goto_finished(self, packet):
@@ -65,7 +60,6 @@ class Robot(object):
     def set_team(self, team):
         position.Pose.match_team = team
         self._team = team
-        self.fire_color = COLOR_RED if team == TEAM_RED else COLOR_YELLOW
 
     def get_team(self):
         return self._team

@@ -350,11 +350,6 @@ class PicControlChannel(PacketClientSocketChannel):
         if self.first_connection:
             self.first_connection = False
             self.event_loop.on_turret_boot(None)
-            Timer(self.event_loop, 0, self.ready).start()
-
-
-    def ready(self):
-        self.event_loop.send_packet(packets.ControllerReady())
 
 
 
@@ -514,14 +509,6 @@ class EventLoop(object):
         self.interbot_enabled = interbot_enabled
         self.exit_value = 0
 
-        if IS_HOST_DEVICE_ARM and IS_MAIN_ROBOT:
-            folder = os.path.join(os.path.dirname(__file__), "colordetector")
-            cmds = ["g++", "-Wall", "-O2", "-o", "colordetector", "colordetector.cpp", "-l", "opencv_core", "-l", "opencv_highgui", "-l", "opencv_imgproc"]
-            builder.Builder("colordetector.cpp", "colordetector", cmds, folder).build()
-            self.colordetector = ProcessChannel(self, "CAM", [os.path.join(folder, "colordetector"), "-q", "1"])
-        else:
-            self.colordetector = None
-
 
     def on_keep_alive(self, packet):
         now = datetime.datetime.now()
@@ -531,8 +518,8 @@ class EventLoop(object):
             leds.driver.heartbeat_tick()
 
 
-    def on_device_ready(self, packet):
-        logger.set_team(packet.team)
+    def on_team(self, packet):
+        logger.set_team(packet.value)
 
 
     def on_start(self, packet):
@@ -594,8 +581,6 @@ class EventLoop(object):
         elif self.do_send_packet(packet, packets.PIC32_RANGE_START, packets.PIC32_RANGE_END, self.pic_control_channel):
             return
         elif IS_HOST_DEVICE_PC and self.do_send_packet(packet, packets.SIMULATOR_RANGE_START, packets.SIMULATOR_RANGE_END, self.pic_control_channel):
-            return
-        elif self.do_send_packet(packet, packets.COLORDET_RANGE_START, packets.COLORDET_RANGE_END, self.colordetector):
             return
         elif self.do_send_packet(packet, packets.INTERBOT_RANGE_START, packets.INTERBOT_RANGE_END, self.interbot_channel):
             return
@@ -666,7 +651,5 @@ class EventLoop(object):
             self.interbot_channel.close()
         if self.interbot_server is not None:
             self.interbot_server.close()
-        if self.colordetector is not None:
-            self.colordetector.close()
 
         self.exit_value = exit_value

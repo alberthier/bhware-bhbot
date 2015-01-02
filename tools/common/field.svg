@@ -11,320 +11,354 @@
 
         <!--
           == Colors ==
-
-          yellow:        #ffb901
+          yellow: #f9c001
           yellow-darker: #dea100
-          red:           #e91009
-          red-darker:    #ba0d07
-          green:         #4ea836
-          green-darker:  #3c822a
-          gray:          #bfc1ab
-          gray-draker:   #979988
-          brown:         #7c382d
-          brown-darker:  #54261f
-          black:         #010204
+          green: #00aa1e
+          green-darker: #367526
+          blue: #00ace6
+          blue-darker: #007fab
+          red: #e00000
+          red-darker: #b80d07
+          gray: #b3afa3
+          black: #010204
         -->
 
         <!-- Main Field -->
         <rect
-            style="fill:#bfc1ab;stroke:none"
-            id="main_gray_border"
+            style="fill:#b80d07;stroke:none"
+            id="main_red_border"
             width="3040"
             height="2040"
             x="-20"
             y="-20" />
         <rect
-            style="fill:#ba0d07;stroke:none"
-            id="red_border"
-            width="420"
-            height="720"
-            x="-20"
-            y="-20" />
-        <rect
-            style="fill:#dea100;stroke:none"
-            id="yellow_border"
-            width="420"
-            height="720"
-            x="2600"
-            y="-20" />
-        <rect
-            style="fill:#54261f;stroke:none"
-            id="yellow_mammoth"
-            width="700"
-            height="60"
-            x="400"
-            y="-60" />
-        <rect
-            style="fill:#54261f;stroke:none"
-            id="red_mammoth"
-            width="700"
-            height="60"
-            x="1900"
-            y="-60" />
-        <rect
-            style="fill:#979988;stroke:none"
-            id="fresco"
-            width="800"
-            height="40"
-            x="1100"
-            y="-40" />
-        <rect
-            style="fill:#4ea836;stroke:none"
+            style="fill:#00ace6;stroke:none"
             id="mainfield"
             width="3000"
             height="2000"
             x="0"
             y="0" />
 
-        <!-- Start Zones -->
-        <path
-            style="fill:#bfc1ab;stroke:none"
-            id="yellow_start_zone"
-            d="M 3000 0 v 690 a 390 390 0 0 1 -390 -390 v -300 z" />
-        <path
-            style="fill:none;stroke:#ffb901;stroke-width:20"
-            id="yellow_start_zone_border"
-            d="M 3000 690 a 390 390 0 0 1 -390 -390 v -300" />
-        <circle
-            style="fill:#ffb901;stroke:none"
-            id="yellow_hand"
-            cx="2820"
-            cy="300"
-            r="50" />
-        <path
-            style="fill:#bfc1ab;stroke:none"
-            id="red_start_zone"
-            d="M 0 0 h 390 v 300 a 390 390 0 0 1 -390 390 z" />
-        <path
-            style="fill:none;stroke:#e91009;stroke-width:20"
-            id="red_start_zone_border"
-            d="M 390 0 v 300 a 390 390 0 0 1 -390 390" />
-        <circle
-            style="fill:#e91009;stroke:none"
-            id="red_hand"
-            cx="180"
-            cy="300"
-            r="50" />
-
-        <!-- Torchs -->
+        <!-- Left Start Zone -->
         <rect
-            style="fill:#65665b;stroke:none"
-            id="yellow_torch_11"
-            width="22"
+            style="fill:#00aa1e;stroke:none"
+            id="left_green_zone"
+            width="400"
+            height="1200"
+            x="0"
+            y="400" />
+        <path
+            style="fill:#f9c001;stroke:none"
+            id="left_yellow_zone"
+            d="M 0 800 h 450 a 200 200 0 0 1 0 400 h -450" />
+        <rect
+            style="fill:#dea100;stroke:none"
+            id="left_yellow_border_1"
+            width="400"
             height="22"
             x="0"
-            y="731" />
+            y="778" />
         <rect
-            style="fill:#65665b;stroke:none"
-            id="yellow_torch_12"
-            width="22"
+            style="fill:#dea100;stroke:none"
+            id="left_yellow_border_2"
+            width="400"
             height="22"
             x="0"
-            y="847" />
+            y="1200" />
         <rect
-            style="fill:#65665b;stroke:none"
-            id="yellow_torch_21"
-            width="22"
-            height="22"
-            x="1231"
-            y="1978" />
+            style="fill:#dea100;stroke:none"
+            id="left_yellow_border_3"
+            width="70"
+            height="70"
+            x="0"
+            y="965" />
         <rect
-            style="fill:#65665b;stroke:none"
-            id="yellow_torch_22"
+            style="fill:#dea100;stroke:none"
+            id="left_yellow_border_4"
             width="22"
-            height="22"
-            x="1347"
-            y="1978" />
-        <rect
-            style="fill:#65665b;stroke:none"
-            id="red_torch_11"
-            width="22"
-            height="22"
-            x="2978"
-            y="731" />
-        <rect
-            style="fill:#65665b;stroke:none"
-            id="red_torch_12"
-            width="22"
-            height="22"
-            x="2978"
-            y="847" />
-        <rect
-            style="fill:#65665b;stroke:none"
-            id="yellow_torch_21"
-            width="22"
-            height="22"
-            x="1631"
-            y="1978" />
-        <rect
-            style="fill:#65665b;stroke:none"
-            id="yellow_torch_22"
-            width="22"
-            height="22"
-            x="1747"
-            y="1978" />
+            height="400"
+            x="48"
+            y="800" />
 
-        <!-- Fireplaces -->
+        <!-- Right Start Zone -->
+        <rect
+            style="fill:#f9c001;stroke:none"
+            id="right_yellow_zone"
+            width="400"
+            height="1200"
+            x="2600"
+            y="400" />
         <path
-            style="fill:#7c382d;stroke:none"
-            id="yellow_fireplace"
-            d="M 0 2000 h 250 a 250 250 0 0 0 -250 -250 z" />
+            style="fill:#00aa1e;stroke:none"
+            id="right_green_zone"
+            d="M 3000 800 h -450 a 200 200 0 0 0 0 400 h 450" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="right_green_border_1"
+            width="400"
+            height="22"
+            x="2600"
+            y="778" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="right_green_border_2"
+            width="400"
+            height="22"
+            x="2600"
+            y="1200" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="right_green_border_3"
+            width="70"
+            height="70"
+            x="2930"
+            y="965" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="right_green_border_4"
+            width="22"
+            height="400"
+            x="2930"
+            y="800" />
+
+        <!-- Spotlight Platform -->
         <path
-            style="fill:#7c382d;stroke:none"
-            id="red_fireplace"
-            d="M 3000 2000 v -250 a 250 250 0 0 0 -250 250 z" />
+            style="fill:#e00000;stroke:none"
+            id="spot_building_area"
+            d="M 1100 2000 v -100 a 100 100 0 0 1 100 -100 h 600 a 100 100 0 0 1 100 100 v 100" />
+        <rect
+            style="fill:#b80d07;stroke:none"
+            id="spot_platform"
+            width="600"
+            height="100"
+            x="1200"
+            y="1900" />
 
-        <!-- Hill -->
-        <circle
-            style="fill:#7c382d;stroke:none"
-            id="hill"
-            cx="1500"
-            cy="1000"
-            r="150" />
+        <!-- Robomovies Ticket -->
+        <path
+            style="fill:#e00000;stroke:#010204;stroke-width:22"
+            id="robomovies"
+            d="M 1500 811 h 480 a 90 90 0 0 0 90 90 v 300 a 90 90 0 0 0 -90 90 h -960 a 90 90 0 0 0 -90 -90 v -300 a 90 90 0 0 0 90 -90 z" />
 
-        <!-- Trees -->
-        <circle
-            style="fill:#54261f;stroke:none"
-            id="yellow_tree_trunk_1"
-            cx="0"
-            cy="1300"
-            r="25" />
-        <circle
-            style="fill:#3c822a;stroke:none"
-            id="yellow_tree_1"
-            cx="0"
-            cy="1300"
-            r="150" />
-        <circle
-            style="fill:#54261f;stroke:none"
-            id="yellow_tree_trunk_2"
-            cx="700"
-            cy="2000"
-            r="25" />
-        <circle
-            style="fill:#3c822a;stroke:none"
-            id="yellow_tree_2"
-            cx="700"
-            cy="2000"
-            r="150" />
-        <circle
-            style="fill:#54261f;stroke:none"
-            id="red_tree_trunk_1"
-            cx="3000"
-            cy="1300"
-            r="25" />
-        <circle
-            style="fill:#3c822a;stroke:none"
-            id="red_tree_1"
-            cx="3000"
-            cy="1300"
-            r="150" />
-        <circle
-            style="fill:#54261f;stroke:none"
-            id="red_tree_trunk_2"
-            cx="2300"
-            cy="2000"
-            r="25" />
-        <circle
-            style="fill:#3c822a;stroke:none"
-            id="red_tree_2"
-            cx="2300"
-            cy="2000"
-            r="150" />
+        <!-- Popcorn machine -->
+        <rect
+            style="fill:#007fab;stroke:none"
+            id="left_popcorn_machine_1"
+            width="70"
+            height="70"
+            x="265"
+            y="0" />
+        <rect
+            style="fill:#007fab;stroke:none"
+            id="left_popcorn_machine_2"
+            width="70"
+            height="70"
+            x="565"
+            y="0" />
+        <rect
+            style="fill:#007fab;stroke:none"
+            id="right_popcorn_machine_1"
+            width="70"
+            height="70"
+            x="2365"
+            y="0" />
+        <rect
+            style="fill:#007fab;stroke:none"
+            id="right_popcorn_machine_2"
+            width="70"
+            height="70"
+            x="2665"
+            y="0" />
+
+        <!-- Steps -->
+        <rect
+            style="fill:#007fab;stroke:none"
+            id="steps_border"
+            width="1066"
+            height="580"
+            x="967"
+            y="0" />
+        <rect
+            style="fill:#b3afa3;stroke:none"
+            id="left_steps"
+            width="500"
+            height="558"
+            x="989"
+            y="22" />
+        <rect
+            style="fill:#dea100;stroke:none"
+            id="left_steps_carpet_1"
+            width="500"
+            height="278"
+            x="989"
+            y="22" />
+        <rect
+            style="fill:#dea100;stroke:none"
+            id="left_steps_carpet_2"
+            width="300"
+            height="300"
+            x="1089"
+            y="280" />
+        <rect
+            style="fill:#b3afa3;stroke:none"
+            id="right_steps"
+            width="500"
+            height="558"
+            x="1511"
+            y="22" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="left_steps_carpet_1"
+            width="500"
+            height="278"
+            x="1511"
+            y="22" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="left_steps_carpet_2"
+            width="300"
+            height="300"
+            x="1611"
+            y="280" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="989"
+            y1="368"
+            x2="1489"
+            y2="368" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="989"
+            y1="438"
+            x2="1489"
+            y2="438" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="989"
+            y1="508"
+            x2="1489"
+            y2="508" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="989"
+            y1="578"
+            x2="1489"
+            y2="578" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="1511"
+            y1="368"
+            x2="2011"
+            y2="368" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="1511"
+            y1="438"
+            x2="2011"
+            y2="438" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="1511"
+            y1="508"
+            x2="2011"
+            y2="508" />
+        <line
+            style="stroke:#010204;stroke-width:4"
+            x1="1511"
+            y1="578"
+            x2="2011"
+            y2="578" />
 
         <!-- Paths -->
         <path
             style="fill:none;stroke:#010204;stroke-width:20"
-            id="yellow_black_path"
-            d="M 0 600 h 1200 a 150 150 0 0 0 150 -150 v -450" />
+            id="black_path_1"
+            d="M 250 2000
+               a 150 150 0 0 1 150 -150
+               h 460
+               a 150 150 0 0 0 150 -150
+               a 150 150 0 0 1 150 -150
+               h 680
+               a 150 150 0 0 1 150 150
+               a 150 150 0 0 0 150 150
+               h 460
+               a 150 150 0 0 1 150 150" />
         <path
             style="fill:none;stroke:#010204;stroke-width:20"
-            id="red_black_path"
-            d="M 3000 600 h -1200 a 150 150 0 0 1 -150 -150 v -450" />
-
-        <!-- Baskets -->
-        <rect
-            style="fill:#3c822a;stroke:none"
-            id="yellow_basket_border_green"
-            width="700"
-            height="130"
-            x="400"
-            y="0" />
-        <rect
-            style="fill:#dea100;stroke:none"
-            id="yellow_basket_border_yellow"
-            width="700"
-            height="170"
-            x="400"
-            y="130" />
-        <rect
-            style="fill:#ffb901;stroke:none"
-            id="yellow_basket"
-            width="656"
-            height="148"
-            x="422"
-            y="130" />
-        <rect
-            style="fill:#3c822a;stroke:none"
-            id="red_basket_border_green"
-            width="700"
-            height="130"
-            x="1900"
-            y="0" />
-        <rect
-            style="fill:#ba0d07;stroke:none"
-            id="red_basket_border_red"
-            width="700"
-            height="170"
-            x="1900"
-            y="130" />
-        <rect
-            style="fill:#e91009;stroke:none"
-            id="red_basket"
-            width="656"
-            height="148"
-            x="1922"
-            y="130" />
+            id="left_black_path"
+            d="M 400 1850
+               a 150 150 0 0 0 150 -150
+               v -873" />
+        <path
+            style="fill:none;stroke:#010204;stroke-width:20"
+            id="right_black_path"
+            d="M 2600 1850
+               a 150 150 0 0 1 -150 -150
+               v -873" />
+        <line
+            style="stroke:#010204;stroke-width:20"
+            x1="550"
+            y1="1850"
+            x2="550"
+            y2="2000" />
+        <line
+            style="stroke:#010204;stroke-width:20"
+            x1="850"
+            y1="1850"
+            x2="850"
+            y2="2000" />
+        <line
+            style="stroke:#010204;stroke-width:20"
+            x1="2150"
+            y1="1850"
+            x2="2150"
+            y2="2000" />
+        <line
+            style="stroke:#010204;stroke-width:20"
+            x1="2450"
+            y1="1850"
+            x2="2450"
+            y2="2000" />
 
         <!-- Beacon places -->
         <rect
-            style="fill:#ba0d07;stroke:none"
-            id="red_beacon_1"
+            style="fill:#367526;stroke:none"
+            id="left_beacon_1"
             width="80"
             height="80"
             x="-100"
             y="-100" />
         <rect
             style="fill:#dea100;stroke:none"
-            id="yellow_beacon_1"
+            id="left_beacon_2"
             width="80"
             height="80"
             x="-100"
             y="960" />
         <rect
-            style="fill:#ba0d07;stroke:none"
-            id="red_beacon_2"
+            style="fill:#367526;stroke:none"
+            id="left_beacon_3"
             width="80"
             height="80"
             x="-100"
             y="2020" />
         <rect
             style="fill:#dea100;stroke:none"
-            id="yellow_beacon_2"
+            id="right_beacon_1"
             width="80"
             height="80"
             x="3020"
             y="-100" />
         <rect
-            style="fill:#ba0d07;stroke:none"
-            id="red_beacon_3"
+            style="fill:#367526;stroke:none"
+            id="right_beacon_2"
             width="80"
             height="80"
             x="3020"
             y="960" />
         <rect
             style="fill:#dea100;stroke:none"
-            id="yellow_beacon_3"
+            id="right_beacon_3"
             width="80"
             height="80"
             x="3020"

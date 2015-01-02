@@ -16,64 +16,44 @@ IS_HOST_DEVICE_PC                      = not IS_HOST_DEVICE_ARM
 FIELD_Y_SIZE                           = 3.0
 FIELD_X_SIZE                           = 2.0
 
-# Main robot
-MAIN_ROBOT_X_SIZE                      = 0.295
-MAIN_ROBOT_Y_SIZE                      = 0.300
-MAIN_ROBOT_CENTER_X                    = 0.1475
-MAIN_ROBOT_CENTER_Y                    = 0.150
-MAIN_ROBOT_GYRATION_RADIUS             = 0.218
-MAIN_ROBOT_MEAN_METER_PER_S            = 0.6
-MAIN_ROBOT_VMAX_LIMIT                  = 88.0
-
-# Secondary robot
-SECONDARY_ROBOT_X_SIZE                 = 0.155
-SECONDARY_ROBOT_Y_SIZE                 = 0.165
-SECONDARY_ROBOT_CENTER_X               = 0.0775
-SECONDARY_ROBOT_CENTER_Y               = 0.0825
-SECONDARY_ROBOT_GYRATION_RADIUS        = 0.100535
-SECONDARY_ROBOT_MEAN_METER_PER_S       = 0.8
-SECONDARY_ROBOT_VMAX_LIMIT             = 0.88
-
-# Main start positons
-MAIN_RED_START_Y                       = MAIN_ROBOT_GYRATION_RADIUS
-MAIN_RED_START_X                       = 0.25
-MAIN_RED_START_ANGLE                   = 0.0
-
-# Secondary start positons (the robot starts 90 degrees rotated that's why YELLOW_START_Y use ROBOT_CENTER_X)
-SECONDARY_RED_START_Y                  = SECONDARY_ROBOT_GYRATION_RADIUS + 0.01
-SECONDARY_RED_START_X                  = 0.56
-SECONDARY_RED_START_ANGLE              = math.pi / 2.0
-
-ROBOT_MEAN_SPEED = MAIN_ROBOT_MEAN_METER_PER_S
-ROBOT_VMAX_LIMIT = MAIN_ROBOT_VMAX_LIMIT
+MAIN_ROBOT_GYRATION_RADIUS = 0.218
+SECONDARY_ROBOT_GYRATION_RADIUS = 0.100535
 
 def setup_definitions(is_main_robot):
     globals()["IS_MAIN_ROBOT"]         = is_main_robot
-    globals()["ROBOT_X_SIZE"]          = MAIN_ROBOT_X_SIZE          if IS_MAIN_ROBOT else SECONDARY_ROBOT_X_SIZE
-    globals()["ROBOT_Y_SIZE"]          = MAIN_ROBOT_Y_SIZE          if IS_MAIN_ROBOT else SECONDARY_ROBOT_Y_SIZE
-    globals()["ROBOT_CENTER_X"]        = MAIN_ROBOT_CENTER_X        if IS_MAIN_ROBOT else SECONDARY_ROBOT_CENTER_X
-    globals()["ROBOT_CENTER_Y"]        = MAIN_ROBOT_CENTER_Y        if IS_MAIN_ROBOT else SECONDARY_ROBOT_CENTER_Y
-    globals()["ROBOT_GYRATION_RADIUS"] = MAIN_ROBOT_GYRATION_RADIUS if IS_MAIN_ROBOT else SECONDARY_ROBOT_GYRATION_RADIUS
-    globals()["RED_START_Y"]           = MAIN_RED_START_Y           if IS_MAIN_ROBOT else SECONDARY_RED_START_Y
-    globals()["RED_START_X"]           = MAIN_RED_START_X           if IS_MAIN_ROBOT else SECONDARY_RED_START_X
-    globals()["RED_START_ANGLE"]       = MAIN_RED_START_ANGLE       if IS_MAIN_ROBOT else SECONDARY_RED_START_ANGLE
-    globals()["GUN_FIRE"]              = MAIN_GUN_FIRE              if IS_MAIN_ROBOT else SECONDARY_GUN_FIRE
-    globals()["GUN_LOAD"]              = MAIN_GUN_LOAD              if IS_MAIN_ROBOT else SECONDARY_GUN_LOAD
-    globals()["ROBOT_MEAN_SPEED"]      = MAIN_ROBOT_MEAN_METER_PER_S if IS_MAIN_ROBOT else SECONDARY_ROBOT_MEAN_METER_PER_S
-    globals()["ROBOT_VMAX_LIMIT"]      = MAIN_ROBOT_VMAX_LIMIT      if IS_MAIN_ROBOT else SECONDARY_ROBOT_VMAX_LIMIT
+
+    if is_main_robot:
+        globals()["ROBOT_X_SIZE"]          = 0.295
+        globals()["ROBOT_Y_SIZE"]          = 0.300
+        globals()["ROBOT_CENTER_X"]        = 0.1475
+        globals()["ROBOT_CENTER_Y"]        = 0.150
+        globals()["ROBOT_GYRATION_RADIUS"] = MAIN_ROBOT_GYRATION_RADIUS
+        globals()["LEFT_START_Y"]          = ROBOT_GYRATION_RADIUS
+        globals()["LEFT_START_X"]          = 0.25
+        globals()["LEFT_START_ANGLE"]      = 0.0
+    else:
+        globals()["ROBOT_X_SIZE"]          = 0.155
+        globals()["ROBOT_Y_SIZE"]          = 0.165
+        globals()["ROBOT_CENTER_X"]        = 0.0775
+        globals()["ROBOT_CENTER_Y"]        = 0.0825
+        globals()["ROBOT_GYRATION_RADIUS"] = SECONDARY_ROBOT_GYRATION_RADIUS
+        globals()["LEFT_START_Y"]          = ROBOT_GYRATION_RADIUS + 0.01
+        globals()["LEFT_START_X"]          = 0.56
+        globals()["LEFT_START_ANGLE"]      = math.pi / 2.0
+
+    globals()["ROBOT_VMAX_LIMIT"]                  = 88.0
 
 # Rule specific
 MATCH_DURATION_MS                      = 90000
-FUNNY_ACTION_DURATION_MS               = 5000
+FUNNY_ACTION_DURATION_MS               = 0
 FULL_DURATION_MS                       = MATCH_DURATION_MS + FUNNY_ACTION_DURATION_MS
 BREWERY_LIFETIME_MS                    = FULL_DURATION_MS + 5000
-TEAM_COLOR_RED                         = "#e91009"
-TEAM_COLOR_YELLOW                      = "#ffb901"
+TEAM_LEFT_COLOR                        = "#f9c001"
+TEAM_RIGHT_COLOR                       = "#00aa1e"
 
 # Timing
 KEEP_ALIVE_DELAY_MS                    = 250
 KEEP_ALIVE_MINIMUM_AGE_S               = (KEEP_ALIVE_DELAY_MS * 4.0 / 5.0) / 1000.0
-EVENT_LOOP_TICK_RESOLUTION_S           = 0.05
 
 #Teammate collaboration
 TEAMMATE_INFO_DELAY_MS                 = 100 #Time between two position information sent to teammate
@@ -88,7 +68,7 @@ REMOTE_PORT                            = 7001
 REMOTE_LOG_PORT                        = 23
 
 if IS_HOST_DEVICE_ARM:
-    MAIN_INTERBOT_IP                   = "doc"
+    MAIN_INTERBOT_IP                   = "main"
 else:
     MAIN_INTERBOT_IP                   = "localhost"
 MAIN_INTERBOT_PORT                     = 7002
@@ -111,19 +91,6 @@ else:
 # Log directory
 LOG_DIR                                = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "logs")
 
-# Brewery's web sever
-WEB_SERVER_PORT                        = 8080
-
-# Use pathfinding algorithm to evaluate the best goal
-GOAL_EVALUATION_USES_PATHFINDING       = True
-
-# Pathfinding
-MAIN_OPPONENT_AVOIDANCE_RANGE          = 0.5
-SECONDARY_OPPONENT_AVOIDANCE_RANGE     = 0.4
-
-# Opponent detection
-OPPONENT_DETECTION_DISAPPEARING_MS      = 800
-
 # Blocking opponent handling
 DEFAULT_OPPONENT_WAIT_MS               = 2000
 DEFAULT_OPPONENT_DISAPPEAR_RETRIES     = -1
@@ -131,8 +98,8 @@ DEFAULT_OPPONENT_DISAPPEAR_RETRIES     = -1
 # Turret detection ranges
 TURRET_SHORT_DISTANCE_DETECTION_RANGE  = 0.55
 TURRET_LONG_DISTANCE_DETECTION_RANGE   = 1.0
-TURRET_SHORT_DISTANCE_DETECTION_ID     = 190
-TURRET_LONG_DISTANCE_DETECTION_ID      = 240
+TURRET_SHORT_DISTANCE_DETECTION_ID     = 250
+TURRET_LONG_DISTANCE_DETECTION_ID      = 255
 
 
 ########################################################################
@@ -163,20 +130,15 @@ REMOTE_DEVICE = Enum("Remote hardware type",
     REMOTE_DEVICE_UNKNOWN   = 2,
 )
 
-TEAM = Enum("Team color",
-    TEAM_YELLOW  = 0,
-    TEAM_RED     = 1,
-    TEAM_UNKNOWN = 2,
+CONTROLLER_STATUS = Enum("Controller status",
+    CONTROLLER_STATUS_BUSY  = 0,
+    CONTROLLER_STATUS_READY = 1,
 )
 
-COLOR = Enum("Color",
-    COLOR_YELLOW    = 0,
-    COLOR_RED       = 1,
-    COLOR_GREEN     = 2,
-    COLOR_BROWN     = 3,
-    COLOR_VIOLET    = 4,
-    COLOR_BLACK     = 5,
-    COLOR_NONE      = 32,
+TEAM = Enum("Team color",
+    TEAM_RIGHT   = 0,
+    TEAM_LEFT    = 1,
+    TEAM_UNKNOWN = 2,
 )
 
 DIRECTION = Enum("Direction",
@@ -200,13 +162,15 @@ AXIS = Enum("Axis",
 ACTUATOR_TYPE = Enum("Actuator type",
     ACTUATOR_TYPE_SERVO_AX = 0,
     ACTUATOR_TYPE_SERVO_RX = 1,
-    ACTUATOR_TYPE_RELAY    = 2,
+    ACTUATOR_TYPE_OUTPUT   = 2,
     ACTUATOR_TYPE_PWM      = 3,
 )
 
 SERVO_COMMAND = Enum("Servo subcommand",
-    SERVO_COMMAND_MOVE        = 0,
-    SERVO_COMMAND_SETUP_SPEED = 1,
+    SERVO_COMMAND_MOVE          = 0,
+    SERVO_COMMAND_SETUP_SPEED   = 1,
+    SERVO_COMMAND_POSITION      = 2,
+    SERVO_COMMAND_TORQUE_ENABLE = 3,
 )
 
 SERVO_STATUS = Enum("Servo status",
@@ -250,13 +214,18 @@ GOAL_STATUS = Enum("Goal status",
     GOAL_DISABLED   = 4,
 )
 
+INPUT = Enum("Inputs",
+    INPUT_START      = 0,
+    INPUT_TEAM       = 1,
+    INPUT_ROBOT_INIT = 2,
+)
+
 
 def makeServoMoveCommand(servo, value):
     return (servo[0], servo[1], SERVO_COMMAND_MOVE, value, servo[2])
 
 def makeServoSetupCommand(servo, value):
     return (servo[0], servo[1], SERVO_COMMAND_SETUP_SPEED, value, servo[2])
-
 
 
 DEFAULT_SERVOS_TIMEOUT_MS = 2000
@@ -328,20 +297,20 @@ FLIP_FLOP_MODE = -1
 MAGNET_TOGGLES = 3
 # /!\ For Guns and net the relay should stay at OFF once fired. So we toggle it 3 times
 # name                     actuator type       id  action      nb toggles
-MAIN_GUN_FIRE           = (ACTUATOR_TYPE_RELAY, 1, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-MAIN_GUN_LOAD           = (ACTUATOR_TYPE_RELAY, 1, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-SECONDARY_GUN_FIRE      = (ACTUATOR_TYPE_RELAY, 1, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-SECONDARY_GUN_LOAD      = (ACTUATOR_TYPE_RELAY, 1, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-MAMMOTH_NET_THROW       = (ACTUATOR_TYPE_RELAY, 2, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-MAMMOTH_NET_LOAD        = (ACTUATOR_TYPE_RELAY, 2, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-PAINT_1_RELEASE         = (ACTUATOR_TYPE_RELAY, 2, ACTION_ON , MAGNET_TOGGLES) # ID: OK - ACTION: OK
-PAINT_1_HOLD            = (ACTUATOR_TYPE_RELAY, 2, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-PAINT_1_FLIP_FLOP_START = (ACTUATOR_TYPE_RELAY, 2, ACTION_ON , FLIP_FLOP_MODE) # ID: OK - ACTION: OK
-PAINT_1_FLIP_FLOP_STOP  = (ACTUATOR_TYPE_RELAY, 2, ACTION_OFF, FLIP_FLOP_MODE) # ID: OK - ACTION: OK
-PAINT_2_RELEASE         = (ACTUATOR_TYPE_RELAY, 3, ACTION_ON , MAGNET_TOGGLES) # ID: OK - ACTION: OK
-PAINT_2_HOLD            = (ACTUATOR_TYPE_RELAY, 3, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
-PAINT_2_FLIP_FLOP_START = (ACTUATOR_TYPE_RELAY, 3, ACTION_ON , FLIP_FLOP_MODE) # ID: OK - ACTION: OK
-PAINT_2_FLIP_FLOP_STOP  = (ACTUATOR_TYPE_RELAY, 3, ACTION_OFF, FLIP_FLOP_MODE) # ID: OK - ACTION: OK
+MAIN_GUN_FIRE           = (ACTUATOR_TYPE_OUTPUT, 1, ACTION_ON, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+MAIN_GUN_LOAD           = (ACTUATOR_TYPE_OUTPUT, 1, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+SECONDARY_GUN_FIRE      = (ACTUATOR_TYPE_OUTPUT, 1, ACTION_ON, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+SECONDARY_GUN_LOAD      = (ACTUATOR_TYPE_OUTPUT, 1, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+MAMMOTH_NET_THROW       = (ACTUATOR_TYPE_OUTPUT, 2, ACTION_ON, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+MAMMOTH_NET_LOAD        = (ACTUATOR_TYPE_OUTPUT, 2, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+PAINT_1_RELEASE         = (ACTUATOR_TYPE_OUTPUT, 2, ACTION_ON , MAGNET_TOGGLES) # ID: OK - ACTION: OK
+PAINT_1_HOLD            = (ACTUATOR_TYPE_OUTPUT, 2, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+PAINT_1_FLIP_FLOP_START = (ACTUATOR_TYPE_OUTPUT, 2, ACTION_ON , FLIP_FLOP_MODE) # ID: OK - ACTION: OK
+PAINT_1_FLIP_FLOP_STOP  = (ACTUATOR_TYPE_OUTPUT, 2, ACTION_OFF, FLIP_FLOP_MODE) # ID: OK - ACTION: OK
+PAINT_2_RELEASE         = (ACTUATOR_TYPE_OUTPUT, 3, ACTION_ON , MAGNET_TOGGLES) # ID: OK - ACTION: OK
+PAINT_2_HOLD            = (ACTUATOR_TYPE_OUTPUT, 3, ACTION_OFF, MAGNET_TOGGLES) # ID: OK - ACTION: OK
+PAINT_2_FLIP_FLOP_START = (ACTUATOR_TYPE_OUTPUT, 3, ACTION_ON , FLIP_FLOP_MODE) # ID: OK - ACTION: OK
+PAINT_2_FLIP_FLOP_STOP  = (ACTUATOR_TYPE_OUTPUT, 3, ACTION_OFF, FLIP_FLOP_MODE) # ID: OK - ACTION: OK
 
 # Motors : Values from 0x0 = max speed dir1; 0x3FF = stop ; 0x7FF = max speed dir2
 # name      actuator type       id  speed

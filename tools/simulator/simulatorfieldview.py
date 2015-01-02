@@ -376,31 +376,31 @@ class RobotLayer(fieldview.Layer):
             key = event.text()
             team = self.robot_controller.team
 
-            if team == TEAM_YELLOW and key == 'q' or team == TEAM_RED and key == 's':
+            if team == TEAM_RIGHT and key == 'q' or team == TEAM_LEFT and key == 's':
                 # Main opponent - short distance
                 packet.robot = OPPONENT_ROBOT_MAIN
                 packet.distance = OPPONENT_DISTANCE_FAR
                 self.robot_controller.send_packet(packet)
                 packet.distance = OPPONENT_DISTANCE_NEAR
                 self.robot_controller.send_packet(packet)
-            elif team == TEAM_YELLOW and key == 'Q' or team == TEAM_RED and key == 'S':
+            elif team == TEAM_RIGHT and key == 'Q' or team == TEAM_LEFT and key == 'S':
                 # Main opponent - long distance
                 packet.distance = OPPONENT_DISTANCE_FAR
                 packet.robot = OPPONENT_ROBOT_MAIN
                 self.robot_controller.send_packet(packet)
-            elif team == TEAM_YELLOW and key == 'w' or team == TEAM_RED and key == 'x':
+            elif team == TEAM_RIGHT and key == 'w' or team == TEAM_LEFT and key == 'x':
                 # Secondary opponent - short distance
                 packet.robot = OPPONENT_ROBOT_SECONDARY
                 packet.distance = OPPONENT_DISTANCE_FAR
                 self.robot_controller.send_packet(packet)
                 packet.distance = OPPONENT_DISTANCE_NEAR
                 self.robot_controller.send_packet(packet)
-            elif team == TEAM_YELLOW and key == 'W' or team == TEAM_RED and key == 'X':
+            elif team == TEAM_RIGHT and key == 'W' or team == TEAM_LEFT and key == 'X':
                 # Secondary opponent - long distance
                 packet.distance = OPPONENT_DISTANCE_FAR
                 packet.robot = OPPONENT_ROBOT_SECONDARY
                 self.robot_controller.send_packet(packet)
-            elif team == TEAM_YELLOW and key == 'a' or team == TEAM_RED and key == 'z':
+            elif team == TEAM_RIGHT and key == 'a' or team == TEAM_LEFT and key == 'z':
                 self.robot.block()
 
 
@@ -571,10 +571,10 @@ class GameElementsLayer(fieldview.Layer):
 
         self.fires = []
         for x, y, horizontal in [(15, 800, False), (900, 600, False), (400, 1100, True), (900, 1600, False), (1300, 1985, True)]:
-            self.fires.append(Fire(x, y, self, True, horizontal, TEAM_COLOR_RED))
-            self.fires.append(Fire(3000 - x, y, self, True, horizontal, TEAM_COLOR_YELLOW))
-        self.fires.append(Fire(900, 1100, self, False, False, TEAM_COLOR_RED))
-        self.fires.append(Fire(2100, 1100, self, False, False, TEAM_COLOR_YELLOW))
+            self.fires.append(Fire(x, y, self, True, horizontal, TEAM_LEFT_COLOR))
+            self.fires.append(Fire(3000 - x, y, self, True, horizontal, TEAM_RIGHT_COLOR))
+        self.fires.append(Fire(900, 1100, self, False, False, TEAM_LEFT_COLOR))
+        self.fires.append(Fire(2100, 1100, self, False, False, TEAM_RIGHT_COLOR))
 
         self.elements = self.fires
 
