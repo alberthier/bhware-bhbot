@@ -45,8 +45,10 @@ class Map:
         self.use_interbot_position = TEAMMATE_POSITION_IN_MAP
 
 
-    def on_device_ready(self, packet):
-        if IS_HOST_DEVICE_PC:
+    def on_controller_status(self, packet):
+        if packet.status == CONTROLLER_STATUS_BUSY:
+            return
+        if packet.remote_device == REMOTE_DEVICE_SIMULATOR:
             self.event_loop.send_packet(packets.SimulatorClearGraphMapZones())
 
         self.main_opponent_zone = self.add_zone(self.create_circular_coords(0.0, 0.0, 0.130 + ROBOT_GYRATION_RADIUS))
@@ -56,31 +58,31 @@ class Map:
 
         # Add Field obstacles
         offset = ROBOT_GYRATION_RADIUS
-        if not IS_MAIN_ROBOT:
-            offset += 0.07
-        symetrical_zones = []
-        # Fruit baskets
-        basket_offset = math.sin(math.pi / 8.0) * offset
-        symetrical_zones.append([(0.0, 0.4 - offset),
-                                 (0.3 + basket_offset, 0.4 - offset),
-                                 (0.3 + offset, 0.4 - basket_offset),
-                                 (0.3 + offset, 1.1 + basket_offset),
-                                 (0.3 + basket_offset, 1.1 + offset),
-                                 (0.0, 1.1 + offset)])
-        three_dist = 0.37 if IS_MAIN_ROBOT else 0.21
-        symetrical_zones.append(self.create_half_circle_coords(1.3, 0.0, three_dist, False))
-        symetrical_zones.append(self.create_half_circle_coords(2.0, 0.7, three_dist, True))
-        # Bottom hearts of fire
-        symetrical_zones.append(self.create_quarter_coords(FIELD_X_SIZE, 0.0, 0.25 + offset))
-        # Add symetrical zones
-        for zone in symetrical_zones:
-            self.add_zone(zone)
-            symetrical = []
-            for x, y in zone:
-                symetrical.append((x, FIELD_Y_SIZE - y))
-            self.add_zone(symetrical)
-        # Add central heart of fire
-        self.add_zone(self.create_circular_coords(FIELD_X_SIZE / 2.0, FIELD_Y_SIZE / 2.0, 0.15 + offset))
+
+        popcorn_loc = 0.300 - 0.035 - offset
+        self.add_zone([(0.0, popcorn_loc),
+                       (0.07 + offset, popcorn_loc),
+                       (0.07 + offset, FIELD_Y_SIZE - popcorn_loc),
+                       (0.0, FIELD_Y_SIZE - popcorn_loc)])
+        steps_loc = 0.967 - offset
+        self.add_zone([(0.0, steps_loc),
+                       (0.580 + offset, steps_loc),
+                       (0.580 + offset, FIELD_Y_SIZE - steps_loc),
+                       (0.0, FIELD_Y_SIZE - steps_loc)])
+        start_loc = 0.8 - 0.022 - offset
+        self.add_zone([(start_loc, 0.0),
+                       (start_loc, 0.4 + offset),
+                       (FIELD_X_SIZE - start_loc, 0.4 + offset),
+                       (FIELD_X_SIZE - start_loc, 0.0)])
+        self.add_zone([(start_loc, FIELD_Y_SIZE),
+                       (start_loc, FIELD_Y_SIZE - 0.4 - offset),
+                       (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset),
+                       (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
+        platfrom_loc = 1.2 - offset
+        self.add_zone([(FIELD_X_SIZE, platfrom_loc),
+                       (FIELD_X_SIZE - 0.1 - offset, platfrom_loc),
+                       (FIELD_X_SIZE - 0.1 - offset, FIELD_Y_SIZE - platfrom_loc),
+                       (FIELD_X_SIZE, FIELD_Y_SIZE - platfrom_loc)])
 
         self.pathfinder.field_config_done()
 
