@@ -322,12 +322,6 @@ class GraphicsRobotObject(QObject):
         self.set_rotation(angle_deg)
 
 
-    def hits_fire(self, fire):
-        if fire not in self.carried_elements:
-            if self.structure is not None and self.structure.collidesWithItem(fire):
-                fire.lay()
-
-
 
 
 class RobotLayer(fieldview.Layer):
@@ -506,58 +500,40 @@ class GraphRoutingLayer(fieldview.Layer):
 
 
 
-class Fire(QGraphicsPathItem):
+class Stand(QGraphicsEllipseItem):
 
-    def __init__(self, x, y, game_elements_layer, standing, horizontal, color):
+    def __init__(self, game_elements_layer, x, y, color):
         QGraphicsPathItem.__init__(self)
         self.game_elements_layer = game_elements_layer
         self.x = x
         self.y = y
-        self.standing = standing
-        self.horizontal = horizontal
-        self.color = color
-
-        self.standing_path = QPainterPath()
-        self.standing_path.moveTo(-70, -15)
-        self.standing_path.lineTo(70, -15)
-        self.standing_path.lineTo(70, 15)
-        self.standing_path.lineTo(-70, 15)
-        self.standing_path.closeSubpath()
-
-        self.laying_path = QPainterPath()
-        self.laying_path.moveTo(-70, 36)
-        self.laying_path.lineTo(0, -74)
-        self.laying_path.lineTo(70, 36)
-        self.laying_path.closeSubpath()
+        self.setBrush(QBrush(QColor(color), Qt.SolidPattern))
+        self.setPen(QPen(QColor(color).darker(135), 10))
+        self.setRect(0.0, 0.0, 60.0, 60.0)
 
 
     def setup(self):
-        if self.standing:
-            self.stand()
-        else:
-            self.lay()
-        if self.horizontal:
-            self.setRotation(0)
-        else:
-            self.setRotation(90)
         self.setParentItem(self.game_elements_layer)
         self.setPos(self.x, self.y)
 
 
-    def stand(self):
-        self.setPen(QPen(Qt.NoPen))
-        self.setPath(self.standing_path)
-        self.setBrush(QBrush(QColor("#010204"), Qt.SolidPattern))
 
 
-    def lay(self):
-        pen = QPen(QBrush(Qt.SolidPattern), 1)
-        c = QColor(self.color)
-        pen.setColor(c.darker())
-        self.setPen(pen)
-        self.setPath(self.laying_path)
-        self.setBrush(QBrush(c, Qt.SolidPattern))
+class Cup(QGraphicsEllipseItem):
 
+    def __init__(self, game_elements_layer, x, y):
+        QGraphicsPathItem.__init__(self)
+        self.game_elements_layer = game_elements_layer
+        self.x = x
+        self.y = y
+        self.setBrush(QBrush(QColor("#ffffff"), Qt.SolidPattern))
+        self.setPen(QPen(QColor("#ffffff").darker(150), 10))
+        self.setRect(0.0, 0.0, 95.0, 95.0)
+
+
+    def setup(self):
+        self.setParentItem(self.game_elements_layer)
+        self.setPos(self.x, self.y)
 
 
 
@@ -569,14 +545,18 @@ class GameElementsLayer(fieldview.Layer):
         self.main_bar = field_view_controller.ui.main_bar
         self.scene().changed.connect(self.scene_changed)
 
-        self.fires = []
-        for x, y, horizontal in [(15, 800, False), (900, 600, False), (400, 1100, True), (900, 1600, False), (1300, 1985, True)]:
-            self.fires.append(Fire(x, y, self, True, horizontal, TEAM_LEFT_COLOR))
-            self.fires.append(Fire(3000 - x, y, self, True, horizontal, TEAM_RIGHT_COLOR))
-        self.fires.append(Fire(900, 1100, self, False, False, TEAM_LEFT_COLOR))
-        self.fires.append(Fire(2100, 1100, self, False, False, TEAM_RIGHT_COLOR))
+        self.movable_elements = []
+        for x, y in [(850, 100), (90, 200), (850, 200), (90, 1750), (90, 1850), (870, 1355), (1300, 1400), (1100, 1770)]:
+            y -= 30
+            self.movable_elements.append(Stand(self, x - 30, y, TEAM_LEFT_COLOR))
+            self.movable_elements.append(Stand(self, 3000 - x - 30, y, TEAM_RIGHT_COLOR))
+        for x, y in [(250, 1750), (910, 800)]:
+            y -= 47.5
+            self.movable_elements.append(Cup(self, x - 47.5, y))
+            self.movable_elements.append(Cup(self, 3000 - x - 47.5, y))
+        self.movable_elements.append(Cup(self, 1500 - 47.5, 1650 - 47.5))
 
-        self.elements = self.fires
+        self.elements = self.movable_elements
 
         for piece in self.elements:
             self.addToGroup(piece)
@@ -593,7 +573,7 @@ class GameElementsLayer(fieldview.Layer):
     def scene_changed(self):
         robot_a = self.field_view_controller.ui.game_controller.robot_a.robot_layer.robot
         robot_b = self.field_view_controller.ui.game_controller.robot_b.robot_layer.robot
-        for elt in self.fires:
+        for elt in self.movable_elements:
             if not elt in robot_a.carried_elements and not elt in robot_b.carried_elements:
                 robot = None
                 if elt.collidesWithItem(robot_a.robot_item):
@@ -624,9 +604,6 @@ class GameElementsLayer(fieldview.Layer):
                     dx = sign * math.cos(angle) * dist
                     dy = sign * math.sin(angle) * dist
                     elt.setPos(elt.pos().x() + dx, elt.pos().y() + dy)
-        for fire in self.fires:
-            robot_a.hits_fire(fire)
-            robot_b.hits_fire(fire)
 
         if self.main_bar.opponent_detection.isChecked():
             if robot_a.item and robot_b.item :
