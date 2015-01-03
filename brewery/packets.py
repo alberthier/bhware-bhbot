@@ -394,8 +394,8 @@ class GotoFinished(BasePacket):
     TYPE = 58
     DEFINITION = (
         ('reason'             , UEnum8(REASON, REASON_DESTINATION_REACHED)),
-        ('current_pose'       , Pose  ("Robot pose at the end of the movement")),
         ('current_point_index', UInt8 (0, "Last reached point index of the point list given in the Goto packet")),
+        ('current_pose'       , Pose  ("Robot pose at the end of the movement")),
     )
 
 
