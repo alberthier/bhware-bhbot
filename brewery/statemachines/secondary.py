@@ -30,8 +30,8 @@ class Main(State):
 
 
     def on_controller_status(self, packet):
-    	if packet.status == CONTROLLER_STATUS_READY:
-        	self.send_packet(packets.InputStatusRequest(INPUT_TEAM))
+        if packet.status == CONTROLLER_STATUS_READY:
+            self.send_packet(packets.InputStatusRequest(INPUT_TEAM))
 
 
     def on_start(self, packet):
