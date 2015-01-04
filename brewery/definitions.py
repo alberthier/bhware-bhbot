@@ -16,17 +16,17 @@ IS_HOST_DEVICE_PC                      = not IS_HOST_DEVICE_ARM
 FIELD_Y_SIZE                           = 3.0
 FIELD_X_SIZE                           = 2.0
 
-MAIN_ROBOT_GYRATION_RADIUS = 0.218
+MAIN_ROBOT_GYRATION_RADIUS = 0.208
 SECONDARY_ROBOT_GYRATION_RADIUS = 0.100535
 
 def setup_definitions(is_main_robot):
     globals()["IS_MAIN_ROBOT"]         = is_main_robot
 
     if is_main_robot:
-        globals()["ROBOT_X_SIZE"]          = 0.295
-        globals()["ROBOT_Y_SIZE"]          = 0.300
-        globals()["ROBOT_CENTER_X"]        = 0.1475
-        globals()["ROBOT_CENTER_Y"]        = 0.150
+        globals()["ROBOT_X_SIZE"]          = 0.300
+        globals()["ROBOT_Y_SIZE"]          = 0.290
+        globals()["ROBOT_CENTER_X"]        = 0.150
+        globals()["ROBOT_CENTER_Y"]        = 0.145
         globals()["ROBOT_GYRATION_RADIUS"] = MAIN_ROBOT_GYRATION_RADIUS
         globals()["LEFT_START_Y"]          = ROBOT_GYRATION_RADIUS
         globals()["LEFT_START_X"]          = 0.25
