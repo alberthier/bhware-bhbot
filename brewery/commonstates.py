@@ -607,8 +607,7 @@ class Trigger(statemachine.State):
     SERVO_COMMAND      = 2
     SERVO_VALUE        = 3
     SERVO_TIMEOUT      = 4
-    RELAY_ACTION       = 2
-    RELAY_TOGGLE_COUNT = 3
+    OUTPUT_ACTION      = 2
     PWM_VALUE          = 2
 
     def __init__(self, *args):
@@ -638,8 +637,8 @@ class Trigger(statemachine.State):
             actuator_type = cmd[self.TYPE]
             if actuator_type in [ ACTUATOR_TYPE_SERVO_AX, ACTUATOR_TYPE_SERVO_RX ]:
                 self.send_packet(packets.ServoControl(*cmd))
-            elif actuator_type == ACTUATOR_TYPE_ON_OFF:
-                self.send_packet(packets.RelayControl(id = cmd[self.ID], action = cmd[self.RELAY_ACTION]))
+            elif actuator_type == ACTUATOR_TYPE_OUTPUT:
+                self.send_packet(packets.OutputControl(id = cmd[self.ID], action = cmd[self.OUTPUT_ACTION]))
             elif actuator_type == ACTUATOR_TYPE_PWM:
                 self.send_packet(packets.PwmControl(id = cmd[self.ID], value = cmd[self.PWM_VALUE]))
             else:
@@ -654,7 +653,7 @@ class Trigger(statemachine.State):
         yield from self.cleanup(packet.type, packet.id, packet.command)
 
 
-    def on_relay_control(self, packet):
+    def on_output_control(self, packet):
         self.exit_reason = SERVO_STATUS_SUCCESS
         self.statuses[packet.id] = SERVO_STATUS_SUCCESS
         yield from self.cleanup(ACTUATOR_TYPE_ON_OFF, packet.id)

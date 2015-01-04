@@ -75,8 +75,10 @@ class RobotController(object):
                 self.team_name = "yellow"
                 self.team_color = TEAM_LEFT_COLOR
             if is_main:
+                self.inputs = MAIN_INPUT
                 self.team_name = "Main " + self.team_name
             else:
+                self.inputs = SECONDARY_INPUT
                 self.team_name = "Secondary " + self.team_name
                 self.team_color = QColor(self.team_color).lighter().name()
 
@@ -196,7 +198,7 @@ class RobotController(object):
     def on_input_status_request(self, packet):
         status = packets.InputStatus()
         status.id = packet.id
-        if packet.id == INPUT_TEAM:
+        if packet.id == self.inputs.lookup_by_name["INPUT_TEAM"]:
             status.value = self.team
         else:
             status.value = random.choice([0, 1])
@@ -240,7 +242,7 @@ class RobotController(object):
 
     def send_start_signal(self):
         packet = packets.InputStatus()
-        packet.id = INPUT_START
+        packet.id = self.inputs.lookup_by_name["INPUT_START"]
         packet.value = 1
         self.send_packet(packet)
 
