@@ -216,6 +216,11 @@ GOAL_STATUS = Enum("Goal status",
     GOAL_DISABLED   = 4,
 )
 
+SIDE = Enum("Side",
+    SIDE_LEFT  = 0,
+    SIDE_RIGHT = 1,
+)
+
 MAIN_INPUT = Enum("Inputs",
     MAIN_INPUT_START                = 0,
     MAIN_INPUT_TEAM                 = 1,
