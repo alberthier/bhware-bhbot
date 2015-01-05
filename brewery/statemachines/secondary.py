@@ -31,12 +31,35 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
-            self.send_packet(packets.InputStatusRequest(INPUT_TEAM))
+            yield GetInputStatus(INPUT_TEAM)
+            yield CalibratePosition()
 
 
     def on_start(self, packet):
         self.yield_at(90000, EndOfMatch())
         logger.log("Starting ...")
+
+
+
+
+class CalibratePosition(State):
+
+    def on_enter(self):
+        if IS_HOST_DEVICE_ARM:
+            yield SpeedControl(0.2)
+            xinit = 0.778 - ROBOT_CENTER_X
+            xmove = xinit - 0.05
+            yield DefinePosition(xinit, 1.0, -math.pi)
+            yield MoveLineTo(xmove, 1.0)
+            yield RotateTo(math.pi / 2.0)
+            yield MoveLineTo(xmove, 0.0)
+            yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)
+            yield SpeedControl()
+            yield MoveLineTo(xmove, LEFT_START_Y)
+            yield RotateTo(0.0)
+            yield MoveLineTo(LEFT_START_X, LEFT_START_Y)
+        else:
+            yield DefinePosition(LEFT_START_X, LEFT_START_Y, 0.0)
 
 
 
