@@ -30,6 +30,7 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
+            yield Initialize()
             yield GetInputStatus(SECONDARY_INPUT_TEAM)
             yield CalibratePosition()
 
@@ -37,6 +38,18 @@ class Main(State):
     def on_start(self, packet):
         self.yield_at(90000, EndOfMatch())
         logger.log("Starting ...")
+        yield Trigger(CUP_GRIPPER_OPEN)
+
+
+
+
+class Initialize(State):
+
+    def on_enter(self):
+        yield Trigger(LEFT_CARPET_DROPPER_CLOSE, RIGHT_CARPET_DROPPER_CLOSE,
+                      LEFT_CARPET_EJECTOR_HOLD, RIGHT_CARPET_EJECTOR_HOLD,
+                      CUP_GRIPPER_CLOSE)
+        yield None
 
 
 

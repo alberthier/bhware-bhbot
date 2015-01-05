@@ -32,6 +32,7 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
+            yield Initialize()
             yield GetInputStatus(MAIN_INPUT_TEAM)
             yield CalibratePosition()
 
@@ -40,6 +41,26 @@ class Main(State):
         self.yield_at(90000, EndOfMatch())
         logger.log("Starting ...")
         yield PickupBulb()
+
+
+
+
+class Initialize(State):
+
+    def on_enter(self):
+        yield Trigger(LEFT_BUILDER_PLIERS_LEFT_CLOSE, LEFT_BUILDER_PLIERS_RIGHT_CLOSE,
+                      RIGHT_BUILDER_PLIERS_LEFT_CLOSE, RIGHT_BUILDER_PLIERS_RIGHT_CLOSE,
+                      LEFT_BUILDER_ELEVATOR_DOWN,
+                      RIGHT_BUILDER_ELEVATOR_DOWN,
+                      LEFT_BUILDER_GRIPPER_LEFT_CLOSE, LEFT_BUILDER_GRIPPER_RIGHT_CLOSE,
+                      RIGHT_BUILDER_GRIPPER_LEFT_CLOSE, RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE,
+                      LEFT_BUILDER_LIGHTER_CLOSE,
+                      RIGHT_BUILDER_LIGHTER_CLOSE,
+                      LIGHTER_GRIPPER_OPEN,
+                      LIGHTER_ELEVATOR_DOWN,
+                      LEFT_CLAPMAN_CLOSE,
+                      RIGHT_CLAPMAN_CLOSE)
+        yield None
 
 
 
