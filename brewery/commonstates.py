@@ -168,7 +168,6 @@ class DefinePosition(statemachine.State):
 class AntiBlocking(statemachine.State):
 
     def __init__(self, desired_status):
-        self.status = desired_status
         if desired_status :
             self.packet = packets.EnableAntiBlocking()
         else :
@@ -616,7 +615,7 @@ class Trigger(statemachine.State):
             a list of tuples (actuator_type, id, args...) for multiple motor control
             ex:
                 Trigger(ACTUATOR_TYPE_SERVO_AX, 1, 154, 1000)
-                Trigger((ACTUATOR_TYPE_SERVO_AX, 1, 154, 1000), (ACTUATOR_TYPE_ON_OFF, 2, ACTION_ON))
+                Trigger((ACTUATOR_TYPE_SERVO_AX, 1, 154, 1000), (ACTUATOR_TYPE_OUTPUT, 2, ACTION_ON))
         """
         if len(args) > 0:
             if type(args[0]) == tuple:
@@ -628,8 +627,10 @@ class Trigger(statemachine.State):
         else:
             raise TypeError("Invalid arguments")
 
-        self.exit_reason = None
+        self.status = False
         self.statuses = {}
+        for cmd in self.commands:
+            self.statuses[cmd[self.ID]] = False
 
 
     def on_enter(self):
@@ -648,20 +649,17 @@ class Trigger(statemachine.State):
     def on_servo_control(self, packet):
         if packet.status != SERVO_STATUS_SUCCESS:
             self.log("Servo #{} timed out".format(packet.id))
-        self.exit_reason = packet.status
-        self.statuses[packet.id] = packet.status
+        self.statuses[packet.id] = packet.status == SERVO_STATUS_SUCCESS
         yield from self.cleanup(packet.type, packet.id, packet.command)
 
 
     def on_output_control(self, packet):
-        self.exit_reason = SERVO_STATUS_SUCCESS
-        self.statuses[packet.id] = SERVO_STATUS_SUCCESS
-        yield from self.cleanup(ACTUATOR_TYPE_ON_OFF, packet.id)
+        self.statuses[packet.id] = True
+        yield from self.cleanup(ACTUATOR_TYPE_OUTPUT, packet.id)
 
 
     def on_pwm_control(self, packet):
-        self.exit_reason = SERVO_STATUS_SUCCESS
-        self.statuses[packet.id] = SERVO_STATUS_SUCCESS
+        self.statuses[packet.id] = True
         yield from self.cleanup(ACTUATOR_TYPE_PWM, packet.id)
 
 
@@ -672,6 +670,7 @@ class Trigger(statemachine.State):
                     del self.commands[i]
                 break
         if len(self.commands) == 0:
+            self.status = not (False in self.statuses)
             yield None
 
 
@@ -689,7 +688,7 @@ class GetInputStatus(statemachine.State):
 
     def on_input_status(self, packet):
         if packet.id == self.id:
-            self.status = packet.status
+            self.value = packet.value
             yield None
 
 
