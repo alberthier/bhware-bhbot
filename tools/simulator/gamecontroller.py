@@ -31,6 +31,7 @@ class GameController(object):
         self.setting_up = False
         self.time = 0
         self.expected_robots = []
+        self.next_expected_connection = None
         self.keep_alive_timer = QTimer()
         self.keep_alive_timer.setInterval(KEEP_ALIVE_DELAY_MS)
         self.keep_alive_timer.timeout.connect(self.timer_tick)
@@ -47,14 +48,18 @@ class GameController(object):
             self.robot_a.hide_all()
             self.robot_b.hide_all()
             self.expected_robots = self.main_bar.get_expected_robots()
-        if not self.robot_a.is_process_started() and len(self.expected_robots) >= 1:
+        if not self.robot_a.is_process_started() and len(self.expected_robots) != 0:
             self.robot_a.setup(*self.expected_robots[0])
-        elif not self.robot_b.is_process_started() and len(self.expected_robots) >= 2:
             del self.expected_robots[0]
+            self.next_expected_connection = self.robot_a
+        elif not self.robot_b.is_process_started() and len(self.expected_robots) != 0:
             self.robot_b.setup(*self.expected_robots[0])
+            del self.expected_robots[0]
+            self.next_expected_connection = self.robot_b
         else:
             self.expected_robots = []
             self.setting_up = False
+            self.next_expected_connection = None
             self.keep_alive_timer.start()
             if self.start_requested:
                 self.try_start()
@@ -109,11 +114,8 @@ class GameController(object):
 
 
     def brewery_connected(self):
-        if not self.robot_a.is_connected():
-            self.robot_a.connected(self.server.nextPendingConnection())
-            self.setup()
-        elif not self.robot_b.is_connected():
-            self.robot_b.connected(self.server.nextPendingConnection())
+        if self.next_expected_connection is not None:
+            self.next_expected_connection.connected(self.server.nextPendingConnection())
             self.setup()
         else:
             # Only two robots can play
