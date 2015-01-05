@@ -43,6 +43,13 @@ class RobotController(object):
         self.stop_requested = False
 
 
+    def get_input_id(self, name):
+        if self.is_main:
+            return MAIN_INPUT.lookup_by_name["MAIN_" + name]
+        else:
+            return SECONDARY_INPUT.lookup_by_name["SECONDARY_" + name]
+
+
     def is_process_started(self):
         return self.process != None
 
@@ -198,7 +205,7 @@ class RobotController(object):
     def on_input_status_request(self, packet):
         status = packets.InputStatus()
         status.id = packet.id
-        if packet.id == self.inputs.lookup_by_name["INPUT_TEAM"]:
+        if packet.id == self.get_input_id("INPUT_TEAM"):
             status.value = self.team
         else:
             status.value = random.choice([0, 1])
@@ -242,7 +249,7 @@ class RobotController(object):
 
     def send_start_signal(self):
         packet = packets.InputStatus()
-        packet.id = self.inputs.lookup_by_name["INPUT_START"]
+        packet.id = self.get_input_id("INPUT_START")
         packet.value = 1
         self.send_packet(packet)
 

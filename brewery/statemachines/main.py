@@ -3,7 +3,6 @@
 import collections
 import math
 
-import statemachine
 import packets
 import position
 import logger
@@ -55,6 +54,7 @@ class CalibratePosition(State):
             yield SpeedControl()
         else:
             yield DefinePosition(LEFT_START_X, LEFT_START_Y, math.pi / 2.0)
+        yield None
 
 
 

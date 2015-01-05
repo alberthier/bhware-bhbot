@@ -3,7 +3,6 @@
 import collections
 import math
 
-import statemachine
 import packets
 import position
 import logger

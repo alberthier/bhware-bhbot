@@ -3,7 +3,6 @@
 import collections
 import math
 
-import statemachine
 import packets
 import position
 import logger
@@ -60,6 +59,7 @@ class CalibratePosition(State):
             yield MoveLineTo(LEFT_START_X, LEFT_START_Y)
         else:
             yield DefinePosition(LEFT_START_X, LEFT_START_Y, 0.0)
+        yield None
 
 
 

@@ -81,10 +81,7 @@ class MainWindowController(QObject):
 
             log_line.append(content)
             for view in self.views:
-                if packet_type is packets.KeepAlive:
-                    match_time = logtools.get_value(log_line[logger.LOG_LINE_CONTENT], "match_time")
-                    if match_time <= 0 or match_time > 90000:
-                        continue
+                # TODO filter KeepAlive flood here
                 view.process_log_line(log_line, lineno, last_lineno)
             lineno += 1
         dir_name, log_name = os.path.split(self.log_file)
@@ -176,4 +173,3 @@ class MainWindowController(QObject):
         self.remote_files_to_download -= 1
         if self.remote_files_to_download == 0:
             self.load_log()
-
