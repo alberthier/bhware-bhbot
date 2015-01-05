@@ -39,6 +39,7 @@ class Main(State):
     def on_start(self, packet):
         self.yield_at(90000, EndOfMatch())
         logger.log("Starting ...")
+        yield PickupBulb()
 
 
 
@@ -56,6 +57,19 @@ class CalibratePosition(State):
             yield SpeedControl()
         else:
             yield DefinePosition(LEFT_START_X, LEFT_START_Y, math.pi / 2.0)
+        yield None
+
+
+
+
+class PickupBulb(State):
+
+    def on_enter(self):
+        yield Trigger(LIGHTER_ELEVATOR_BULB)
+        yield Trigger(LIGHTER_GRIPPER_CLOSE)
+        yield Trigger(LIGHTER_ELEVATOR_UP)
+        yield Trigger(LIGHTER_GRIPPER_OPEN)
+        yield Trigger(LIGHTER_ELEVATOR_DOWN)
         yield None
 
 
