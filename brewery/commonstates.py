@@ -314,6 +314,8 @@ class OpponentHandlingConfig:
         self.wait_delay = wait_delay
 
 
+
+
 NO_OPPONENT_HANDLING = OpponentHandlingConfig(False, False, None, None)
 #OPPONENT_HANDLING = OpponentHandlingConfig(True, True, 0, 0)
 OPPONENT_HANDLING = OpponentHandlingConfig(True, False, 0, 0)
@@ -387,11 +389,21 @@ class AbstractMove(statemachine.State):
             yield None
 
 
+    def get_direction(self, x, y):
+        dx = x - self.robot.pose.virt.x
+        dy = y - self.robot.pose.virt.y
+        a = math.atan2(dy, dx) - self.robot.pose.virt.angle
+        if -math.pi / 2.0 <= a and a <= math.pi / 2.0:
+            return DIRECTION_FORWARD
+        else:
+            return DIRECTION_BACKWARDS
+
+
 
 
 class RotateTo(AbstractMove):
 
-    def __init__(self, angle, direction = DIRECTION_FORWARD, chained = None, virtual = True):
+    def __init__(self, angle, direction = DIRECTION_AUTO, chained = None, virtual = True):
         super().__init__(chained, NO_OPPONENT_HANDLING)
         pose = position.Pose(0.0, 0.0, angle, virtual)
         self.packet = packets.Rotate(direction = direction, angle = pose.angle)
@@ -401,7 +413,7 @@ class RotateTo(AbstractMove):
 
 class LookAt(AbstractMove):
 
-    def __init__(self, x, y, direction = DIRECTION_FORWARD, chained = None, virtual = True):
+    def __init__(self, x, y, direction = DIRECTION_AUTO, chained = None, virtual = True):
         super().__init__(chained, NO_OPPONENT_HANDLING)
         self.pose = position.Pose(x, y, None, virtual)
         self.direction = direction
@@ -420,7 +432,7 @@ class LookAt(AbstractMove):
 
 class LookAtOpposite(AbstractMove):
 
-    def __init__(self, x, y, direction = DIRECTION_FORWARD, chained = None, virtual = True):
+    def __init__(self, x, y, direction = DIRECTION_AUTO, chained = None, virtual = True):
         super().__init__(chained, NO_OPPONENT_HANDLING)
         self.pose = position.Pose(x, y, None, virtual)
         self.direction = direction
@@ -439,7 +451,7 @@ class LookAtOpposite(AbstractMove):
 
 class MoveCurve(AbstractMove):
 
-    def __init__(self, angle, points, direction = DIRECTION_FORWARD, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
+    def __init__(self, angle, points, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
         super().__init__(chained, opponent_handling_config)
         apose = position.Pose(0.0, 0.0, angle, virtual)
         poses = []
@@ -451,11 +463,18 @@ class MoveCurve(AbstractMove):
         self.packet = packets.MoveCurve(direction = direction, angle = apose.angle, points = poses)
 
 
+    def on_enter(self):
+        if self.packet.direction == DIRECTION_AUTO:
+            first_point = self.packet.points[0]
+            self.packet.direction = self.get_direction(first_point.virt.x, first_point.virt.y)
+        yield from super().on_enter()
+
+
 
 
 class MoveCurveTo(MoveCurve):
 
-    def __init__(self, angle, pose, direction = DIRECTION_FORWARD, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
+    def __init__(self, angle, pose, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
         super().__init__(angle, [pose], direction, chained, virtual, opponent_handling)
 
 
@@ -463,7 +482,7 @@ class MoveCurveTo(MoveCurve):
 
 class MoveLine(AbstractMove):
 
-    def __init__(self, points, direction = DIRECTION_FORWARD, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
+    def __init__(self, points, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
         super().__init__(chained, opponent_handling_config)
         poses = []
         for pt in points:
@@ -474,11 +493,18 @@ class MoveLine(AbstractMove):
         self.packet = packets.MoveLine(direction = direction, points = poses)
 
 
+    def on_enter(self):
+        if self.packet.direction == DIRECTION_AUTO:
+            first_point = self.packet.points[0]
+            self.packet.direction = self.get_direction(first_point.virt.x, first_point.virt.y)
+        yield from super().on_enter()
+
+
 
 
 class MoveLineTo(MoveLine):
 
-    def __init__(self, x, y, direction = DIRECTION_FORWARD, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
+    def __init__(self, x, y, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
         super().__init__([position.Pose(x, y, None, virtual)], direction, chained, virtual, opponent_handling_config)
 
 
@@ -486,7 +512,7 @@ class MoveLineTo(MoveLine):
 
 class MoveLineRelative(statemachine.State):
 
-    def __init__(self, distance, direction = DIRECTION_FORWARD, chained = None, opponent_handling_config = OPPONENT_HANDLING):
+    def __init__(self, distance, direction = DIRECTION_AUTO, chained = None, opponent_handling_config = OPPONENT_HANDLING):
         self.opponent_handling_config = opponent_handling_config
         self.distance = distance * direction
         self.direction = direction
@@ -497,7 +523,7 @@ class MoveLineRelative(statemachine.State):
         current_pose = self.robot.pose
         x = current_pose.virt.x + math.cos(current_pose.virt.angle) * self.distance
         y = current_pose.virt.y + math.sin(current_pose.virt.angle) * self.distance
-        move = yield MoveLineTo(x, y, self.direction, self.chained, self.opponent_handling_config)
+        move = yield MoveLineTo(x, y, self.direction, self.chained, True, self.opponent_handling_config)
         self.exit_reason = move.exit_reason
         yield None
 
@@ -506,14 +532,15 @@ class MoveLineRelative(statemachine.State):
 
 class RotateRelative(statemachine.State):
 
-    def __init__(self, relative_angle, chained = None):
+    def __init__(self, relative_angle, direction = DIRECTION_AUTO, chained = None):
         self.relative_angle = relative_angle
+        self.direction = direction
         self.chained = chained
 
 
     def on_enter(self):
         current_pose = self.robot.pose
-        move = yield RotateTo(current_pose.angle + self.relative_angle, self.chained)
+        move = yield RotateTo(current_pose.angle + self.relative_angle, self.direction, self.chained)
         self.exit_reason = move.exit_reason
         yield None
 
@@ -522,7 +549,7 @@ class RotateRelative(statemachine.State):
 
 class MoveArc(AbstractMove):
 
-    def __init__(self, center_x, center_y, radius, points, direction = DIRECTION_FORWARD, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
+    def __init__(self, center_x, center_y, radius, points, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
         AbstractMove.__init__(self, chained, opponent_handling_config)
         cpose = position.Pose(center_x, center_y, None, virtual)
         angles = []
@@ -532,11 +559,21 @@ class MoveArc(AbstractMove):
         self.packet = packets.MoveArc(direction = direction, center = cpose, radius = radius, points = angles)
 
 
+    def on_enter(self):
+        if self.packet.direction == DIRECTION_AUTO:
+            first_angle = self.packet.points[0].virt.angle
+            first_point = position.Pose(center_x + math.cos(first_angle) * self.packet.radius,
+                                        center_y + math.sin(first_angle) * self.packet.radius,
+                                        None, True)
+            self.packet.direction = self.get_direction(first_point.virt.x, first_point.virt.y)
+        yield from super().on_enter()
+
+
 
 
 class FollowPath(statemachine.State):
 
-    def __init__(self, path, direction = DIRECTION_FORWARD, chained = None):
+    def __init__(self, path, direction = DIRECTION_AUTO, chained = None):
         super().__init__()
         self.path = path
         self.direction = direction
@@ -548,6 +585,9 @@ class FollowPath(statemachine.State):
         move = self.chained
         dest = self.path[-1]
         self.robot.destination = position.Pose(dest.x, dest.y, 0.0)
+        if self.direction == DIRECTION_AUTO:
+            first_point = self.path[0]
+            self.direction = self.get_direction(first_point.virt.x, first_point.virt.y)
         for pose in self.path:
             if self.direction == DIRECTION_FORWARD:
                 if not self.robot.is_looking_at(pose):
@@ -565,7 +605,7 @@ class FollowPath(statemachine.State):
 
 class Navigate(statemachine.State):
 
-    def __init__(self, x, y, direction = DIRECTION_FORWARD):
+    def __init__(self, x, y, direction = DIRECTION_AUTO):
         statemachine.State.__init__(self)
         self.destination = position.Pose(x, y, None, True)
         self.direction = direction
@@ -697,6 +737,8 @@ class GetInputStatus(statemachine.State):
 ##################################################
 # GOAL MANAGEMENT
 ##################################################
+
+
 
 
 class ExecuteGoals(statemachine.State):
