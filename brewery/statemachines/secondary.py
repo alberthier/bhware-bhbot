@@ -31,7 +31,7 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
-            yield GetInputStatus(INPUT_TEAM)
+            yield GetInputStatus(SECONDARY_INPUT_TEAM)
             yield CalibratePosition()
 
 

@@ -120,6 +120,31 @@ class OptionalAngle(AbstractItem):
 
 
 
+class RobotUEnum8(UInt8):
+
+    def __init__(self, main_enum, secondary_enum, description = None):
+        self.main_enum = main_enum
+        self.secondary_enum = secondary_enum
+        UInt8.__init__(self, 0, description)
+
+
+    def to_dump(self, value):
+        try:
+            if IS_MAIN_ROBOT:
+                v = self.main_enum.lookup_by_value[value]
+            else:
+                v = self.secondary_enum.lookup_by_value[value]
+        except:
+            v = value
+        return v
+
+
+    def from_dump(self, value):
+        return value
+
+
+
+
 ################################################################################
 # Base packet class
 
@@ -502,7 +527,7 @@ class InputStatusRequest(BasePacket):
 
     TYPE = 68
     DEFINITION = (
-        ('id',    UInt8(0, "Input identifier")),
+        ('id',    RobotUEnum8(MAIN_INPUT, SECONDARY_INPUT, "Input identifier")),
     )
 
 
@@ -512,14 +537,15 @@ class InputStatus(BasePacket):
 
     TYPE = 69
     DEFINITION = (
-        ('id',    UInt8(0, "PWM identifier")),
+        ('id',    RobotUEnum8(MAIN_INPUT, SECONDARY_INPUT, "Input identifier")),
         ('value', UInt8(0, "Value")),
     )
 
     def handler_methods(self):
         yield from BasePacket.handler_methods(self)
         name = INPUT.lookup_by_value[self.id]
-        name = "on" + name[5:].lower()
+        offset = 10 if IS_MAIN_ROBOT else 15
+        name = "on" + name[offset:].lower()
         yield name
 
 

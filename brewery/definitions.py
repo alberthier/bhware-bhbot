@@ -217,22 +217,22 @@ GOAL_STATUS = Enum("Goal status",
 )
 
 MAIN_INPUT = Enum("Inputs",
-    INPUT_START                = 0,
-    INPUT_TEAM                 = 1,
-    INPUT_ROBOT_INIT           = 2,
-    INPUT_LEFT_BULB_PRESENCE   = 4,
-    INPUT_LEFT_STAND_PRESENCE  = 5,
-    INPUT_RIGHT_BULB_PRESENCE  = 6,
-    INPUT_RIGHT_STAND_PRESENCE = 7,
-    INPUT_LEFT_SCANNER         = 8,
-    INPUT_RIGHT_SCANNER        = 9,
+    MAIN_INPUT_START                = 0,
+    MAIN_INPUT_TEAM                 = 1,
+    MAIN_INPUT_ROBOT_INIT           = 2,
+    MAIN_INPUT_LEFT_BULB_PRESENCE   = 4,
+    MAIN_INPUT_LEFT_STAND_PRESENCE  = 5,
+    MAIN_INPUT_RIGHT_BULB_PRESENCE  = 6,
+    MAIN_INPUT_RIGHT_STAND_PRESENCE = 7,
+    MAIN_INPUT_LEFT_SCANNER         = 8,
+    MAIN_INPUT_RIGHT_SCANNER        = 9,
 )
 
 SECONDARY_INPUT = Enum("Inputs",
-    INPUT_START        = 0,
-    INPUT_TEAM         = 1,
-    INPUT_ROBOT_INIT   = 2,
-    INPUT_CUP_PRESENCE = 3,
+    SECONDARY_INPUT_START        = 0,
+    SECONDARY_INPUT_TEAM         = 1,
+    SECONDARY_INPUT_ROBOT_INIT   = 2,
+    SECONDARY_INPUT_CUP_PRESENCE = 3,
 )
 
 def makeServoMoveCommand(servo, value):
