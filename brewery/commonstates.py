@@ -675,6 +675,26 @@ class Trigger(statemachine.State):
             yield None
 
 
+
+
+class GetInputStatus(statemachine.State):
+
+    def __init__(self, id):
+        self.id = id
+
+
+    def on_enter(self):
+        self.send_packet(packets.InputStatusRequest(self.id))
+
+
+    def on_input_status(self, packet):
+        if packet.id == self.id:
+            self.status = packet.status
+            yield None
+
+
+
+
 ##################################################
 # GOAL MANAGEMENT
 ##################################################
