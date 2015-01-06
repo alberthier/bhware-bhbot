@@ -70,12 +70,12 @@ function loadcommands() {
             if(req.status == 200) {
                 var main = document.getElementById("main");
                 var commands = JSON.parse(req.responseText);
-                Object.keys(commands).sort().forEach(function (section) {
+                commands.forEach(function (section) {
                     var title = document.createElement("h3");
                     main.appendChild(title);
                     main.appendChild(document.createElement("br"));
-                    title.textContent = section;
-                    commands[section].forEach(function (cmd) {
+                    title.textContent = section[0];
+                    section[1].forEach(function (cmd) {
                         var div = document.createElement("div");
                         main.appendChild(div);
                         div.className = "row";
