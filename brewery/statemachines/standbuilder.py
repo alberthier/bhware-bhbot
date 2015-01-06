@@ -30,8 +30,10 @@ class Main(State):
             self.fsm.PLIERS_RIGHT_CLOSE  = LEFT_BUILDER_PLIERS_RIGHT_CLOSE
             self.fsm.PLIERS_RIGHT_OPEN   = LEFT_BUILDER_PLIERS_RIGHT_OPEN
             self.fsm.GRIPPER_LEFT_CLOSE  = LEFT_BUILDER_GRIPPER_LEFT_CLOSE
+            self.fsm.GRIPPER_LEFT_GUIDE  = LEFT_BUILDER_GRIPPER_LEFT_GUIDE
             self.fsm.GRIPPER_LEFT_OPEN   = LEFT_BUILDER_GRIPPER_LEFT_OPEN
             self.fsm.GRIPPER_RIGHT_CLOSE = LEFT_BUILDER_GRIPPER_RIGHT_CLOSE
+            self.fsm.GRIPPER_RIGHT_GUIDE = LEFT_BUILDER_GRIPPER_RIGHT_GUIDE
             self.fsm.GRIPPER_RIGHT_OPEN  = LEFT_BUILDER_GRIPPER_RIGHT_OPEN
             self.fsm.LIGHTER_CLOSE       = LEFT_BUILDER_LIGHTER_CLOSE
             self.fsm.LIGHTER_OPEN        = LEFT_BUILDER_LIGHTER_OPEN
@@ -47,8 +49,10 @@ class Main(State):
             self.fsm.PLIERS_RIGHT_CLOSE  = RIGHT_BUILDER_PLIERS_RIGHT_CLOSE
             self.fsm.PLIERS_RIGHT_OPEN   = RIGHT_BUILDER_PLIERS_RIGHT_OPEN
             self.fsm.GRIPPER_LEFT_CLOSE  = RIGHT_BUILDER_GRIPPER_LEFT_CLOSE
+            self.fsm.GRIPPER_LEFT_GUIDE  = RIGHT_BUILDER_GRIPPER_LEFT_GUIDE
             self.fsm.GRIPPER_LEFT_OPEN   = RIGHT_BUILDER_GRIPPER_LEFT_OPEN
             self.fsm.GRIPPER_RIGHT_CLOSE = RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE
+            self.fsm.GRIPPER_RIGHT_GUIDE = RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE
             self.fsm.GRIPPER_RIGHT_OPEN  = RIGHT_BUILDER_GRIPPER_RIGHT_OPEN
             self.fsm.LIGHTER_CLOSE       = RIGHT_BUILDER_LIGHTER_CLOSE
             self.fsm.LIGHTER_OPEN        = RIGHT_BUILDER_LIGHTER_OPEN
@@ -87,7 +91,7 @@ class Build(State):
         if stand_count < 4:
             yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
             if stand_count < 3:
-                yield Trigger(self.fsm.GRIPPER_LEFT_OPEN, self.fsm.GRIPPER_RIGHT_OPEN)
+                yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
                 yield Trigger(self.fsm.ELEVATOR_UP)
                 yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
                 yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, ELEVATOR_DOWN)
