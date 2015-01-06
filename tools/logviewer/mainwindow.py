@@ -103,7 +103,7 @@ class MainWindowController(QObject):
     def download_remote_loglist(self):
         self.network_manager = QNetworkAccessManager()
         self.network_manager.finished.connect(self.display_log_chooser)
-        url = "http://{}:{}/fsroot/root/bhware/bhbot/logs/".format(self.host, self.port)
+        url = "http://{}:{}/bhware/logs/".format(self.host, self.port)
         self.network_manager.get(QNetworkRequest(QUrl(url)))
 
 
@@ -112,17 +112,16 @@ class MainWindowController(QObject):
         images = []
         while reply.canReadLine():
             line = str(reply.readLine(), "utf-8").strip()
-            if line.startswith("<tr "):
-                idx = line.find("<a href=")
-                if idx != -1:
-                    idx += 9
-                    eidx = line.find("'>", idx)
-                    if eidx != -1:
-                        fname = line[idx:eidx]
-                        if fname.endswith(".py"):
-                            logs.append(fname)
-                        elif fname.endswith(".jpg") or fname.endswith(".svg"):
-                            images.append(fname)
+            idx = line.find('<a href="')
+            if idx != -1:
+                idx += 9
+                eidx = line.find('">', idx)
+                if eidx != -1:
+                    fname = line[idx:eidx]
+                    if fname.endswith(".py"):
+                        logs.append(fname)
+                    elif fname.endswith(".jpg") or fname.endswith(".svg"):
+                        images.append(fname)
         logs.sort()
         logs = [l for l in reversed(logs)]
         if len(logs) == 0:
@@ -144,10 +143,10 @@ class MainWindowController(QObject):
                 for img in images:
                     if img.startswith(log_base):
                         self.remote_files_to_download += 1
-                        url = "http://{}:{}/fsroot/root/bhware/bhbot/logs/{}".format(self.host, self.port, img)
+                        url = "http://{}:{}/bhware/logs/{}".format(self.host, self.port, img)
                         self.network_manager.get(QNetworkRequest(QUrl(url)))
                 self.remote_files_to_download += 1
-                url = "http://{}:{}/fsroot/root/bhware/bhbot/logs/{}".format(self.host, self.port, self.log_file)
+                url = "http://{}:{}/bhware/logs/{}".format(self.host, self.port, self.log_file)
                 self.network_manager.get(QNetworkRequest(QUrl(url)))
                 return
         QApplication.instance().quit();
