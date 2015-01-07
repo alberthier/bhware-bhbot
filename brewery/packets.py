@@ -543,10 +543,11 @@ class InputStatus(BasePacket):
 
     def handler_methods(self):
         yield from BasePacket.handler_methods(self)
-        name = INPUT.lookup_by_value[self.id]
-        offset = 10 if IS_MAIN_ROBOT else 15
-        name = "on" + name[offset:].lower()
-        yield name
+        if self.id in INPUT.lookup_by_value:
+            name = INPUT.lookup_by_value[self.id]
+            offset = 10 if IS_MAIN_ROBOT else 15
+            name = "on" + name[offset:].lower()
+            yield name
 
 
 # Simulator
