@@ -86,4 +86,4 @@ class CalibratePosition(State):
 class EndOfMatch(statemachine.State):
 
     def on_enter(self):
-        yield Stop()
+        self.send_packet(packets.Stop())
