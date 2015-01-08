@@ -78,7 +78,7 @@ class Build(State):
         # Dispatch manually
         if packet.id == self.fsm.INPUT_BULB_PRESENCE:
             yield from self.on_bulb_presence(packet)
-        elif packet.id == self.fsm.INPUT_STAND_PRESENCE:
+        elif packet.id == self.fsm.INPUT_STAND_PRESENCE and packet.value == 1:
             yield from self.on_stand_presence(packet)
 
 
@@ -96,6 +96,7 @@ class Build(State):
                 yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
                 yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, ELEVATOR_DOWN)
             self.robot.stand_count[self.fsm.side] += 1
+        self.send_packet(StandConstructionDone())
 
 
 

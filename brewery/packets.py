@@ -757,6 +757,13 @@ class OpponentDisappeared(BasePacket):
     )
 
 
+
+
+class StandConstructionDone(BasePacket):
+
+    TYPE = 235
+
+
 ################################################################################
 # Packets lookup setup
 
