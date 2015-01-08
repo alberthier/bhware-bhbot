@@ -50,6 +50,7 @@ def sym_y(coord_y):
 def sym_angle(angle):
     return -angle
 
+
 def angle_minus_pi_to_pi(a):
     if a > math.pi :
         return a - 2 * math.pi
@@ -57,5 +58,18 @@ def angle_minus_pi_to_pi(a):
         return a + 2 * math.pi
     return a
 
+
 def compare_angles(a1, a2, epsilon):
     return abs(angle_minus_pi_to_pi((angle_minus_pi_to_pi(a1) - angle_minus_pi_to_pi(a2)))) < epsilon
+
+
+def get_center_pose_for_point(robot_point_x, robot_point_y, dest_x, dest_y, dest_angle):
+    """
+        Returns the pose of the center of the robots that brings the point (robot_point_x, robot_point_y)
+        at (dest_x, dest_y)
+    """
+    cos_a = math.cos(dest_angle)
+    sin_a = math.sin(dest_angle)
+    center_x = dest_x - (cos_a * robot_point_x - sin_a * robot_point_y)
+    center_y = dest_y + sin_a * robot_point_x + cos_a * robot_point_y
+    return (center_x, center_y, dest_angle)

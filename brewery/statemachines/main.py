@@ -20,6 +20,16 @@ import statemachines.testsmain as testsmain
 
 
 
+def left_builder_at(x, y, angle):
+    return get_center_pose_for_point(0.150, 0.0725, x, y, angle)
+
+
+def right_builder_at(x, y, angle):
+    return get_center_pose_for_point(0.150, -0.0725, x, y, angle)
+
+
+
+
 class Main(State):
 
     def on_enter(self):
@@ -41,6 +51,12 @@ class Main(State):
         self.yield_at(90000, EndOfMatch())
         logger.log("Starting ...")
         yield PickupBulb()
+        cx, cy, a = left_builder_at(0.2, 0.85, math.pi)
+        #cx, cy, a = right_builder_at(1.355, 0.87, 0.0)
+        self.log("({}, {}, {})".format(cx, cy, a))
+        yield MoveLineTo(1.0, cy)
+        yield RotateTo(a)
+        yield MoveLineTo(cx, cy)
 
 
 
