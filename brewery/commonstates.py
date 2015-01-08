@@ -643,11 +643,12 @@ class Trigger(statemachine.State):
 
     TYPE               = 0
     ID                 = 1
-    SERVO_COMMAND      = 2
-    SERVO_VALUE        = 3
-    SERVO_TIMEOUT      = 4
-    OUTPUT_ACTION      = 2
-    PWM_VALUE          = 2
+    TYPED_ID           = 0
+    SERVO_COMMAND      = 1
+    SERVO_VALUE        = 2
+    SERVO_TIMEOUT      = 3
+    OUTPUT_ACTION      = 1
+    PWM_VALUE          = 1
 
     def __init__(self, *args):
         """
@@ -670,18 +671,19 @@ class Trigger(statemachine.State):
         self.status = False
         self.statuses = {}
         for cmd in self.commands:
-            self.statuses[cmd[self.ID]] = False
+            self.statuses[cmd[self.TYPED_ID]] = False
 
 
     def on_enter(self):
         for cmd in self.commands:
-            actuator_type = cmd[self.TYPE]
+            actuator_type = cmd[self.TYPED_ID][self.TYPE]
+            actuator_id = cmd[self.TYPED_ID][self.ID]
             if actuator_type in [ ACTUATOR_TYPE_SERVO_AX, ACTUATOR_TYPE_SERVO_RX ]:
                 self.send_packet(packets.ServoControl(*cmd))
             elif actuator_type == ACTUATOR_TYPE_OUTPUT:
-                self.send_packet(packets.OutputControl(id = cmd[self.ID], action = cmd[self.OUTPUT_ACTION]))
+                self.send_packet(packets.OutputControl(id = actuator_id, action = cmd[self.OUTPUT_ACTION]))
             elif actuator_type == ACTUATOR_TYPE_PWM:
-                self.send_packet(packets.PwmControl(id = cmd[self.ID], value = cmd[self.PWM_VALUE]))
+                self.send_packet(packets.PwmControl(id = actuator_id, value = cmd[self.PWM_VALUE]))
             else:
                 self.log("Unknown actuator type in command: {}".format(cmd))
 
@@ -690,22 +692,24 @@ class Trigger(statemachine.State):
         if packet.status != SERVO_STATUS_SUCCESS:
             self.log("Servo #{} timed out".format(packet.id))
         self.statuses[packet.id] = packet.status == SERVO_STATUS_SUCCESS
-        yield from self.cleanup(packet.type, packet.id, packet.command)
+        yield from self.cleanup(packet.id, packet.command)
 
 
     def on_output_control(self, packet):
-        self.statuses[packet.id] = True
-        yield from self.cleanup(ACTUATOR_TYPE_OUTPUT, packet.id)
+        typed_id = (ACTUATOR_TYPE_OUTPUT, packet.id)
+        self.statuses[typed_id] = True
+        yield from self.cleanup(typed_id)
 
 
     def on_pwm_control(self, packet):
-        self.statuses[packet.id] = True
-        yield from self.cleanup(ACTUATOR_TYPE_PWM, packet.id)
+        typed_id = (ACTUATOR_TYPE_PWM, packet.id)
+        self.statuses[typed_id] = True
+        yield from self.cleanup(typed_id)
 
 
-    def cleanup(self, actuator_type, id, subcommand = None):
+    def cleanup(self, typed_id, subcommand = None):
         for i, cmd in enumerate(self.commands):
-            if cmd[self.TYPE] == actuator_type and cmd[self.ID] == id:
+            if cmd[self.TYPED_ID] == typed_id:
                 if subcommand is None or subcommand == cmd[self.SERVO_COMMAND]:
                     del self.commands[i]
                 break

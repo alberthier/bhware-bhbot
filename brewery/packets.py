@@ -145,6 +145,43 @@ class RobotUEnum8(UInt8):
 
 
 
+class RobotServo(AbstractItem):
+    C_TYPE = "BB"
+    DESCRIPTION = "Actuator identifier"
+
+    def __init__(self, main_enum, secondary_enum, description = None):
+        self.main_enum = main_enum
+        self.secondary_enum = secondary_enum
+        super().__init__((0, 0), description)
+
+
+    def serialize(self, value, buf):
+        buf.append(value[0])
+        buf.append(value[1])
+
+
+    def deserialize(self, iterator):
+        act_type = next(iterator)
+        act_id = next(iterator)
+        return (act_type, act_id)
+
+
+    def to_dump(self, value):
+        try:
+            if IS_MAIN_ROBOT:
+                v = self.main_enum.lookup_by_value[value]
+            else:
+                v = self.secondary_enum.lookup_by_value[value]
+        except:
+            v = str(value)
+        return v
+
+
+    def from_dump(self, value):
+        return value
+
+
+
 ################################################################################
 # Base packet class
 
@@ -187,16 +224,11 @@ class BasePacket(object):
 
     def __init__(self, *args, **kwargs):
         values_iter = None
-        if len(args) != 0 and type(args[0]) != tuple:
+        if len(args) != 0:
             values_iter = iter(args)
         for name, item in self.DEFINITION:
             value = None
-            if values_iter is None:
-                for aname, avalue in args:
-                    if name == aname:
-                        value = avalue
-                        break
-            else:
+            if values_iter is not None:
                 try:
                     value = next(values_iter)
                 except StopIteration:
@@ -490,8 +522,7 @@ class ServoControl(BasePacket):
 
     TYPE = 65
     DEFINITION = (
-        ('type',    UEnum8(ACTUATOR_TYPE, ACTUATOR_TYPE_SERVO_AX)),
-        ('id',      UInt8 (0, "Servo identifier")),
+        ('id',      RobotServo(MAIN_SERVO_IDS, SECONDARY_SERVO_IDS, "Servo identifier")),
         ('command', UEnum8(SERVO_COMMAND, SERVO_COMMAND_MOVE)),
         ('value',   UInt16(0, "Servo command value")),
         ('timeout', UInt32(0, "Timeout in ms")),
@@ -505,7 +536,7 @@ class OutputControl(BasePacket):
 
     TYPE = 66
     DEFINITION = (
-        ('id',     UInt8 (0, "Output identifier")),
+        ('id',     RobotUEnum8(MAIN_OUTPUT_IDS, SECONDARY_OUTPUT_IDS, "Output identifier")),
         ('action', UEnum8(ACTION, ACTION_OFF)),
     )
 
@@ -516,7 +547,7 @@ class PwmControl(BasePacket):
 
     TYPE = 67
     DEFINITION = (
-        ('id',    UInt8 (0, "PWM identifier")),
+        ('id',     RobotUEnum8(MAIN_PWM_IDS, SECONDARY_PWM_IDS, "Output identifier")),
         ('value', UInt16(0, "Value [0x0 - 0x3FF - 0x7FF]")),
     )
 
