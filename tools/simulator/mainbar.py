@@ -23,19 +23,19 @@ class MainBar(QWidget, MainBar_Ui):
         self.set_icon(self.reload, "refresh")
         self.set_icon(self.start_pause, "start")
         self.set_icon(self.stop, "stop")
-        self.set_color_icon(self.main_yellow_robot, TEAM_RIGHT_COLOR)
-        self.set_color_icon(self.secondary_yellow_robot, TEAM_RIGHT_COLOR)
-        self.set_color_icon(self.main_red_robot, TEAM_LEFT_COLOR)
-        self.set_color_icon(self.secondary_red_robot, TEAM_LEFT_COLOR)
+        self.set_color_icon(self.main_right_robot, TEAM_RIGHT_COLOR)
+        self.set_color_icon(self.secondary_right_robot, TEAM_RIGHT_COLOR)
+        self.set_color_icon(self.main_left_robot, TEAM_LEFT_COLOR)
+        self.set_color_icon(self.secondary_left_robot, TEAM_LEFT_COLOR)
 
-        self.main_yellow_robot.setChecked(True)
-        self.main_red_robot.setChecked(True)
-        self.oldest_pressed = self.main_yellow_robot
+        self.main_right_robot.setChecked(True)
+        self.main_left_robot.setChecked(True)
+        self.oldest_pressed = self.main_right_robot
 
-        self.main_yellow_robot.toggled.connect(self.main_yellow_toggled)
-        self.secondary_yellow_robot.toggled.connect(self.secondary_yellow_toggled)
-        self.main_red_robot.toggled.connect(self.main_red_toggled)
-        self.secondary_red_robot.toggled.connect(self.secondary_red_toggled)
+        self.main_right_robot.toggled.connect(self.main_right_toggled)
+        self.secondary_right_robot.toggled.connect(self.secondary_right_toggled)
+        self.main_left_robot.toggled.connect(self.main_left_toggled)
+        self.secondary_left_robot.toggled.connect(self.secondary_left_toggled)
 
 
     def set_icon(self, button, icon_name):
@@ -49,24 +49,24 @@ class MainBar(QWidget, MainBar_Ui):
         button.setIcon(QIcon(pixmap))
 
 
-    def main_yellow_toggled(self):
-        self.button_toggled(self.main_yellow_robot)
+    def main_right_toggled(self):
+        self.button_toggled(self.main_right_robot)
 
 
-    def secondary_yellow_toggled(self):
-        self.button_toggled(self.secondary_yellow_robot)
+    def secondary_right_toggled(self):
+        self.button_toggled(self.secondary_right_robot)
 
 
-    def main_red_toggled(self):
-        self.button_toggled(self.main_red_robot)
+    def main_left_toggled(self):
+        self.button_toggled(self.main_left_robot)
 
 
-    def secondary_red_toggled(self):
-        self.button_toggled(self.secondary_red_robot)
+    def secondary_left_toggled(self):
+        self.button_toggled(self.secondary_left_robot)
 
 
     def button_toggled(self, toggled):
-        buttons = [ self.main_yellow_robot, self.secondary_yellow_robot, self.main_red_robot, self.secondary_red_robot ]
+        buttons = [ self.main_right_robot, self.secondary_right_robot, self.main_left_robot, self.secondary_left_robot ]
         cpt = 0
         for button in buttons:
             if button.isChecked():
@@ -83,8 +83,8 @@ class MainBar(QWidget, MainBar_Ui):
 
     def get_expected_robots(self):
         expected = []
-        buttons = [ self.main_yellow_robot, self.secondary_yellow_robot, self.main_red_robot, self.secondary_red_robot ]
-        teams = [ TEAM_RIGHT, TEAM_RIGHT, TEAM_LEFT, TEAM_LEFT ]
+        buttons = [ self.main_left_robot, self.secondary_left_robot, self.main_right_robot, self.secondary_right_robot ]
+        teams = [ TEAM_LEFT, TEAM_LEFT, TEAM_RIGHT, TEAM_RIGHT ]
         robot_type = [ True, False, True, False ]
 
         for button, team, is_main in zip(buttons, teams, robot_type):
