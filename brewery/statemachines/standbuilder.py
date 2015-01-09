@@ -94,9 +94,9 @@ class Build(State):
                 yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
                 yield Trigger(self.fsm.ELEVATOR_UP)
                 yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
-                yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, ELEVATOR_DOWN)
+                yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, self.fsm.ELEVATOR_DOWN)
             self.robot.stand_count[self.fsm.side] += 1
-        self.send_packet(StandConstructionDone())
+        self.send_packet(packets.StandConstructionDone())
 
 
 

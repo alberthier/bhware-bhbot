@@ -587,7 +587,7 @@ class GameElementsLayer(fieldview.Layer):
                     ey = elt.pos().y() - robot.item.y()
                     elt_angle = math.atan2(ey, ex) % (math.pi * 2.0)
 
-                    ref = abs(angle - elt_angle)
+                    ref = (elt_angle - angle) % (math.pi * 2.0)
 
                     if ref < math.pi / 4.0 or ref >= 7.0 * math.pi / 4.0:
                         sign = 1.0
@@ -604,6 +604,12 @@ class GameElementsLayer(fieldview.Layer):
                     dx = sign * math.cos(angle) * dist
                     dy = sign * math.sin(angle) * dist
                     elt.setPos(elt.pos().x() + dx, elt.pos().y() + dy)
+
+                    if isinstance(elt, Stand) and robot.layer.robot_controller.is_main:
+                        if ref < math.pi / 4.0:
+                            robot.layer.robot_controller.send_packet(packets.InputStatus(MAIN_INPUT_RIGHT_STAND_PRESENCE, 1))
+                        elif ref > 7.0 * math.pi / 4.0:
+                            robot.layer.robot_controller.send_packet(packets.InputStatus(MAIN_INPUT_LEFT_STAND_PRESENCE, 1))
 
         if self.main_bar.opponent_detection.isChecked():
             if robot_a.item and robot_b.item :
