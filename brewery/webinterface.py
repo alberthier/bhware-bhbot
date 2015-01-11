@@ -2,6 +2,7 @@
 
 
 import json
+import logger
 import os
 import socket
 import traceback
@@ -14,6 +15,11 @@ from definitions import *
 
 
 
+LAST_WEB_FSM = None
+
+
+
+
 class WebInterface:
 
     def __init__(self, event_loop):
@@ -22,14 +28,9 @@ class WebInterface:
     def __call__(self, environ, start_response):
         response = None
         path = environ["PATH_INFO"]
-        if path == "/hostname":
-            response = socket.gethostname()
-        elif path == "/statemachines":
-            response = self.statemachines(environ)
-        elif path == "/remotecontrol":
-            response = self.remotecontrol(environ)
-        elif path == "/eval":
-            response = self.eval(environ)
+        handler = path[1:]
+        if hasattr(self, handler):
+            response = getattr(self, handler)(environ)
 
         if response is None:
             code = "404 Not Found"
@@ -156,11 +157,29 @@ class WebInterface:
                     encoding = value
                     break
         code = str(environ["wsgi.input"].read(), encoding)
-        fsm = statemachine.StateMachine(self.event_loop, "eval", code = code)
+        global LAST_WEB_FSM
+        LAST_WEB_FSM = statemachine.StateMachine(self.event_loop, "eval", code = code)
         text = ""
-        if fsm.error is not None:
-            for l in traceback.format_exception(type(fsm.error), fsm.error, None):
+        if LAST_WEB_FSM.error is not None:
+            for l in traceback.format_exception(type(LAST_WEB_FSM.error), LAST_WEB_FSM.error, None):
                 text += l
         else:
             text = "OK"
         return text
+
+
+    def inputs(self, environ):
+        result = {}
+
+        inputs = MAIN_INPUT if IS_MAIN_ROBOT else SECONDARY_INPUT
+        result = inputs.lookup_by_value
+
+        return json.dumps(result)
+
+
+    def getevaloutput(self, environ):
+        global LAST_WEB_FSM
+        if LAST_WEB_FSM is not None:
+            return LAST_WEB_FSM.output
+        else:
+            return ""

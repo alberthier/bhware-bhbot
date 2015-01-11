@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inputs</title>
+    <style type="text/css">
+    table {
+        font-family: "Monospace";
+    }
+    </style>
+    <script type="text/javascript">
+
+    var INPUTS_URL = "/brewery/inputs";
+    var inputs = {};
+
+    function initialize() {
+        var req = new XMLHttpRequest();
+        req.open("GET", INPUTS_URL, true);
+        req.onreadystatechange = function(e) {
+            if (req.readyState == 4) {
+                if(req.status == 200) {
+                    var list = document.getElementById("list");
+                    inputs = JSON.parse(req.responseText);
+                    for (var i = 0; i < 15; ++i) {
+                        var tr = document.createElement("tr");
+                        var nametd = document.createElement("td");
+                        var valuetd = document.createElement("td");
+                        tr.appendChild(nametd);
+                        var name = inputs[i];
+                        if (!name) {
+                            name = "<unassigned>"
+                        }
+                        nametd.textContent = "Input " + i + " (" + name + ")";
+                        tr.appendChild(valuetd);
+                        valuetd.setAttribute("id", "input" + i);
+                        list.appendChild(tr);
+                    }
+                    requestinputs();
+                }
+            }
+        };
+        req.send();
+    }
+
+    function requestinputs() {
+        var code = "statuses = []\n" +
+                   "for i in range(16):\n" +
+                   "    gis = GetInputStatus(i)\n" +
+                   "    yield gis\n" +
+                   "    statuses.append(str(gis.value))\n" +
+                   "self.output = '[' + ','.join(statuses) + ']'\n";
+        var req = new XMLHttpRequest();
+        req.open("POST", "/brewery/eval", true);
+        req.onreadystatechange = function(e) {
+            if (req.readyState == 4) {
+                setTimeout(getinputs, 200);
+            }
+        }
+        req.send(code);
+    }
+
+    function getinputs() {
+        var req = new XMLHttpRequest();
+        req.open("GET", "/brewery/getevaloutput", true);
+        req.onreadystatechange = function(e) {
+            if (req.readyState == 4) {
+                if(req.status == 200) {
+                    statuses = JSON.parse(req.responseText);
+                    for (var i = 0; i < statuses.length; ++i) {
+                        var valuetd = document.getElementById("input" + i);
+                        valuetd.textContent = statuses[i];
+                    }
+                }
+            }
+        }
+        req.send();
+
+        setTimeout(requestinputs, 500);
+    }
+
+</script>
+</head>
+<body id="main" onload="initialize()">
+    <table id="list">
+    </table>
+</body>
+</html>

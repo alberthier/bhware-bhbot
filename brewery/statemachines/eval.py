@@ -26,6 +26,7 @@ class Main(statemachine.State):
                 state = """
 class WebCodeState(statemachine.State):
     def on_enter(self):
+        self.output = None
         self.error = None
         try:
 {code}
@@ -37,6 +38,7 @@ class WebCodeState(statemachine.State):
                 state = state.format(code = code)
                 exec(compile(state, "<webcode>", "exec"))
                 webStateCode = yield eval("WebCodeState()")
+                self.fsm.output = webStateCode.output
                 self.fsm.error = webStateCode.error
                 exec(compile("del WebCodeState", "<webcode>", "exec"))
         except Exception as e:
