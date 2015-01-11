@@ -569,6 +569,7 @@ class InputStatus(BasePacket):
     TYPE = 69
     DEFINITION = (
         ('id',    RobotUEnum8(MAIN_INPUT, SECONDARY_INPUT, "Input identifier")),
+        ('kind',  UEnum8(KIND, KIND_EVENT)),
         ('value', UInt8(0, "Value")),
     )
 
@@ -578,6 +579,8 @@ class InputStatus(BasePacket):
             name = INPUT.lookup_by_value[self.id]
             offset = 10 if IS_MAIN_ROBOT else 15
             name = "on" + name[offset:].lower()
+            if self.kind == KIND_READ:
+                name += "_read"
             yield name
 
 

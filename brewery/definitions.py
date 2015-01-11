@@ -181,6 +181,11 @@ ACTION = Enum("Action",
     ACTION_ON  = 1,
 )
 
+KIND = Enum("Input kind",
+    KIND_EVENT = 0,
+    KIND_READ  = 1,
+)
+
 TRAJECTORY = Enum("Navigation result",
     TRAJECTORY_DESTINATION_REACHED     = 0,
     TRAJECTORY_BLOCKED                 = 1,

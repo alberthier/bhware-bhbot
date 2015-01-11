@@ -205,6 +205,7 @@ class RobotController(object):
     def on_input_status_request(self, packet):
         status = packets.InputStatus()
         status.id = packet.id
+        status.kind = KIND_READ
         if packet.id == self.get_input_id("INPUT_TEAM"):
             status.value = self.team
         else:
