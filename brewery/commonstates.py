@@ -390,13 +390,7 @@ class AbstractMove(statemachine.State):
 
 
     def get_direction(self, x, y):
-        dx = x - self.robot.pose.virt.x
-        dy = y - self.robot.pose.virt.y
-        a = math.atan2(dy, dx) - self.robot.pose.virt.angle
-        if -math.pi / 2.0 <= a and a <= math.pi / 2.0:
-            return DIRECTION_FORWARD
-        else:
-            return DIRECTION_BACKWARDS
+        return tools.get_direction(self.robot.pose, x, y)
 
 
 
@@ -587,7 +581,7 @@ class FollowPath(statemachine.State):
         self.robot.destination = position.Pose(dest.x, dest.y, 0.0)
         if self.direction == DIRECTION_AUTO:
             first_point = self.path[0]
-            self.direction = self.get_direction(first_point.virt.x, first_point.virt.y)
+            self.direction = tools.get_direction(self.robot.pose, first_point.virt.x, first_point.virt.y)
         for pose in self.path:
             if self.direction == DIRECTION_FORWARD:
                 if not self.robot.is_looking_at(pose):
@@ -625,6 +619,7 @@ class Navigate(statemachine.State):
             yield None
             return
         move = yield FollowPath(path, self.direction)
+        self.direction = move.direction # fetch the real move direction in case of DIRECTION_AUTO for the caller
         self.exit_reason = move.exit_reason
         yield None
 
@@ -785,7 +780,7 @@ class ExecuteGoals(statemachine.State):
                         goal.is_blacklisted = True
                         goal.available()
                     if move.exit_reason == TRAJECTORY_BLOCKED:
-                        direction = DIRECTION_BACKWARDS if goal.direction == DIRECTION_FORWARD else DIRECTION_FORWARD
+                        direction = DIRECTION_BACKWARDS if move.direction == DIRECTION_FORWARD else DIRECTION_FORWARD
                         dist = ROBOT_GYRATION_RADIUS - ROBOT_CENTER_X + 0.02
                         yield MoveLineRelative(dist, direction)
                         self.event_loop.map.robot_blocked(goal.direction)
@@ -822,7 +817,7 @@ class ExecuteGoals(statemachine.State):
 class EscapeToAnywhere(statemachine.Timer):
 
     def __init__(self):
-        super(self).__init__(50)
+        super().__init__(50)
 
 
     def on_enter(self):
@@ -839,5 +834,4 @@ class EscapeToAnywhere(statemachine.Timer):
         if exit_reason == TRAJECTORY_BLOCKED:
             move = yield MoveLineRelative(0.1, DIRECTION_BACKWARDS)
             exit_reason = move.exit_reason
-        if exit_reason == TRAJECTORY_DESTINATION_REACHED:
-            yield None
+        yield None

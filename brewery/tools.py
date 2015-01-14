@@ -73,3 +73,22 @@ def get_center_pose_for_point(robot_point_x, robot_point_y, dest_x, dest_y, dest
     center_x = dest_x - (cos_a * robot_point_x - sin_a * robot_point_y)
     center_y = dest_y + sin_a * robot_point_x + cos_a * robot_point_y
     return (center_x, center_y, dest_angle)
+
+
+def get_direction(robot_pose, x, y):
+    dx = x - robot_pose.virt.x
+    dy = y - robot_pose.virt.y
+    a = math.atan2(dy, dx) - robot_pose.virt.angle
+    if -math.pi / 2.0 <= a and a <= math.pi / 2.0:
+        return 1 # DIRECTION_FORWARD
+    else:
+        return -1 # DIRECTION_BACKWARDS
+
+
+def get_offset_position(robot_pose, x, y, offset):
+    a = angle_between(robot_pose.x, robot_pose.y, x, y)
+    dist = distance(robot_pose.x, robot_pose.y, x, y)
+    dist += offset
+    x = robot_pose.x + math.cos(a) * dist
+    y = robot_pose.y + math.sin(a) * dist
+    return (x, y)
