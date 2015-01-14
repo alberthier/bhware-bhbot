@@ -726,7 +726,7 @@ class GetInputStatus(statemachine.State):
 
 
     def on_input_status(self, packet):
-        if packet.id == self.id:
+        if packet.id == self.id and packet.kind == KIND_READ:
             self.value = packet.value
             yield None
 

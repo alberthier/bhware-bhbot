@@ -41,7 +41,7 @@ class Robot(object):
         return abs(current_angle - angle) < (math.pi / 32.0)
 
 
-    def on_team(self, packet):
+    def on_team_read(self, packet):
         self.team = packet.value
 
 

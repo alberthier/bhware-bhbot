@@ -518,7 +518,7 @@ class EventLoop(object):
             leds.driver.heartbeat_tick()
 
 
-    def on_team(self, packet):
+    def on_team_read(self, packet):
         logger.set_team(packet.value)
 
 
