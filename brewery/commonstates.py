@@ -762,7 +762,7 @@ class ExecuteGoals(statemachine.State):
 
             if navigation_failures < 10:
                 logger.log("Choosing the best goal")
-                goal = gm.get_next_goal()
+                goal = gm.get_simple_next_goal()
             else:
                 logger.log("Escaping to anywhere !!")
                 yield EscapeToAnywhere()

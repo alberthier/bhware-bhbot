@@ -144,6 +144,43 @@ class GoalManager:
         return False
 
 
+    def get_simple_next_goal(self):
+        candidates = self.get_candidate_goals()
+
+        if len(candidates) == 0:
+            return None
+
+        for goal in candidates :
+            goal.before_evaluation()
+
+        candidates.sort(key = lambda goal : goal.weight)
+
+        logger.log('Candidate goals : {}'.format(["{}({})".format(goal.uid, goal.weight) for goal in candidates]))
+
+        best_weight = candidates[0].weight
+        best_candidates = []
+        for goal in candidates:
+            if goal.weight == best_weight:
+                best_candidates.append(goal)
+            else:
+                break
+
+        if len(best_candidates) == 1:
+            return best_candidates[0]
+        else:
+            best_goal = None
+            for goal in best_candidates:
+                pose = position.Pose(goal.x, goal.y, virtual = True)
+                logger.log("Evaluate goal {}".format(goal.uid))
+                if GoalManager.GOAL_EVALUATION_USES_PATHFINDING:
+                    goal.navigation_cost = self.event_loop.map.evaluate(self.event_loop.robot.pose, pose)
+                else:
+                    goal.navigation_cost = tools.distance(self.event_loop.robot.pose.x, self.event_loop.robot.pose.y, pose.x, pose.y)
+                if best_goal is None or best_goal.navigation_cost > goal.navigation_cost:
+                    best_goal = goal
+            return best_goal
+
+
     def get_next_goal(self):
         candidates = self.get_candidate_goals()
 
