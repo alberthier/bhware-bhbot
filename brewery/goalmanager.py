@@ -18,11 +18,12 @@ from definitions import *
 
 class Goal:
 
-    def __init__(self, identifier, weight, x, y, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
+    def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
         self.identifier = identifier
         self.weight = weight
         self.x = x
         self.y = y
+        self.offset = offset
         self.direction = direction
         self.handler_state = handler_state
         self.navigation_cost = 0.0

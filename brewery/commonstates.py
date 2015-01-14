@@ -599,16 +599,27 @@ class FollowPath(statemachine.State):
 
 class Navigate(statemachine.State):
 
-    def __init__(self, x, y, direction = DIRECTION_AUTO):
+    def __init__(self, x, y, direction = DIRECTION_AUTO, offset = 0):
         statemachine.State.__init__(self)
         self.destination = position.Pose(x, y, None, True)
         self.direction = direction
         self.exit_reason = TRAJECTORY_DESTINATION_REACHED
+        self.offset = offset
 
 
     def create_path(self):
-        (cost, path) = self.event_loop.map.route(self.robot.pose, self.destination)
-        return path
+        cost, path = self.event_loop.map.route(self.robot.pose, self.destination)
+        if len(path) == 0 or self.offset == 0:
+            return path
+        else:
+            p = self.robot.pose if len(path) == 1 else path[-2]
+            a = tools.angle_between(p.x, p.y, self.destination.x, self.destination.y)
+            dist = tools.distance(p.x, p.y, self.destination.x, self.destination.y)
+            dist += self.offset
+            last_pose = path[-1]
+            last_pose.x = p.x + math.cos(a) * dist
+            last_pose.y = p.y + math.sin(a) * dist
+            return path
 
 
     def on_enter(self):
@@ -767,7 +778,7 @@ class ExecuteGoals(statemachine.State):
                 current_navigation_succeeded = True
                 if goal.navigate :
                     logger.log('Navigating to goal')
-                    move = yield Navigate(goal.x, goal.y, goal.direction)
+                    move = yield Navigate(goal.x, goal.y, goal.direction, goal.offset)
                     logger.log('End of navigation : {}'.format(TRAJECTORY.lookup_by_value[move.exit_reason]))
 
                     current_navigation_succeeded = move.exit_reason == TRAJECTORY_DESTINATION_REACHED
