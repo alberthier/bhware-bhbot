@@ -71,7 +71,7 @@ def get_center_pose_for_point(robot_point_x, robot_point_y, dest_x, dest_y, dest
     cos_a = math.cos(dest_angle)
     sin_a = math.sin(dest_angle)
     center_x = dest_x - (cos_a * robot_point_x - sin_a * robot_point_y)
-    center_y = dest_y + sin_a * robot_point_x + cos_a * robot_point_y
+    center_y = dest_y - (sin_a * robot_point_x + cos_a * robot_point_y)
     return (center_x, center_y, dest_angle)
 
 

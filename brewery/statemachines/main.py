@@ -20,14 +20,31 @@ import statemachines.testsmain as testsmain
 
 
 
-def left_builder_at(x, y, angle):
+def left_builder_at_pose(x, y, angle):
     return get_center_pose_for_point(0.150, 0.0725, x, y, angle)
 
 
-def right_builder_at(x, y, angle):
+def right_builder_at_pose(x, y, angle):
     return get_center_pose_for_point(0.150, -0.0725, x, y, angle)
 
 
+def builder_at_point(side, robot_pose, x, y):
+    px = 0.150
+    py = -0.0725 if side == SIDE_LEFT else 0.0725
+
+    ra = angle_between(robot_pose.virt.x, robot_pose.virt.y, x, y)
+    d = distance(robot_pose.virt.x, robot_pose.virt.y, x, y)
+    pose = Pose(0.0, 0.0, ra, True)
+    pose.virt.angle += math.asin(px / d)
+    return get_center_pose_for_point(px, py, x, y, pose.virt.angle)
+
+
+def left_builder_at_point(robot_pose, x, y):
+    return builder_at_point(SIDE_LEFT, robot_pose, x, y)
+
+
+def right_builder_at_point(robot_pose, x, y):
+    return builder_at_point(SIDE_RIGHT, robot_pose, x, y)
 
 
 class Main(State):
