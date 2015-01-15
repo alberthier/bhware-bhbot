@@ -56,6 +56,12 @@ class Main(State):
         StateMachine(self.event_loop, "standbuilder", side = SIDE_LEFT)
         StateMachine(self.event_loop, "standbuilder", side = SIDE_RIGHT)
 
+        gm = self.robot.goal_manager
+        gm.add(
+                           # identifier, order, x, y, offset, direction, handler_state
+#            goalmanager.Goal("GRAB_NORTH_STANDS", 1, LEFT_START_X, p1y, 0.020, DIRECTION_FORWARD, GrabNorthStands),
+        )
+
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
@@ -68,12 +74,8 @@ class Main(State):
         self.yield_at(90000, EndOfMatch())
         logger.log("Starting ...")
         yield PickupBulb()
-        cx, cy, a = left_builder_at(0.2, 0.85, math.pi)
-        #cx, cy, a = right_builder_at(1.355, 0.87, 0.0)
-        self.log("({}, {}, {})".format(cx, cy, a))
-        yield MoveLineTo(1.0, cy)
-        yield RotateTo(a)
-        yield MoveLineTo(cx, cy)
+        yield GrabNorthStands()
+        yield ExecuteGoals()
 
 
 
@@ -124,6 +126,42 @@ class PickupBulb(State):
         yield Trigger(LIGHTER_ELEVATOR_UP)
         yield Trigger(LIGHTER_GRIPPER_OPEN)
         yield Trigger(LIGHTER_ELEVATOR_DOWN)
+        yield None
+
+
+
+
+class GrabNorthStands(State):
+
+    def on_enter(self):
+        x1, y1, angle0 = right_builder_at_pose(0.080, 0.850, math.pi)
+        angle1 = math.radians(165)
+        a1 = math.tan(angle1)
+        b1 = y1 - a1 * x1
+        angle2 = math.radians(-150)
+        x2, y2, angle2 = left_builder_at_pose(0.200, 0.090, angle2)
+        a2 = math.tan(angle2)
+        b2 = y2 - a2 * x2
+        xc = (b2 - b1) / (a1 - a2)
+        yc = a1 * xc + b1
+
+        yield MoveLineTo(LEFT_START_X, y1)
+        yield RotateTo(angle0)
+        yield MoveLineTo(x1, y1)
+        yield RotateTo(angle1)
+        yield MoveLineTo(xc, yc)
+        yield RotateTo(angle2)
+        yield MoveLineTo(x2, y2)
+
+        yield None
+
+
+
+
+class WaitForStandGrabbing(State):
+
+    def on_enter(self):
+        self.exit_reason = GOAL_DONE
         yield None
 
 
