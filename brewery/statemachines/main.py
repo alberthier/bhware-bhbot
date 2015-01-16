@@ -30,14 +30,16 @@ def right_builder_at_pose(x, y, angle):
 
 def builder_at_point(side, robot_pose, x, y):
     px = 0.150
-    py = -0.0725 if side == SIDE_LEFT else 0.0725
+    py = 0.0725 if side == SIDE_LEFT else -0.0725
+    sign = -1 if side == SIDE_LEFT else 1
+
+    ra = math.atan2(robot_pose.virt.y, robot_pose.virt.x)
+    da = math.atan2(y, x)
 
     ra = angle_between(robot_pose.virt.x, robot_pose.virt.y, x, y)
     d = distance(robot_pose.virt.x, robot_pose.virt.y, x, y)
-    pose = Pose(0.0, 0.0, ra, True)
-    pose.virt.angle += math.asin(px / d)
-    return get_center_pose_for_point(px, py, x, y, pose.virt.angle)
-
+    angle = ra + sign * math.asin((px / 2.0) / d)
+    return get_center_pose_for_point(px, py, x, y, angle)
 
 def left_builder_at_point(robot_pose, x, y):
     return builder_at_point(SIDE_LEFT, robot_pose, x, y)
@@ -45,6 +47,8 @@ def left_builder_at_point(robot_pose, x, y):
 
 def right_builder_at_point(robot_pose, x, y):
     return builder_at_point(SIDE_RIGHT, robot_pose, x, y)
+
+
 
 
 class Main(State):
@@ -60,6 +64,7 @@ class Main(State):
         gm.add(
                            # identifier, order, x, y, offset, direction, handler_state
 #            goalmanager.Goal("GRAB_NORTH_STANDS", 1, LEFT_START_X, p1y, 0.020, DIRECTION_FORWARD, GrabNorthStands),
+            goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0.0, DIRECTION_FORWARD, GrabNorthMineStand),
         )
 
 
@@ -74,7 +79,7 @@ class Main(State):
         self.yield_at(90000, EndOfMatch())
         logger.log("Starting ...")
         yield PickupBulb()
-        yield GrabNorthStands()
+        yield GrabNorthStairsStands()
         yield ExecuteGoals()
 
 
@@ -131,28 +136,30 @@ class PickupBulb(State):
 
 
 
-class GrabNorthStands(State):
+class GrabNorthStairsStands(State):
 
     def on_enter(self):
-        x1, y1, angle0 = right_builder_at_pose(0.080, 0.850, math.pi)
-        angle1 = math.radians(165)
-        a1 = math.tan(angle1)
-        b1 = y1 - a1 * x1
-        angle2 = math.radians(-150)
-        x2, y2, angle2 = left_builder_at_pose(0.200, 0.090, angle2)
-        a2 = math.tan(angle2)
-        b2 = y2 - a2 * x2
-        xc = (b2 - b1) / (a1 - a2)
-        yc = a1 * xc + b1
+        x, y, angle = right_builder_at_pose(0.080, 0.850, math.pi)
 
-        yield MoveLineTo(LEFT_START_X, y1)
-        yield RotateTo(angle0)
-        yield MoveLineTo(x1, y1)
-        yield RotateTo(angle1)
-        yield MoveLineTo(xc, yc)
-        yield RotateTo(angle2)
-        yield MoveLineTo(x2, y2)
+        yield MoveLineTo(LEFT_START_X, y)
+        yield RotateTo(angle)
+        yield MoveLineTo(x, y)
+        yield LookAtOpposite(0.42, 0.73)
+        yield MoveLineTo(0.42, 0.73)
 
+        yield None
+
+
+
+
+class GrabNorthMineStand(State):
+
+    def on_enter(self):
+        x, y, angle = left_builder_at_point(self.robot.pose, 0.200, 0.090)
+        yield RotateTo(angle)
+        yield MoveLineTo(x, y)
+        yield MoveLineRelative(0.2, DIRECTION_BACKWARDS)
+        self.exit_reason = GOAL_DONE
         yield None
 
 
@@ -161,7 +168,6 @@ class GrabNorthStands(State):
 class WaitForStandGrabbing(State):
 
     def on_enter(self):
-        self.exit_reason = GOAL_DONE
         yield None
 
 
