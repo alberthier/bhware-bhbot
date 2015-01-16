@@ -31,15 +31,15 @@ def right_builder_at_pose(x, y, angle):
 def builder_at_point(side, robot_pose, x, y):
     px = 0.150
     py = 0.0725 if side == SIDE_LEFT else -0.0725
-    sign = -1 if side == SIDE_LEFT else 1
 
     ra = math.atan2(robot_pose.virt.y, robot_pose.virt.x)
     da = math.atan2(y, x)
 
     ra = angle_between(robot_pose.virt.x, robot_pose.virt.y, x, y)
     d = distance(robot_pose.virt.x, robot_pose.virt.y, x, y)
-    angle = ra + sign * math.asin((px / 2.0) / d)
+    angle = ra - math.asin(py / d)
     return get_center_pose_for_point(px, py, x, y, angle)
+
 
 def left_builder_at_point(robot_pose, x, y):
     return builder_at_point(SIDE_LEFT, robot_pose, x, y)
