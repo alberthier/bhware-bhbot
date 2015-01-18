@@ -86,9 +86,22 @@ def get_direction(robot_pose, x, y):
 
 
 def get_offset_position(robot_pose, x, y, offset):
+    """
+    Returns the (x, y) position offseted by 'offset' mm with robot_pose as start reference
+    """
     a = angle_between(robot_pose.x, robot_pose.y, x, y)
     dist = distance(robot_pose.x, robot_pose.y, x, y)
     dist += offset
     x = robot_pose.x + math.cos(a) * dist
     y = robot_pose.y + math.sin(a) * dist
     return (x, y)
+
+
+def get_crossing_point(x1, y1, angle1, x2, y2, angle2):
+    a1 = math.tan(angle1)
+    b1 = y1 - a1 * x1
+    a2 = math.tan(angle2)
+    b2 = y2 - a2 * x2
+    xc = (b2 - b1) / (a1 - a2)
+    yc = a1 * xc + b1
+    return (xc, yc)
