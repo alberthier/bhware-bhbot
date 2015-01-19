@@ -111,9 +111,10 @@ class StateMachine(object):
         self.state_stack.pop()
         self.log("Exiting state {old} ({old} -> {new})".format(old = previous_state.name, new = self.current_state_name))
         current_state = self.current_state
+        if isinstance(previous_state, Timer):
+            self.log("Stopping timer")
+            self.timer.stop()
         if current_state is not None:
-            if isinstance(current_state, Timer):
-                self.timer.stop()
             return (previous_state, self.current_state.fsm_current_method)
         else:
             return (previous_state, None)
@@ -157,8 +158,14 @@ class StateMachine(object):
 
 
     def on_timeout(self):
-        self.current_state.stop()
-        self.process(self.current_state.on_timeout())
+        cs = self.current_state
+        if isinstance(cs, Timer):
+            cs.stop()
+            self.process(cs.on_timeout())
+        else:
+            self.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            self.log("!! on_timeout called wheras the current state isn't a Timer !!")
+            self.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 
 
