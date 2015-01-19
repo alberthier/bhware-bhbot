@@ -607,9 +607,9 @@ class GameElementsLayer(fieldview.Layer):
 
                     if isinstance(elt, Stand) and robot.layer.robot_controller.is_main:
                         if ref < math.pi / 4.0:
-                            robot.layer.robot_controller.send_packet(packets.InputStatus(MAIN_INPUT_RIGHT_STAND_PRESENCE, 1))
+                            robot.layer.robot_controller.send_packet(packets.InputStatus(MAIN_INPUT_RIGHT_STAND_PRESENCE, KIND_EVENT, 1))
                         elif ref > 7.0 * math.pi / 4.0:
-                            robot.layer.robot_controller.send_packet(packets.InputStatus(MAIN_INPUT_LEFT_STAND_PRESENCE, 1))
+                            robot.layer.robot_controller.send_packet(packets.InputStatus(MAIN_INPUT_LEFT_STAND_PRESENCE, KIND_EVENT, 1))
 
         if self.main_bar.opponent_detection.isChecked():
             if robot_a.item and robot_b.item :
