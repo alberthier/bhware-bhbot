@@ -300,9 +300,6 @@ class WaitForOpponentLeave(statemachine.Timer):
                 else :
                     logger.log('WaitForOpponentLeave : retries remaining = {}'.format(self.retries))
 
-    def on_exit(self):
-        self.log("WaitForOpponentLeave : exit reason={}".format(TRAJECTORY.lookup_by_value[self.exit_reason]))
-
 
 
 

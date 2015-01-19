@@ -108,7 +108,6 @@ class StateMachine(object):
 
     def pop_state(self):
         previous_state = self.current_state
-        previous_state.on_exit()
         self.state_stack.pop()
         self.log("Exiting state {old} ({old} -> {new})".format(old = previous_state.name, new = self.current_state_name))
         current_state = self.current_state
@@ -208,10 +207,6 @@ class State:
 
 
     def on_enter(self):
-        pass
-
-
-    def on_exit(self):
         pass
 
 

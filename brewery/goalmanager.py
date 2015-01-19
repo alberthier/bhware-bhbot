@@ -327,7 +327,6 @@ class GoalManager:
     def update_goal_status(self, goal, new_status):
         if not isinstance(goal, Goal):
             for g in self.goals:
-                logger.log("{} == {}".format(g.identifier, goal))
                 if g.identifier == goal:
                     goal = g
                     break
