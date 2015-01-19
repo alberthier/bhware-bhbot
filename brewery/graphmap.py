@@ -34,12 +34,13 @@ class Map:
         self.event_loop = event_loop
         self.build_module()
         import graphpathfinding
-        self.pathfinder = graphpathfinding.PathFinder(ROBOT_GYRATION_RADIUS,                # min x
-                                                      ROBOT_GYRATION_RADIUS,                # min y
-                                                      FIELD_X_SIZE - ROBOT_GYRATION_RADIUS, # max x
-                                                      FIELD_Y_SIZE - ROBOT_GYRATION_RADIUS, # max y
-                                                      0.02,                                 # zone escape increment
-                                                      1.00)                                 # zone max escape increment
+        field_offset = 0.05
+        self.pathfinder = graphpathfinding.PathFinder(field_offset,                # min x
+                                                      field_offset,                # min y
+                                                      FIELD_X_SIZE - field_offset, # max x
+                                                      FIELD_Y_SIZE - field_offset, # max y
+                                                      0.02,                        # zone escape increment
+                                                      1.00)                        # zone max escape increment
         self.teammate_zone_timer = eventloop.Timer(self.event_loop, TEAMMATE_INFO_DELAY_MS * 2, self.disable_teammate_zone)
         self.ubo_zone_timer = eventloop.Timer(self.event_loop, 2000, self.disable_ubo_zone)
         self.use_interbot_position = TEAMMATE_POSITION_IN_MAP
