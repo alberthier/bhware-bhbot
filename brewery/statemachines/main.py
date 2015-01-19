@@ -177,12 +177,12 @@ class StaticStrategy(State):
         stand_grab_offset = 0.01
 
         # GRAB_NORTH_STAIRS_STANDS
-        x, y, angle = right_builder_at_pose(0.190, 0.850, math.pi)
+        x, y, angle = right_builder_at_pose(0.200 - stand_grab_offset, 0.850, math.pi)
         yield MoveLineTo(LEFT_START_X, y)
         yield RotateTo(angle)
         yield MoveLineTo(x, y)
         yield WaitForStandStored(SIDE_RIGHT)
-        x, y, angle = right_builder_at_pose(0.090, 0.850, math.pi)
+        x, y, angle = right_builder_at_pose(0.100 - stand_grab_offset, 0.850, math.pi)
         yield MoveLineTo(x, y)
         yield WaitForStandGrabbed(SIDE_RIGHT)
         yield LookAtOpposite(0.42, 0.73)
@@ -199,22 +199,23 @@ class StaticStrategy(State):
         x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
         yield MoveLineTo(x, y)
 
-        # GRAB_SOUTH_PLATFORM_STANDS
+        # GRAB_SOUTH_PLATFORM_STAND_1
         yield LookAt(0.5, 0.62)
         yield MoveLineTo(0.5, 0.62)
-        stands_angle = angle_between(1.355, 0.870, 1.770, 1.100)
-        self.log("stands_angle = {}".format(stands_angle))
-        sx, sy, angle = left_builder_at_pose(1.770, 1.100, stands_angle)
-        x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, 0.0, sx, sy, stands_angle)
-        self.log("cx, cy = {} {}".format(x, y))
-        yield LookAt(x, y)
-        yield MoveLineTo(x, y)
+        x, y, angle = left_builder_at_point(self.robot.pose, 1.355, 0.870)
         yield RotateTo(angle)
-        sx, sy = get_offset_position(self.robot.pose, sx, sy, stand_grab_offset)
-        yield MoveLineTo(sx, sy)
+        x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
+        yield MoveLineTo(x, y)
         yield WaitForStandGrabbed(SIDE_LEFT)
 
-        # GRAB_PLATFORM_CENTER_STAND
+        # GRAB_SOUTH_PLATFORM_STAND_2
+        x, y, angle = left_builder_at_point(self.robot.pose, 1.770, 1.100)
+        yield RotateTo(angle)
+        x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
+        yield MoveLineTo(x, y)
+        yield WaitForStandGrabbed(SIDE_LEFT)
+
+        # GRAB_SOUTH_PLATFORM_STAND_3
         x, y, angle = left_builder_at_point(self.robot.pose, 1.4, 1.3)
         yield RotateTo(angle)
         x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
