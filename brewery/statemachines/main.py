@@ -225,7 +225,7 @@ class StaticStrategy(State):
         yield LookAt(x, y)
         yield MoveLineTo(x, y)
         yield from self.grab_stand(None, SIDE_RIGHT, 1.75, 0.09, True)
-        yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_RIGHT, 1.85, 0.09, True)
+        yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.85, 0.09, True)
 
         yield None
 
