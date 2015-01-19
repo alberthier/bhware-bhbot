@@ -57,8 +57,9 @@ class Main(State):
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
-        StateMachine(self.event_loop, "standbuilder", side = SIDE_LEFT)
-        StateMachine(self.event_loop, "standbuilder", side = SIDE_RIGHT)
+        self.fsm.builders = {}
+        self.fsm.builders[SIDE_LEFT]  = StateMachine(self.event_loop, "standbuilder", side = SIDE_LEFT)
+        self.fsm.builders[SIDE_RIGHT] = StateMachine(self.event_loop, "standbuilder", side = SIDE_RIGHT)
 
         gm = self.robot.goal_manager
 #        gm.add(
@@ -124,6 +125,39 @@ class CalibratePosition(State):
 
 
 
+class WaitForStandStored(Timer):
+
+    def __init__(self, side):
+        super().__init__(2000)
+        self.side = side
+
+    def on_enter(self):
+        builder = self.fsm.builders[self.side]
+        if not builder.building:
+            yield None
+
+
+    def on_stand_construction_done(self, packet):
+        if packet.side == self.side:
+            yield None
+
+
+    def on_timeout(self):
+        self.log("{} timed out !!!!!!!!!!!!!!".format(type(self).__name__))
+        yield None
+
+
+
+
+class WaitForStandGrabbed(Timer):
+
+    def on_stand_grabbed(self, packet):
+        if packet.side == self.side:
+            yield None
+
+
+
+
 class PickupBulb(State):
 
     def on_enter(self):
@@ -143,11 +177,14 @@ class StaticStrategy(State):
         stand_grab_offset = 0.01
 
         # GRAB_NORTH_STAIRS_STANDS
-        x, y, angle = right_builder_at_pose(0.080, 0.850, math.pi)
+        x, y, angle = right_builder_at_pose(0.190, 0.850, math.pi)
         yield MoveLineTo(LEFT_START_X, y)
         yield RotateTo(angle)
-        x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
         yield MoveLineTo(x, y)
+        yield WaitForStandStored(SIDE_RIGHT)
+        x, y, angle = right_builder_at_pose(0.090, 0.850, math.pi)
+        yield MoveLineTo(x, y)
+        yield WaitForStandGrabbed(SIDE_RIGHT)
         yield LookAtOpposite(0.42, 0.73)
         yield MoveLineTo(0.42, 0.73)
 
@@ -158,6 +195,7 @@ class StaticStrategy(State):
         yield RotateTo(angle)
         x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
         yield MoveLineTo(x, y)
+        yield WaitForStandGrabbed(SIDE_LEFT)
         x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
         yield MoveLineTo(x, y)
 
@@ -174,12 +212,14 @@ class StaticStrategy(State):
         yield RotateTo(angle)
         sx, sy = get_offset_position(self.robot.pose, sx, sy, stand_grab_offset)
         yield MoveLineTo(sx, sy)
+        yield WaitForStandGrabbed(SIDE_LEFT)
 
         # GRAB_PLATFORM_CENTER_STAND
         x, y, angle = left_builder_at_point(self.robot.pose, 1.4, 1.3)
         yield RotateTo(angle)
         x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
         yield MoveLineTo(x, y)
+        yield WaitForStandGrabbed(SIDE_LEFT)
 
         # GRAB_SOUTH_MINE_STANDS
         yield RotateTo(-math.pi / 2.0)
@@ -188,12 +228,16 @@ class StaticStrategy(State):
         yield RotateTo(angle)
         x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
         yield MoveLineTo(x, y)
+        yield WaitForStandStored(SIDE_RIGHT)
         x, y, angle = right_builder_at_point(self.robot.pose, 1.85, 0.09)
         yield RotateTo(angle)
         x, y = get_offset_position(self.robot.pose, x, y, stand_grab_offset)
         yield MoveLineTo(x, y)
+        yield WaitForStandStored(SIDE_RIGHT)
 
         yield None
+
+
 
 
 class GrabNorthStairsStands(State):

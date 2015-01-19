@@ -762,9 +762,24 @@ class OpponentDisappeared(BasePacket):
 
 
 
-class StandConstructionDone(BasePacket):
+class StandStored(BasePacket):
 
     TYPE = 235
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
+
+
+
+
+class StandGrabbed(BasePacket):
+
+    TYPE = 236
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
 
 
 ################################################################################

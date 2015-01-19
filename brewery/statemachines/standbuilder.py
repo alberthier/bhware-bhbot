@@ -20,9 +20,8 @@ from tools import *
 class Main(State):
 
     def on_enter(self):
-        if not hasattr(self.robot, "stand_count"):
-            self.robot.stand_count = {}
-        self.robot.stand_count[self.fsm.side] = 0
+        self.fsm.stand_count = 0
+        self.fsm.building = False
 
         if self.fsm.side == SIDE_LEFT:
             self.fsm.PLIERS_LEFT_CLOSE   = LEFT_BUILDER_PLIERS_LEFT_CLOSE
@@ -87,16 +86,18 @@ class Build(State):
 
 
     def on_stand_presence(self, packet):
-        stand_count = self.robot.stand_count[self.fsm.side]
-        if stand_count < 4:
+        if self.fsm.stand_count < 4:
+            self.fsm.building = True
             yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
-            if stand_count < 3:
+            self.send_packet(packets.StandGrabbed(self.fsm.side))
+            if self.fsm.stand_count < 3:
                 yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
                 yield Trigger(self.fsm.ELEVATOR_UP)
                 yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
                 yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, self.fsm.ELEVATOR_DOWN)
-            self.robot.stand_count[self.fsm.side] += 1
-        self.send_packet(packets.StandConstructionDone())
+            self.fsm.stand_count += 1
+        self.fsm.building = False
+        self.send_packet(packets.StandStored(self.fsm.side))
 
 
 
