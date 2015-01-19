@@ -77,7 +77,7 @@ class Build(State):
         # Dispatch manually
         if packet.id == self.fsm.INPUT_BULB_PRESENCE:
             yield from self.on_bulb_presence(packet)
-        elif packet.id == self.fsm.INPUT_STAND_PRESENCE and packet.value == 1:
+        elif packet.id == self.fsm.INPUT_STAND_PRESENCE and packet.kind == KIND_EVENT and packet.value == 1:
             yield from self.on_stand_presence(packet)
 
 
