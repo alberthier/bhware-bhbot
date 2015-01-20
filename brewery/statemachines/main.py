@@ -23,6 +23,8 @@ import statemachines.testsmain as testsmain
 STAND_GRAB_OFFSET = 0.01
 STAND_GOAL_OFFSET = -0.25
 
+STAND_PRESENCE_SENSOR_OFFSET = 0.1
+
 
 
 
@@ -84,6 +86,9 @@ class Main(State):
             goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False)),
             StandGoal("GRAB_PLATFORM_3_STAND", 5, SIDE_LEFT, 1.400, 1.300, GoalGrabStand),
             goalmanager.Goal("GRAB_SOUTH_MINE_STANDS", 6, 1.45, 0.22, 0, DIRECTION_FORWARD, GrabSouthMineStands),
+            goalmanager.Goal("KICK_MINE_CLAPS", 7, 1.77, 0.22, 0, DIRECTION_FORWARD, KickMineClaps),
+            goalmanager.Goal("SCAN_AND_BUILD_SPOTLIGHT", 8, 1.67, 1.2 - STAND_PRESENCE_SENSOR_OFFSET, 0, DIRECTION_FORWARD, ScanAndBuildSpotlight),
+            goalmanager.Goal("KICK_THEIR_CLAP", 9, 1.77, 2.62, 0, DIRECTION_FORWARD, KickTheirClap),
         )
 
     def on_controller_status(self, packet):
@@ -226,6 +231,7 @@ class StaticStrategy(State):
         yield MoveLineTo(x, y)
         yield from self.grab_stand(None, SIDE_RIGHT, 1.75, 0.09, True)
         yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.85, 0.09, True)
+        yield ResettleAfterSouthMineStands()
 
         yield None
 
@@ -289,7 +295,141 @@ class GrabSouthMineStands(State):
         if grab.exit_reason == GOAL_DONE:
             grab = yield GrabStand(SIDE_RIGHT, 1.85, 0.09, False)
         self.exit_reason = grab.exit_reason
+        yield ResettleAfterSouthMineStands()
         yield None
+
+
+
+
+class ResettleAfterSouthMineStands(State):
+
+    def on_enter(self):
+        goal = self.robot.goal_manager.get_goals("KICK_MINE_CLAPS")[0]
+        yield MoveCurve(0.0, [(1.4, goal.y), (1.32, goal.y)])
+        yield DefinePosition(1.222 + ROBOT_CENTER_X, None, 0.0)
+        yield None
+
+
+
+
+class KickMineClaps(State):
+
+    def on_enter(self):
+        goal = self.robot.goal_manager.get_current_goal()
+        yield RotateTo(math.pi / 2.0)
+        yield MoveLineTo(goal.x, 0.10)
+        yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)
+        if self.robot.team == TEAM_LEFT:
+            self.commands = [RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE]
+        else:
+            self.commands = [LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE, LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE]
+        self.commands.reverse()
+        yield Trigger(self.commands.pop())
+        move = MoveLine([(goal.x, 0.22), (goal.x, 0.60), (goal.x, 0.88)])
+        move.on_waypoint_reached = self.on_waypoint_reached
+        yield move
+        yield Trigger(self.commands[-1]) # Use last command in any case as the move may have failed
+        if move.exit_reason == TRAJECTORY_DESTINATION_REACHED:
+            self.exit_reason = GOAL_DONE
+        yield None
+
+
+    def on_waypoint_reached(self, packet):
+        self.send_packet(packets.ServoControl(*self.commands.pop()))
+
+
+
+
+class KickTheirClap(State):
+
+    def on_enter(self):
+        goal = self.robot.goal_manager.get_current_goal()
+
+        yield RotateTo(-math.pi / 2.0)
+        if self.robot.team == TEAM_LEFT:
+            yield Trigger(LEFT_CLAPMAN_OPEN)
+        else:
+            yield Trigger(RIGHT_CLAPMAN_OPEN)
+        yield MoveLineTo(goal.x, 2.40)
+        if self.robot.team == TEAM_LEFT:
+            yield Trigger(LEFT_CLAPMAN_CLOSE)
+        else:
+            yield Trigger(RIGHT_CLAPMAN_CLOSE)
+        self.exit_reason = GOAL_DONE
+        yield None
+
+
+
+
+class ScanAndBuildSpotlight(State):
+
+    def on_enter(self):
+        goal = self.robot.goal_manager.get_current_goal()
+        yield RotateTo(math.pi / 2.0)
+        self.start_pose = self.robot.pose
+        self.stop_pose = None
+        move = MoveLineTo(goal.x, 1.8 - STAND_PRESENCE_SENSOR_OFFSET)
+        move.on_keep_alive = self.on_keep_alive
+        if self.robot.team == TEAM_LEFT:
+            move.on_right_scanner = self.on_scanner
+        else:
+            move.on_left_scanner = self.on_scanner
+        yield move
+        if self.start_pose is not None:
+            if self.stop_pose is None:
+                self.stop_pose = self.robot.pose
+            center_y = STAND_PRESENCE_SENSOR_OFFSET + (self.start_pose.virt.y + self.stop_pose.virt.y) / 2.0
+            yield MoveLineTo(goal.x, center_y)
+            yield RotateTo(0.0)
+            self.fsm.builders[SIDE_LEFT].enabled = False
+            self.fsm.builders[SIDE_RIGHT].enabled = False
+            yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM, RIGHT_BUILDER_ELEVATOR_PLATFORM)
+            yield MoveLineTo(1.77, center_y)
+            yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
+            yield Trigger(LEFT_BUILDER_LIGHTER_OPEN, RIGHT_BUILDER_LIGHTER_OPEN)
+            yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE, RIGHT_BUILDER_LIGHTER_CLOSE)
+            yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE,
+                          RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)
+            yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN,
+                          RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN)
+            yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN,
+                          RIGHT_BUILDER_GRIPPER_LEFT_OPEN, RIGHT_BUILDER_GRIPPER_RIGHT_OPEN)
+            yield MoveLineTo(1.68, center_y)
+            self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_LEFT_CLOSE))
+            self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_RIGHT_CLOSE))
+            self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_LEFT_CLOSE))
+            self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE))
+            self.fsm.builders[SIDE_LEFT].stand_count = 0
+            self.fsm.builders[SIDE_RIGHT].stand_count = 0
+            self.fsm.builders[SIDE_LEFT].enabled = True
+            self.fsm.builders[SIDE_RIGHT].enabled = True
+
+        self.exit_reason = GOAL_DONE
+        yield None
+
+
+    def on_scanner(self, packet):
+        if packet.value == 1:
+            if not self.check_distance():
+                self.start_pose = None
+        else:
+            self.start_pose = self.robot.pose
+
+
+    def on_keep_alive(self, packet):
+        self.check_distance()
+
+
+    def check_distance(self):
+        required_space = ROBOT_CENTER_Y * 2
+        if self.start_pose is not None:
+            d = distance(self.start_pose.x, self.start_pose.y, self.robot.pose.x, self.robot.pose.y)
+            if d >= required_space:
+                self.log("Deposit position found (distance = {})".format(d))
+                self.stop_pose = self.robot.pose
+                self.send_packet(packets.Stop())
+                return True
+        return False
 
 
 

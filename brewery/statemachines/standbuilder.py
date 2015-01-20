@@ -22,6 +22,7 @@ class Main(State):
     def on_enter(self):
         self.fsm.stand_count = 0
         self.fsm.building = False
+        self.fsm.enabled = True
 
         if self.fsm.side == SIDE_LEFT:
             self.fsm.PLIERS_LEFT_CLOSE   = LEFT_BUILDER_PLIERS_LEFT_CLOSE
@@ -86,6 +87,8 @@ class Build(State):
 
 
     def on_stand_presence(self, packet):
+        if not self.fsm.enabled:
+            return
         if self.fsm.stand_count < 4:
             self.fsm.building = True
             yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
