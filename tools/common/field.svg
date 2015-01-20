@@ -320,6 +320,50 @@
             x2="2450"
             y2="2000" />
 
+        <!-- Claps -->
+        <rect
+            style="fill:#dea100;stroke:none"
+            id="clap_yellow_1"
+            width="220"
+            height="30"
+            x="180"
+            y="2000" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="clap_green_1"
+            width="220"
+            height="30"
+            x="480"
+            y="2000" />
+        <rect
+            style="fill:#dea100;stroke:none"
+            id="clap_yellow_2"
+            width="220"
+            height="30"
+            x="780"
+            y="2000" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="clap_green_2"
+            width="220"
+            height="30"
+            x="2000"
+            y="2000" />
+        <rect
+            style="fill:#dea100;stroke:none"
+            id="clap_yellow_3"
+            width="220"
+            height="30"
+            x="2300"
+            y="2000" />
+        <rect
+            style="fill:#367526;stroke:none"
+            id="clap_green_3"
+            width="220"
+            height="30"
+            x="2600"
+            y="2000" />
+
         <!-- Beacon places -->
         <rect
             style="fill:#367526;stroke:none"
