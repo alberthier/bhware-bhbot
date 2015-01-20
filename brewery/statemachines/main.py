@@ -78,8 +78,7 @@ class Main(State):
         self.fsm.builders[SIDE_LEFT]  = StateMachine(self.event_loop, "standbuilder", side = SIDE_LEFT)
         self.fsm.builders[SIDE_RIGHT] = StateMachine(self.event_loop, "standbuilder", side = SIDE_RIGHT)
 
-        gm = self.robot.goal_manager
-        gm.add(
+        self.robot.goal_manager.add(
                            # identifier, order, x, y, offset, direction, handler_state
             goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False)),
             StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
@@ -196,14 +195,9 @@ class StaticStrategy(State):
 
     def on_enter(self):
         # GRAB_NORTH_STAIRS_STANDS
-        x, y, angle = right_builder_at_pose(0.200 - STAND_GRAB_OFFSET, 0.850, math.pi)
-        yield MoveLineTo(LEFT_START_X, y)
-        yield RotateTo(angle)
-        yield MoveLineTo(x, y)
-        yield WaitForStandStored(SIDE_RIGHT)
-        x, y, angle = right_builder_at_pose(0.100 - STAND_GRAB_OFFSET, 0.850, math.pi)
-        yield MoveLineTo(x, y)
-        yield WaitForStandGrabbed(SIDE_RIGHT)
+        yield MoveLineTo(LEFT_START_X, 0.53)
+        yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
+        yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
         yield LookAtOpposite(0.42, 0.73)
         yield MoveLineTo(0.42, 0.73)
 
@@ -383,16 +377,17 @@ class ScanAndBuildSpotlight(State):
             yield RotateTo(0.0)
             self.fsm.builders[SIDE_LEFT].enabled = False
             self.fsm.builders[SIDE_RIGHT].enabled = False
-            yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM, RIGHT_BUILDER_ELEVATOR_PLATFORM)
-            yield MoveLineTo(1.77, center_y)
-            yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
             yield Trigger(LEFT_BUILDER_LIGHTER_OPEN, RIGHT_BUILDER_LIGHTER_OPEN)
             yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE, RIGHT_BUILDER_LIGHTER_CLOSE)
             yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE,
                           RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)
+            yield Trigger(LEFT_BUILDER_ELEVATOR_UP, RIGHT_BUILDER_ELEVATOR_UP)
+            yield MoveLineTo(1.77, center_y)
+            yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
+            yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM, RIGHT_BUILDER_ELEVATOR_PLATFORM)
             yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN,
-                          RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN)
-            yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN,
+                          RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN,
+                          LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN,
                           RIGHT_BUILDER_GRIPPER_LEFT_OPEN, RIGHT_BUILDER_GRIPPER_RIGHT_OPEN)
             yield MoveLineTo(1.68, center_y)
             self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_LEFT_CLOSE))
