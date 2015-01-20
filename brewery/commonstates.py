@@ -505,7 +505,10 @@ class MoveLineRelative(statemachine.State):
 
     def __init__(self, distance, direction = DIRECTION_AUTO, chained = None, opponent_handling_config = OPPONENT_HANDLING):
         self.opponent_handling_config = opponent_handling_config
-        self.distance = distance * direction
+        if direction != DIRECTION_AUTO:
+            self.distance = distance * direction
+        else:
+            self.distance = distance
         self.direction = direction
         self.chained = chained
 
