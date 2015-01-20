@@ -209,7 +209,7 @@ class RobotController(object):
         if packet.id == self.get_input_id("INPUT_TEAM"):
             status.value = self.team
         else:
-            status.value = random.choice([0, 1])
+            status.value = 1 #random.choice([0, 1])
         self.send_packet(status)
 
 
