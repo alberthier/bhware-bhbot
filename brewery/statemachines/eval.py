@@ -17,6 +17,7 @@ from position import *
 class Main(statemachine.State):
 
     def on_enter(self):
+        self.fsm.output = None
         self.fsm.error = None
         try:
             if hasattr(self.fsm, "code") and len(self.fsm.code) != 0:
