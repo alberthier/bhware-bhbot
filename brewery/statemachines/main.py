@@ -23,7 +23,7 @@ import statemachines.testsmain as testsmain
 STAND_GRAB_OFFSET = 0.01
 STAND_GOAL_OFFSET = -0.25
 
-STAND_PRESENCE_SENSOR_OFFSET = 0.1
+STAND_PRESENCE_SENSOR_OFFSET = 0.0
 
 
 
