@@ -415,12 +415,17 @@ class GraphRoutingLayer(fieldview.Layer):
 
     def setup(self):
         self.update_title(self.robot_controller.team_name + " robot graph routing", self.robot_controller.team_color)
+        self.clear_edges()
 
 
-    def on_simulator_clear_graph_map_edges(self, packet):
+    def clear_edges(self):
         for item in self.edges:
             self.scene().removeItem(item)
         self.edges = []
+
+
+    def on_simulator_clear_graph_map_edges(self, packet):
+        self.clear_edges()
 
 
     def on_simulator_graph_map_edges(self, packet):
