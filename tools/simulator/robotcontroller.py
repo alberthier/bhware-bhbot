@@ -155,8 +155,8 @@ class RobotController(object):
             while self.socket.bytesAvailable() > 0 :
                 if self.incoming_packet == None:
                     self.incoming_packet = packets.create_packet(self.socket.peek(1))
-                if self.socket.bytesAvailable() >= self.incoming_packet.MAX_SIZE:
-                    buf = self.socket.read(self.incoming_packet.MAX_SIZE)
+                if self.socket.bytesAvailable() >= self.incoming_packet.get_size():
+                    buf = self.socket.read(self.incoming_packet.get_size())
                     packet = self.incoming_packet
                     self.incoming_packet = None
                     packet.deserialize(buf)

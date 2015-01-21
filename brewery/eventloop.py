@@ -146,10 +146,11 @@ class BinaryPacketHandler:
                     return
             else:
                 try:
+                    packet_size = self.packet.get_size()
                     try:
-                        if self.bytes_available() < self.packet.MAX_SIZE - 1:
+                        if self.bytes_available() < packet_size - 1:
                             return
-                        received_data = self.recv(self.packet.MAX_SIZE - len(self.buffer))
+                        received_data = self.recv(packet_size - len(self.buffer))
                         if len(received_data) == 0:
                             return
                         self.buffer += received_data
@@ -158,7 +159,7 @@ class BinaryPacketHandler:
                             return
                         logger.log_exception(err)
                         return
-                    if len(self.buffer) == self.packet.MAX_SIZE:
+                    if len(self.buffer) == packet_size:
                         # A complete packet has been received, notify the state machine
                         self.packet.deserialize(self.buffer)
                         self.event_loop.process(self, self.packet)

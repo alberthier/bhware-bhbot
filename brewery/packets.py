@@ -190,7 +190,7 @@ class RobotServo(AbstractItem):
 
 class BasePacket(object):
 
-    MAX_SIZE = 256
+    DYNAMIC_SIZE = True
     DEFINITION = ()
     DESCRIPTION = ""
     LOGVIEW_DEFAULT_ENABLED = True
@@ -202,11 +202,10 @@ class BasePacket(object):
     def static_init(cls):
         if cls.STRUCT is None:
             cls.BIN_STRUCT = Struct(StructInstance, "", *cls.DEFINITION)
-            fmt = "<B" + cls.BIN_STRUCT.C_TYPE
-            size = struct.calcsize(fmt)
-            pad_size = cls.MAX_SIZE - size
-            if pad_size > 0:
-                fmt += str(pad_size) + "x"
+            fmt = "<B"
+            if cls.DYNAMIC_SIZE:
+                fmt += "B"
+            fmt += cls.BIN_STRUCT.C_TYPE
             cls.STRUCT = struct.Struct(fmt)
 
         if cls.PACKET_METHOD is None:
@@ -242,8 +241,21 @@ class BasePacket(object):
             setattr(self, name, value)
 
 
+    def get_size(self):
+        return self.STRUCT.size
+
+
+    def get_payload_size(self):
+        if self.DYNAMIC_SIZE:
+            return self.STRUCT.size - 2
+        else:
+            return self.STRUCT.size - 1
+
+
     def serialize(self):
         args = [ self.TYPE ]
+        if self.DYNAMIC_SIZE:
+            args.append(self.get_payload_size())
         self.BIN_STRUCT.serialize(self, args)
         try :
             return self.STRUCT.pack(*args)
@@ -254,8 +266,9 @@ class BasePacket(object):
     def deserialize(self, buf):
         unpacked = self.STRUCT.unpack(buf)
         it = iter(unpacked)
-        # pop the type
-        next(it)
+        next(it) # pop the type
+        if self.DYNAMIC_SIZE:
+            next(it) # pop the size
         self.BIN_STRUCT.deserialize_to(self, it)
 
 
@@ -316,7 +329,7 @@ INTERNAL_RANGE_END    = 256
 
 class TurretDetect(BasePacket):
 
-    MAX_SIZE = 4
+    DYNAMIC_SIZE = False
     TYPE = 32
     DEFINITION = (
         ('distance', UEnum8(OPPONENT_DISTANCE, OPPONENT_DISTANCE_NEAR)),
@@ -329,7 +342,7 @@ class TurretDetect(BasePacket):
 
 class TurretInit(BasePacket):
 
-    MAX_SIZE = 4
+    DYNAMIC_SIZE = False
     TYPE = 33
     DEFINITION = (
         ('mode'          , UEnum8(TURRET_INIT_MODE, TURRET_INIT_MODE_READ)),
@@ -342,7 +355,7 @@ class TurretInit(BasePacket):
 
 class TurretDistances(BasePacket):
 
-    MAX_SIZE = 3
+    DYNAMIC_SIZE = False
     TYPE = 34
     DEFINITION = (
         ('short_distance', UInt8 (0, "Short distance detection range")),
@@ -354,7 +367,7 @@ class TurretDistances(BasePacket):
 
 class TurretBoot(BasePacket):
 
-    MAX_SIZE = 1
+    DYNAMIC_SIZE = False
     TYPE = 35
 
 
