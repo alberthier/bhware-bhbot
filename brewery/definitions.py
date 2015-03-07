@@ -242,10 +242,10 @@ SECONDARY_INPUT = Enum("Inputs",
 )
 
 def makeServoMoveCommand(servo, value):
-    return (servo[0], SERVO_COMMAND_MOVE, value, servo[1])
+    return servo[0], SERVO_COMMAND_MOVE, value, servo[1]
 
 def makeServoSetupCommand(servo, value):
-    return (servo[0], SERVO_COMMAND_SETUP_SPEED, value, servo[1])
+    return servo[0], SERVO_COMMAND_SETUP_SPEED, value, servo[1]
 
 
 DEFAULT_SERVOS_TIMEOUT_MS = 2000

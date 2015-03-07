@@ -72,7 +72,7 @@ def get_center_pose_for_point(robot_point_x, robot_point_y, dest_x, dest_y, dest
     sin_a = math.sin(dest_angle)
     center_x = dest_x - (cos_a * robot_point_x - sin_a * robot_point_y)
     center_y = dest_y - (sin_a * robot_point_x + cos_a * robot_point_y)
-    return (center_x, center_y, dest_angle)
+    return center_x, center_y, dest_angle
 
 
 def get_direction(robot_pose, x, y):
@@ -94,7 +94,7 @@ def get_offset_position(robot_pose, x, y, offset):
     dist += offset
     x = robot_pose.x + math.cos(a) * dist
     y = robot_pose.y + math.sin(a) * dist
-    return (x, y)
+    return x, y
 
 
 def get_crossing_point(x1, y1, angle1, x2, y2, angle2):
@@ -104,4 +104,4 @@ def get_crossing_point(x1, y1, angle1, x2, y2, angle2):
     b2 = y2 - a2 * x2
     xc = (b2 - b1) / (a1 - a2)
     yc = a1 * xc + b1
-    return (xc, yc)
+    return xc, yc

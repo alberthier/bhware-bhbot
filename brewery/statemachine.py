@@ -69,7 +69,7 @@ class StateMachine(object):
     @property
     def current_state_name(self):
         state = self.current_state
-        if state != None:
+        if state is not None:
             return state.name
         else:
             return "(None)"
@@ -115,9 +115,9 @@ class StateMachine(object):
             self.log("Stopping timer")
             self.timer.stop()
         if current_state is not None:
-            return (previous_state, self.current_state.fsm_current_method)
+            return previous_state, self.current_state.fsm_current_method
         else:
-            return (previous_state, None)
+            return previous_state, None
 
 
     def handle_timer(self):

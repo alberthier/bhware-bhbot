@@ -74,7 +74,7 @@ def create_main_robot_base_item(pen, brush, gyration_pen):
     all_group.addToGroup(robot)
     all_group.addToGroup(gyration)
 
-    return (all_group, robot, gyration)
+    return all_group, robot, gyration
 
 
 
@@ -107,7 +107,7 @@ def create_secondary_robot_base_item(pen, brush, gyration_pen):
     all_group.addToGroup(robot)
     all_group.addToGroup(gyration)
 
-    return (all_group, robot, gyration)
+    return all_group, robot, gyration
 
 
 

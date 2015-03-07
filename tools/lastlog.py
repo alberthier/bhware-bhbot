@@ -14,7 +14,7 @@ import helpers
 
 if __name__ == "__main__":
     path = helpers.get_last_logfile()
-    if path != None:
+    if path is not None:
         subprocess.call([path])
     else:
         print("No log file found")

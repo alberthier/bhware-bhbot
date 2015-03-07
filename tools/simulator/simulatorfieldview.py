@@ -150,7 +150,7 @@ class GraphicsRobotObject(QObject):
     def create_rotation_animation(self, angle):
         # Map from robot field reference to Qt reference
         ref_angle = self.convert_angle(angle)
-        angle_deg = ((ref_angle) / math.pi * 180.0)
+        angle_deg = (ref_angle / math.pi * 180.0)
 
         current = self.item.rotation() % 360.0
 
@@ -360,7 +360,7 @@ class RobotLayer(fieldview.Layer):
             angle = int(round(angle / (2.0 * math.pi) * 18.0))
 
             # Rotate the turret:
-            angle += 4;
+            angle += 4
             if angle >= 18:
                 angle -= 18
 
@@ -490,7 +490,7 @@ class GraphRoutingLayer(fieldview.Layer):
                 x = next(i) * 1000.0
                 path.lineTo(x, y)
             except StopIteration:
-                break;
+                break
         path.closeSubpath()
         item.setPath(path)
 
@@ -585,7 +585,7 @@ class GameElementsLayer(fieldview.Layer):
                     robot = robot_a
                 elif elt.collidesWithItem(robot_b.robot_item):
                     robot = robot_b
-                if robot != None:
+                if robot is not None:
                     angle = (robot.item.rotation() / 180.0 * math.pi) % (math.pi * 2.0)
 
                     ex = elt.pos().x() - robot.item.x()
@@ -599,7 +599,7 @@ class GameElementsLayer(fieldview.Layer):
                     elif ref >= math.pi / 4.0 and ref < 3.0 * math.pi / 4.0:
                         sign = -1.0
                         angle += math.pi / 2.0
-                    elif ref >= 3.0 * math.pi / 4.0 and ref < 5.0 * math.pi / 4.0:
+                    elif 3.0 * math.pi / 4.0 <= ref < 5.0 * math.pi / 4.0:
                         sign = -1.0
                     else:
                         sign = 1.0

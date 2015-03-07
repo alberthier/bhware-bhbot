@@ -112,7 +112,7 @@ class Map:
         coords = []
         npoints = 5
         for i in range(npoints):
-            a = float(i) * (math.pi) / float(npoints - 1)
+            a = float(i) * math.pi / float(npoints - 1)
             if vertical:
                 a += math.pi / 2.0
             cx = math.cos(a) * radius
@@ -195,7 +195,7 @@ class Map:
         delta = datetime.datetime.now() - start_date
         if len(path) == 0:
             logger.log("No route found. Cost: {}. compuation time: {}".format(cost, delta.total_seconds()))
-            return (None, [])
+            return None, []
         else:
             logger.log("Route computed. Cost: {}. compuation time: {}".format(cost, delta.total_seconds()))
         pose_path = []
@@ -203,7 +203,7 @@ class Map:
         for (x, y) in path[1:]:
             pose_path.append(position.Pose(x, y))
         self.send_to_simulator(pose_path)
-        return (cost, pose_path)
+        return cost, pose_path
 
 
     def evaluate(self, start, end):

@@ -53,7 +53,7 @@ class LinearSpeedViewController(QObject):
 
     def log_loaded(self):
         if self.average_speed_count > 0.0:
-            self.average_speed = self.average_speed / float(self.average_speed_count)
+            self.average_speed /= float(self.average_speed_count)
             self.speeds.append(0.0)
             if self.plot_widget.has_matplotlib:
                 x = list(map(lambda x: x * KEEP_ALIVE_DELAY_MS / 1000.0, range(len(self.speeds))))
@@ -103,7 +103,7 @@ class AngularSpeedViewController(QObject):
 
     def log_loaded(self):
         if self.average_speed_count > 0.0:
-            self.average_speed = self.average_speed / float(self.average_speed_count)
+            self.average_speed /= float(self.average_speed_count)
             self.speeds.append(0.0)
             if self.plot_widget.has_matplotlib:
                 x = list(map(lambda x: x * KEEP_ALIVE_DELAY_MS / 1000.0, range(len(self.speeds))))

@@ -132,7 +132,7 @@ class SubStateStateTestCase(unittest.TestCase):
 
     def get_current_state(self):
         state = self.root_state
-        while state.sub_state != None:
+        while state.sub_state is not None:
             state = state.sub_state
         return state
 

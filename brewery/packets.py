@@ -163,7 +163,7 @@ class RobotServo(AbstractItem):
     def deserialize(self, iterator):
         act_type = next(iterator)
         act_id = next(iterator)
-        return (act_type, act_id)
+        return act_type, act_id
 
 
     def to_dump(self, value):

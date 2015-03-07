@@ -50,7 +50,7 @@ class MainWindowController(QObject):
 
 
     def fetch_log(self):
-        if self.port != None:
+        if self.port is not None:
             self.download_remote_loglist()
         else:
             self.load_log()
@@ -126,7 +126,7 @@ class MainWindowController(QObject):
         logs = [l for l in reversed(logs)]
         if len(logs) == 0:
             QMessageBox.critical(self.ui, "Error", "No remote log file")
-            QApplication.instance().quit();
+            QApplication.instance().quit()
             return
 
         self.download_dialog = uic.loadUi(os.path.dirname(__file__) + "/downloaddialog.ui")
@@ -149,7 +149,7 @@ class MainWindowController(QObject):
                 url = "http://{}:{}/bhware/logs/{}".format(self.host, self.port, self.log_file)
                 self.network_manager.get(QNetworkRequest(QUrl(url)))
                 return
-        QApplication.instance().quit();
+        QApplication.instance().quit()
 
 
     def save_remote_log(self, reply):
@@ -164,7 +164,7 @@ class MainWindowController(QObject):
         remote_log = open(log_path, "wb")
         while True:
             data = reply.read(4096)
-            if data != None:
+            if data is not None:
                 remote_log.write(data)
             else:
                 break

@@ -51,7 +51,7 @@ def initialize(args = None):
                 term_enable_colors = False
             else:
                 term_enable_colors = os.isatty(sys.stdout.fileno())
-        if filepath != None:
+        if filepath is not None:
             try:
                 log("Logging to '{}'".format(os.path.split(filepath)[1]))
                 log_file = open(filepath, "w")
@@ -103,7 +103,7 @@ def log(obj, sender = "ARM", bold = False):
     time = "'{:=0.02f}'".format(delta.total_seconds())
     if type(obj) != str:
         obj = str(obj)
-    if log_file != None:
+    if log_file is not None:
         try:
             log_file.write("l([" + time + ",'" + sender + "','LOG','# " + obj.replace("'", "\\'") + "'])\n")
             log_file.flush()

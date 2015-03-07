@@ -51,11 +51,11 @@ class RobotController(object):
 
 
     def is_process_started(self):
-        return self.process != None
+        return self.process is not None
 
 
     def is_connected(self):
-        return self.socket != None
+        return self.socket is not None
 
 
     def is_ready(self):
@@ -68,7 +68,7 @@ class RobotController(object):
 
 
     def setup(self, team, is_main):
-        if self.process == None:
+        if self.process is None:
             self.incoming_packet_buffer = ""
             self.incoming_packet = None
             self.resettle_count = 0
@@ -126,8 +126,8 @@ class RobotController(object):
 
 
     def shutdown(self):
-        if self.process != None:
-            if self.socket != None:
+        if self.process is not None:
+            if self.socket is not None:
                 self.socket.disconnected.disconnect(self.shutdown)
             self.process.terminate()
             self.process.waitForFinished()
@@ -151,9 +151,9 @@ class RobotController(object):
 
 
     def read_packet(self):
-        if self.socket != None:
+        if self.socket is not None:
             while self.socket.bytesAvailable() > 0 :
-                if self.incoming_packet == None:
+                if self.incoming_packet is None:
                     self.incoming_packet = packets.create_packet(self.socket.peek(1))
                 if self.socket.bytesAvailable() >= self.incoming_packet.get_size():
                     buf = self.socket.read(self.incoming_packet.get_size())

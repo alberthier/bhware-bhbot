@@ -74,9 +74,10 @@ class Main(State):
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
-        self.fsm.builders = {}
-        self.fsm.builders[SIDE_LEFT]  = StateMachine(self.event_loop, "standbuilder", side = SIDE_LEFT)
-        self.fsm.builders[SIDE_RIGHT] = StateMachine(self.event_loop, "standbuilder", side = SIDE_RIGHT)
+        self.fsm.builders = {
+            SIDE_LEFT: StateMachine(self.event_loop, "standbuilder", side=SIDE_LEFT),
+            SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
+        }
 
         self.robot.goal_manager.add(
                            # identifier, order, x, y, offset, direction, handler_state

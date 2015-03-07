@@ -38,9 +38,9 @@ class Builder:
             f.close()
 
             if oldhash == newhash:
-                return (True, oldhash)
+                return True, oldhash
 
-        return (False, newhash)
+        return False, newhash
 
 
     def build(self):

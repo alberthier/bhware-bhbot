@@ -60,90 +60,99 @@ class WebInterface:
         result = []
 
         if IS_MAIN_ROBOT:
-            actions = []
-            actions.append("yield Trigger(LEFT_BUILDER_PLIERS_LEFT_CLOSE, LEFT_BUILDER_PLIERS_RIGHT_CLOSE)")
-            actions.append("yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN)")
-            actions.append("yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_CLOSE, LEFT_BUILDER_GRIPPER_RIGHT_CLOSE)")
-            actions.append("yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE)")
-            actions.append("yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN)")
-            actions.append("yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE)")
-            actions.append("yield Trigger(LEFT_BUILDER_LIGHTER_OPEN)")
-            actions.append("yield Trigger(LEFT_BUILDER_ELEVATOR_DOWN)")
-            actions.append("yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM)")
-            actions.append("yield Trigger(LEFT_BUILDER_ELEVATOR_UP)")
+            actions = [
+                "yield Trigger(LEFT_BUILDER_PLIERS_LEFT_CLOSE, LEFT_BUILDER_PLIERS_RIGHT_CLOSE)",
+                "yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN)",
+                "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_CLOSE, LEFT_BUILDER_GRIPPER_RIGHT_CLOSE)",
+                "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE)",
+                "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN)",
+                "yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE)",
+                "yield Trigger(LEFT_BUILDER_LIGHTER_OPEN)",
+                "yield Trigger(LEFT_BUILDER_ELEVATOR_DOWN)",
+                "yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM)",
+                "yield Trigger(LEFT_BUILDER_ELEVATOR_UP)"
+            ]
             result.append(["Left Builder", actions])
 
-            actions = []
-            actions.append("yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_CLOSE, RIGHT_BUILDER_PLIERS_RIGHT_CLOSE)")
-            actions.append("yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN)")
-            actions.append("yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_CLOSE, RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE)")
-            actions.append("yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)")
-            actions.append("yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_OPEN, RIGHT_BUILDER_GRIPPER_RIGHT_OPEN)")
-            actions.append("yield Trigger(RIGHT_BUILDER_LIGHTER_CLOSE)")
-            actions.append("yield Trigger(RIGHT_BUILDER_LIGHTER_OPEN)")
-            actions.append("yield Trigger(RIGHT_BUILDER_ELEVATOR_DOWN)")
-            actions.append("yield Trigger(RIGHT_BUILDER_ELEVATOR_PLATFORM)")
-            actions.append("yield Trigger(RIGHT_BUILDER_ELEVATOR_UP)")
+            actions = [
+                "yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_CLOSE, RIGHT_BUILDER_PLIERS_RIGHT_CLOSE)",
+                "yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN)",
+                "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_CLOSE, RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE)",
+                "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)",
+                "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_OPEN, RIGHT_BUILDER_GRIPPER_RIGHT_OPEN)",
+                "yield Trigger(RIGHT_BUILDER_LIGHTER_CLOSE)",
+                "yield Trigger(RIGHT_BUILDER_LIGHTER_OPEN)",
+                "yield Trigger(RIGHT_BUILDER_ELEVATOR_DOWN)",
+                "yield Trigger(RIGHT_BUILDER_ELEVATOR_PLATFORM)",
+                "yield Trigger(RIGHT_BUILDER_ELEVATOR_UP)"
+            ]
             result.append(["Right Builder", actions])
 
-            actions = []
-            actions.append("yield Trigger(LIGHTER_GRIPPER_CLOSE)")
-            actions.append("yield Trigger(LIGHTER_GRIPPER_OPEN)")
-            actions.append("yield Trigger(LIGHTER_ELEVATOR_DOWN)")
-            actions.append("yield Trigger(LIGHTER_ELEVATOR_BULB)")
-            actions.append("yield Trigger(LIGHTER_ELEVATOR_UP)")
+            actions = [
+                "yield Trigger(LIGHTER_GRIPPER_CLOSE)",
+                "yield Trigger(LIGHTER_GRIPPER_OPEN)",
+                "yield Trigger(LIGHTER_ELEVATOR_DOWN)",
+                "yield Trigger(LIGHTER_ELEVATOR_BULB)",
+                "yield Trigger(LIGHTER_ELEVATOR_UP)"
+            ]
             result.append(["Lighter", actions])
 
-            actions = []
-            actions.append("yield Trigger(LEFT_CLAPMAN_CLOSE)")
-            actions.append("yield Trigger(LEFT_CLAPMAN_OPEN)")
+            actions = [
+                "yield Trigger(LEFT_CLAPMAN_CLOSE)",
+                "yield Trigger(LEFT_CLAPMAN_OPEN)"
+            ]
             result.append(["Left clapman", actions])
 
-            actions = []
-            actions.append("yield Trigger(RIGHT_CLAPMAN_CLOSE)")
-            actions.append("yield Trigger(RIGHT_CLAPMAN_OPEN)")
+            actions = [
+                "yield Trigger(RIGHT_CLAPMAN_CLOSE)",
+                "yield Trigger(RIGHT_CLAPMAN_OPEN)"
+            ]
             result.append(["Right clapman", actions])
         else:
-            actions = []
-            actions.append("yield Trigger(LEFT_CARPET_DROPPER_CLOSE)")
-            actions.append("yield Trigger(LEFT_CARPET_DROPPER_OPEN)")
-            actions.append("yield Trigger(LEFT_CARPET_EJECTOR_HOLD)")
-            actions.append("yield Trigger(LEFT_CARPET_EJECTOR_THROW)")
+            actions = [
+                "yield Trigger(LEFT_CARPET_DROPPER_CLOSE)",
+                "yield Trigger(LEFT_CARPET_DROPPER_OPEN)",
+                "yield Trigger(LEFT_CARPET_EJECTOR_HOLD)",
+                "yield Trigger(LEFT_CARPET_EJECTOR_THROW)"
+            ]
             result.append(["Left carpet", actions])
 
-            actions = []
-            actions.append("yield Trigger(RIGHT_CARPET_DROPPER_CLOSE)")
-            actions.append("yield Trigger(RIGHT_CARPET_DROPPER_OPEN)")
-            actions.append("yield Trigger(RIGHT_CARPET_EJECTOR_HOLD)")
-            actions.append("yield Trigger(RIGHT_CARPET_EJECTOR_THROW)")
+            actions = [
+                "yield Trigger(RIGHT_CARPET_DROPPER_CLOSE)",
+                "yield Trigger(RIGHT_CARPET_DROPPER_OPEN)",
+                "yield Trigger(RIGHT_CARPET_EJECTOR_HOLD)",
+                "yield Trigger(RIGHT_CARPET_EJECTOR_THROW)"
+            ]
             result.append(["Right carpet", actions])
 
-            actions = []
-            actions.append("yield Trigger(CUP_GRIPPER_CLOSE)")
-            actions.append("yield Trigger(CUP_GRIPPER_ON_CUP)")
-            actions.append("yield Trigger(CUP_GRIPPER_HALF_OPEN)")
-            actions.append("yield Trigger(CUP_GRIPPER_OPEN)")
+            actions = [
+                "yield Trigger(CUP_GRIPPER_CLOSE)",
+                "yield Trigger(CUP_GRIPPER_ON_CUP)",
+                "yield Trigger(CUP_GRIPPER_HALF_OPEN)",
+                "yield Trigger(CUP_GRIPPER_OPEN)"
+            ]
             result.append(["Cup gripper", actions])
 
-        actions = []
-        actions.append("yield GotoHome()")
-        actions.append("yield MoveLineRelative(0.2)")
-        actions.append("yield MoveLineRelative(-0.2, DIRECTION_BACKWARDS)")
-        actions.append("yield RotateRelative(math.radians(45))")
-        actions.append("yield RotateRelative(math.pi / 4.0)")
-        actions.append("yield Timer(1000)")
-        actions.append("yield DefinePosition(0.0, 0.0, math.pi / 2.0)")
-        actions.append("yield AntiBlocking(True)")
-        actions.append("yield SpeedControl(0.3)")
-        actions.append("yield Rotate(math.pi / 2.0)")
-        actions.append("yield LookAt(1.0, 1.0)")
-        actions.append("yield LookAtOpposite(1.0, 1.0)")
-        actions.append("yield MoveCurve(math.pi / 2.0, [(0.1, 0.2), (0.4, 0.5)])")
-        actions.append("yield MoveCurve(math.pi / 2.0, [(0.1, 0.2), (0.4, 0.5)], DIRECTION_BACKWARDS)")
-        actions.append("yield MoveLineTo(0.1, 0.0)")
-        actions.append("yield MoveLineTo(0.1, 0.0, DIRECTION_BACKWARDS)")
-        actions.append("yield MoveLine([(0.1, 0.0), (0.2, 0.0), (0.3, 0.0)])")
-        actions.append("yield MoveLine([(0.1, 0.0), (0.2, 0.0), (0.3, 0.0)], DIRECTION_BACKWARDS)")
+        actions = [
+            "yield GotoHome()",
+            "yield MoveLineRelative(0.2)",
+            "yield MoveLineRelative(-0.2, DIRECTION_BACKWARDS)",
+            "yield RotateRelative(math.radians(45))",
+            "yield RotateRelative(math.pi / 4.0)",
+            "yield Timer(1000)",
+            "yield DefinePosition(0.0, 0.0, math.pi / 2.0)",
+            "yield AntiBlocking(True)",
+            "yield SpeedControl(0.3)",
+            "yield Rotate(math.pi / 2.0)",
+            "yield LookAt(1.0, 1.0)",
+            "yield LookAtOpposite(1.0, 1.0)",
+            "yield MoveCurve(math.pi / 2.0, [(0.1, 0.2), (0.4, 0.5)])",
+            "yield MoveCurve(math.pi / 2.0, [(0.1, 0.2), (0.4, 0.5)], DIRECTION_BACKWARDS)",
+            "yield MoveLineTo(0.1, 0.0)",
+            "yield MoveLineTo(0.1, 0.0, DIRECTION_BACKWARDS)",
+            "yield MoveLine([(0.1, 0.0), (0.2, 0.0), (0.3, 0.0)])",
+            "yield MoveLine([(0.1, 0.0), (0.2, 0.0), (0.3, 0.0)], DIRECTION_BACKWARDS)"
+        ]
         result.append(["Misc", actions])
 
         return json.dumps(result)

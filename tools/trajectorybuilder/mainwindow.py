@@ -71,7 +71,7 @@ class PathLayer(fieldview.Layer):
 
 
     def add_segment(self):
-        if self.current_segment != None:
+        if self.current_segment is not None:
             x = self.current_segment.line().x2()
             y = self.current_segment.line().y2()
         else:
@@ -168,7 +168,7 @@ class MainWindowController(QObject):
                 state = None
                 print(("Unknown command {}".format(command)))
 
-            if state != None:
+            if state is not None:
                 code += "/* Step{:03} */ {{ {:<50}, StepNext }},\n".format(i, state)
                 i += 1
         code += "};\n"

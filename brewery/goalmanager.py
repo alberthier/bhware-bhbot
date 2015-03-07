@@ -216,8 +216,6 @@ class GoalManager:
             logger.log("Goal '{}'     Navigation cost: {}    Score: {}".format(goal.identifier, goal.navigation_cost, goal.score))
 
         return max(candidates, key = lambda goal : goal.score)
-        if not funny_action_goals :
-            return best_goal
 
 
 
