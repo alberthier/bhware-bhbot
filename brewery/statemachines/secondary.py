@@ -13,7 +13,7 @@ from definitions import *
 from commonstates import *
 from position import *
 from tools import *
-
+from sysinfo import *
 import statemachines.testscommon as testscommon
 import statemachines.testssecondary as testssecondary
 
@@ -52,6 +52,8 @@ class DepositCupGoal(goalmanager.Goal):
 class Main(State):
 
     def on_enter(self):
+        # TODO : maybe created at the wrong place
+        SysInfo(self.event_loop)
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)

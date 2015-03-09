@@ -90,10 +90,14 @@ function fetchhostname() {
 }
 
     </script>
+    <script src="js/jquery-1.11.2.js" language="JavaScript"></script>
 </head>
 <body id="main" onload="fetchhostname()">
     <div id="toolbar">
         <h1 id="name">BH Team</h1>
+        <div id="battery_level">
+            Battery <span id="bat1">N/A</span> <span id="bat2">N/A</span>
+        </div>
         <ul>
             <li><a href="logs.html" target="linktarget">Logs</a></li>
             <li><a href="remotecontrol.html" target="linktarget">Remote Control</a></li>
@@ -108,5 +112,19 @@ function fetchhostname() {
         </ul>
     </div>
     <iframe id="content" name="linktarget" border="0" src="logs.html"></iframe>
+<script language="JavaScript">
+    $.sysinfoCallbacks=$.Callbacks();
+
+    $.sysinfoCallbacks.add(function(data){
+        $("#bat1").text(data.battery.left.voltage.toFixed(3));
+        $("#bat2").text(data.battery.right.voltage.toFixed(3));
+    });
+
+    setInterval(function() {
+        $.ajax("/sysinfo.json").success(function(data) {
+            $.sysinfoCallbacks.fire(data);
+        })
+    },1000);
+</script>
 </body>
 </html>
