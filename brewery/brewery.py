@@ -40,7 +40,7 @@ if __name__ == "__main__":
     if args.pydev_debug :
         import sys
         if sys.platform=="darwin":
-            sys.path.append('/Applications/PyCharm.app/pycharm-debug-py3k.egg')
+            sys.path.append('/Applications/PyCharm.app/Contents/pycharm-debug-py3k.egg')
             import pydevd
             pydevd.settrace(args.pydev_debug[0], port=int(args.pydev_debug[1]), stdoutToServer=True,
                                                           stderrToServer=True)
