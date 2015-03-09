@@ -6,6 +6,7 @@ import stat
 import datetime
 import subprocess
 import traceback
+import packets
 
 from definitions import *
 
@@ -94,7 +95,7 @@ def close():
         log_file = None
 
 
-def log(obj, sender = "ARM", bold = False):
+def log(obj, sender = "ARM", bold = False, is_error = False):
     global start_time
     global term_enable_colors
     global term_color
@@ -113,7 +114,10 @@ def log(obj, sender = "ARM", bold = False):
         if term_enable_colors:
             if bold:
                 obj = TERM_BOLD + obj
-            obj = term_color + obj
+            if is_error :
+                obj = TERM_RED + obj
+            else:
+                obj = term_color + obj
             if bold or len(term_color) != 0:
                 obj += TERM_RESET
         sys.stdout.write(obj + "\n")
@@ -121,6 +125,8 @@ def log(obj, sender = "ARM", bold = False):
     except:
         pass
 
+def error(obj, sender="ARM"):
+    log("ERROR: {}".format(obj),sender,bold=True, is_error=True)
 
 def dbg(obj, sender = "ARM"):
     pass
@@ -136,6 +142,7 @@ def log_exception(exc):
 
 
 def log_packet(packet, sender = "ARM"):
+    assert isinstance(packet,packets.BasePacket)
     global log_file
     global start_time
     delta = datetime.datetime.now() - start_time

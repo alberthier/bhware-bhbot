@@ -87,6 +87,10 @@ class StateMachine(object):
         self.log("")
 
 
+    def log_error(self, msg):
+        logger.error(msg)
+
+
     def dbg(self, msg):
         logger.dbg(self.name + ": " + msg)
 
@@ -200,6 +204,8 @@ class State:
     def log_exception(self, exc):
         self.fsm.log_exception(exc)
 
+    def log_error(self, msg):
+        self.fsm.log_error(msg)
 
     def dbg(self, msg):
         self.fsm.dbg(msg)
