@@ -121,6 +121,8 @@ class BinaryPacketHandler:
     def __init__(self):
         self.buffer = bytes()
         self.packet = None
+        self.last_good_packet = None
+        self.packet_error = False
 
 
     def write_packet(self, packet):
@@ -138,7 +140,11 @@ class BinaryPacketHandler:
                     if len(received_data) == 0:
                         return
                     self.buffer += received_data
-                    self.packet = packets.create_packet(self.buffer)
+                    try:
+                        self.packet = packets.create_packet(self.buffer)
+                    except packets.PacketNotFoundException as e:
+                        logger.error("Packet not found (type={})".format(e.packet_type))
+                        logger.error("Last good packet : {} size={}".format(self.last_good_packet, self.last_good_packet.get_size()))
                 except socket.error as err:
                     if err.errno in [errno.EAGAIN, errno.EINTR]:
                         return
@@ -162,6 +168,7 @@ class BinaryPacketHandler:
                     if len(self.buffer) == packet_size:
                         # A complete packet has been received, notify the state machine
                         self.packet.deserialize(self.buffer)
+                        self.last_good_packet=self.packet
                         self.event_loop.process(self, self.packet)
                         self.buffer = bytes()
                         self.packet = None
@@ -511,7 +518,7 @@ class EventLoop(object):
         self.exit_value = 0
 
 
-    def on_keep_alive(self, packet):
+    def on_keep_alive(self, packet: packets.KeepAlive):
         now = datetime.datetime.now()
         if (now - self.last_ka_date).total_seconds() > KEEP_ALIVE_MINIMUM_AGE_S:
             self.last_ka_date = now

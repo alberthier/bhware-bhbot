@@ -815,8 +815,19 @@ for (item_name, item_type) in inspect.getmembers(sys.modules[__name__]):
     PACKETS_LIST = list(PACKETS_BY_TYPE.values())
 
 
+class PacketNotFoundException(Exception):
+    def __init__(self, packet_type):
+        self.packet_type=packet_type
+
+
 def create_packet(buffer):
-    # TODO : when unknown packet, return a dummy class
+    """
+    Creates BasePacket from buffer
+    :param buffer:
+    :return: BasePacket :raise PacketNotFoundException:
+    """
     (packet_type,) = struct.unpack("<B", buffer[:1])
-    packet_class = PACKETS_BY_TYPE[packet_type]
+    packet_class = PACKETS_BY_TYPE.get(packet_type, None)
+    if packet_class is None:
+        raise PacketNotFoundException(packet_type)
     return packet_class()
