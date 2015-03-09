@@ -1,0 +1,8 @@
+- add constant for undefined servo values
+- enable robot init
+- parametrize nginx config
+- don't throw carpets at the same place
+- variable nginx conf by host
+- export TERM=xterm ?
+- improve Trigger/Read/Torque enable commands
+- RobotInit is triggered at startup --> not good
