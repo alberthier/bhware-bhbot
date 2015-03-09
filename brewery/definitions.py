@@ -250,6 +250,14 @@ def makeServoMoveCommand(servo, value):
 def makeServoSetupCommand(servo, value):
     return servo[0], SERVO_COMMAND_SETUP_SPEED, value, servo[1]
 
+def makeServoReadCommand(servo):
+    return servo[0], SERVO_COMMAND_POSITION, 0, servo[1]
+
+def makeServoTorqueControl(servo, status):
+    return servo[0], SERVO_COMMAND_TORQUE_ENABLE, 1 if status else 0, servo[1]
+
+
+
 
 DEFAULT_SERVOS_TIMEOUT_MS = 2000
 
