@@ -166,6 +166,7 @@ class DepositCarpets(State):
         yield MoveLineTo(0.58 + ROBOT_CENTER_X, goal.y)
         yield Trigger(LEFT_CARPET_DROPPER_OPEN, RIGHT_CARPET_DROPPER_OPEN)
         yield Trigger(LEFT_CARPET_EJECTOR_THROW, RIGHT_CARPET_EJECTOR_THROW)
+        #FIXME : don't throw carpets at the same place
         yield Trigger(LEFT_CARPET_DROPPER_CLOSE, RIGHT_CARPET_DROPPER_CLOSE)
         yield Trigger(LEFT_CARPET_EJECTOR_HOLD, RIGHT_CARPET_EJECTOR_HOLD)
         self.exit_reason = GOAL_DONE
