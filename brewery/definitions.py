@@ -32,6 +32,7 @@ def setup_definitions(is_main_robot):
         globals()["LEFT_START_X"]          = 1.0
         globals()["LEFT_START_ANGLE"]      = 0.0
         globals()["INPUT"]                 = MAIN_INPUT
+        globals()["SERVOS_IDS"]            = MAIN_SERVO_IDS
     else:
         globals()["ROBOT_X_SIZE"]          = 0.155
         globals()["ROBOT_Y_SIZE"]          = 0.165
@@ -42,6 +43,7 @@ def setup_definitions(is_main_robot):
         globals()["LEFT_START_X"]          = 1.0
         globals()["LEFT_START_ANGLE"]      = math.pi / 2.0
         globals()["INPUT"]                 = SECONDARY_INPUT
+        globals()["SERVOS_IDS"]            = SECONDARY_SERVO_IDS
 
     globals()["ROBOT_VMAX_LIMIT"]                  = 88.0
 
@@ -226,13 +228,13 @@ SIDE = Enum("Side",
 )
 
 MAIN_INPUT = Enum("Inputs",
-    MAIN_INPUT_START                = 0, #TODO
-    MAIN_INPUT_TEAM                 = 1, #TODO
-    MAIN_INPUT_ROBOT_INIT           = 2, #TODO
+    MAIN_INPUT_START                = 16,
+    MAIN_INPUT_TEAM                 = 3,
+    MAIN_INPUT_ROBOT_INIT           = 7,
     MAIN_INPUT_LEFT_BULB_PRESENCE   = 4, #TODO
-    MAIN_INPUT_LEFT_STAND_PRESENCE  = 5, #TODO
+    MAIN_INPUT_LEFT_STAND_PRESENCE  = 0,
     MAIN_INPUT_RIGHT_BULB_PRESENCE  = 6, #TODO
-    MAIN_INPUT_RIGHT_STAND_PRESENCE = 7, #TODO
+    MAIN_INPUT_RIGHT_STAND_PRESENCE = 10,
     MAIN_INPUT_LEFT_SCANNER         = 8, #TODO
     MAIN_INPUT_RIGHT_SCANNER        = 9, #TODO
 )
@@ -281,7 +283,7 @@ MAIN_SERVO_IDS = Enum("Main robot servos",
     RIGHT_BUILDER_LIGHTER_ID       = (ACTUATOR_TYPE_SERVO_AX, 205),
     RIGHT_BUILDER_ELEVATOR_ID      = (ACTUATOR_TYPE_SERVO_RX, 207),
     LIGHTER_GRIPPER_ID             = (ACTUATOR_TYPE_SERVO_AX, 11),
-    LIGHTER_ELEVATOR_ID            = (ACTUATOR_TYPE_SERVO_RX, 2),  #TODO
+    LIGHTER_ELEVATOR_ID            = (ACTUATOR_TYPE_SERVO_RX, 5),
     LEFT_CLAPMAN_ID                = (ACTUATOR_TYPE_SERVO_AX, 106),
     RIGHT_CLAPMAN_ID               = (ACTUATOR_TYPE_SERVO_AX, 206),
 )
