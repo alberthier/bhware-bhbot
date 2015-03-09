@@ -41,6 +41,7 @@ class RobotController(object):
         self.ready = False
         self.resettle_count = 0
         self.stop_requested = False
+        self.servo_positions={}
 
 
     def get_input_id(self, name):
@@ -74,6 +75,9 @@ class RobotController(object):
             self.resettle_count = 0
             self.team = team
             self.is_main = is_main
+
+            self.battery_left=15.5
+            self.battery_right=15.5
 
             if team == TEAM_RIGHT:
                 self.team_name = "green"
@@ -109,7 +113,7 @@ class RobotController(object):
 
             if self.offset == 0 and self.game_controller.args.pydev_debug is not None:
                 args.append("--pydev-debug")
-                args.append(args.pydev_debug)
+                args+=self.game_controller.args.pydev_debug
 
             if is_main:
                 if self.game_controller.args.main_fsm is not None:
@@ -190,6 +194,16 @@ class RobotController(object):
 
 
     def on_servo_control(self, packet):
+        """
+
+        :type packet: packets.ServoControl
+        """
+        # if packet.type
+        # packet.status = SERVO_STATUS_SUCCESS
+        if packet.command == SERVO_COMMAND_POSITION:
+            packet.value=self.servo_positions.setdefault(packet.id,random.randint(0,1023))
+        if packet.command == SERVO_COMMAND_MOVE:
+            self.servo_positions[packet.id]=packet.value
         packet.status = SERVO_STATUS_SUCCESS
         self.send_packet(packet)
 
@@ -243,9 +257,11 @@ class RobotController(object):
         if self.robot_layer.robot.item is not None:
             packet = packets.KeepAlive()
             packet.current_pose = self.robot_layer.get_pose()
-            packet.left_battery_voltage = 14.9
-            packet.right_battery_voltage = 14.8
+            packet.left_battery_voltage = self.battery_left
+            packet.right_battery_voltage = self.battery_right
             self.send_packet(packet)
+            self.battery_left-=0.0001*random.random()
+            self.battery_right-=0.0001*random.random()
 
 
     def send_start_signal(self):
