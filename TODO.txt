@@ -6,3 +6,4 @@
 - export TERM=xterm ?
 - improve Trigger/Read/Torque enable commands
 - RobotInit is triggered at startup --> not good
+- if bad packet header or not keep alive in 10s -> reconnect to PIC
