@@ -682,20 +682,9 @@ class Trigger(statemachine.State):
 
     def on_enter(self):
         for cmd in self.commands:
-            actuator_type = cmd[self.TYPED_ID][self.TYPE]
-            actuator_id = cmd[self.TYPED_ID][self.ID]
-            actuator_value = cmd[self.SERVO_VALUE]
-
-            if actuator_value == UNDEFINED_ACTUATOR_VALUE :
-                self.log_error(
-                    "Undefined value for servo {}, not sending command: {}".format(
-                        SERVOS_IDS.lookup_by_value[(actuator_type,actuator_id)],
-                        cmd
-                    )
-                )
-                yield from self.cleanup(actuator_id)
-                continue
-
+            actuator_typed_id = cmd[self.TYPED_ID]
+            actuator_type = actuator_typed_id[self.TYPE]
+            actuator_id = actuator_typed_id[self.ID]
             if actuator_type in [ ACTUATOR_TYPE_SERVO_AX, ACTUATOR_TYPE_SERVO_RX ]:
                 self.send_packet(packets.ServoControl(*cmd))
             elif actuator_type == ACTUATOR_TYPE_OUTPUT:
@@ -705,6 +694,7 @@ class Trigger(statemachine.State):
             else:
                 self.log_error("Unknown actuator type in command: {}".format(cmd))
                 yield from self.cleanup(actuator_id)
+
 
     def on_servo_control(self, packet):
         if packet.status != SERVO_STATUS_SUCCESS:
