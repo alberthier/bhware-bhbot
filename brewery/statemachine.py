@@ -26,7 +26,7 @@ class StateMachine(object):
         main_state = self.instantiate_state_machine(self.name)
         if main_state is not None:
             self.event_loop.fsms.append(self)
-            self.process(self.push_state(main_state))
+            self.process(self.push_state, main_state)
 
 
     def instantiate_state_machine(self, state_machine_name):
@@ -47,7 +47,7 @@ class StateMachine(object):
 
     def preempt_with_state(self, state):
         self.state_stack = []
-        self.process(self.push_state(state))
+        self.process(self.push_state, state)
 
 
     def init_state(self, s):
@@ -97,8 +97,7 @@ class StateMachine(object):
 
     def on_packet(self, packet):
         if self.current_state is not None:
-            generator = packet.dispatch_generator(self.current_state)
-            self.process(generator)
+            self.process(packet.dispatch_generator, self.current_state)
 
 
     def push_state(self, state):
@@ -132,28 +131,56 @@ class StateMachine(object):
                     self.timer.restart(cs._timeout_date)
 
 
-    def process(self, generator):
+    def process(self, method, *args):
+        generator = None
         previous_state = None
+        previous_exception = None
+
+        try:
+            generator = method(*args)
+        except BaseException as e:
+            previous_exception = e
+            if not hasattr(previous_exception, "current_state_name"):
+                previous_exception.current_state_name = self.current_state_name
+            previous_state, generator = self.pop_state()
+
         while generator:
             try:
-                new_state = generator.send(previous_state)
+                try:
+                    new_state = None
+                    if previous_exception is not None:
+                        exception = previous_exception
+                        previous_exception = None
+                        generator.throw(exception)
+                    else:
+                        new_state = generator.send(previous_state)
+                except BaseException as e:
+                    if not isinstance(e, StopIteration):
+                        previous_exception = e
+                        if not hasattr(previous_exception, "current_state_name"):
+                            previous_exception.current_state_name = self.current_state_name
+                    else:
+                        raise e
                 if isinstance(new_state, State):
                     previous_state = None
                     # on_enter can yield a generator
                     self.current_state.fsm_current_method = generator
-                    generator = self.push_state(new_state)
+                    try:
+                        generator = self.push_state(new_state)
+                    except BaseException as e:
+                        previous_exception = e
+                        if not hasattr(previous_exception, "current_state_name"):
+                            previous_exception.current_state_name = self.current_state_name
+                        previous_state, generator = self.pop_state()
                 elif new_state is None:
-                    # yield None means exit current State
+                    # yield None or exception means exit current State
                     previous_state, generator = self.pop_state()
             except StopIteration:
                 generator = None
-            except Exception as e:
-                # On any other Exception, we dump the current generator and pop the state.
-                # We will try to continue in this degraded state, hoping we dont break anything
-                self.log("An exception occured while in state '{}':".format(self.current_state_name))
-                self.log_exception(e)
-                self.log("Trying to continue after having popped the state")
-                previous_state, generator = self.pop_state()
+        if previous_exception is not None:
+            # The raised exception hasn't been handled by any state in the stack
+            self.log("An exception occured while in state '{}':".format(previous_exception.current_state_name))
+            self.log_exception(previous_exception)
         if self.current_state is None and len(self.pending_states) == 0:
             logger.log("State machine '{}' has no current state or pending states, exiting".format(self.name))
             self.event_loop.fsms.remove(self)
@@ -165,7 +192,7 @@ class StateMachine(object):
         cs = self.current_state
         if isinstance(cs, Timer):
             cs.stop()
-            self.process(cs.on_timeout())
+            self.process(cs.on_timeout)
         else:
             self.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             self.log("!! on_timeout called wheras the current state isn't a Timer !!")
