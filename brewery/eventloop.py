@@ -22,6 +22,7 @@ import packets
 import robot
 import statemachine
 import webinterface
+import webconfig
 
 from definitions import *
 
@@ -516,6 +517,8 @@ class EventLoop(object):
         self.packet_queue = collections.deque()
         self.interbot_enabled = interbot_enabled
         self.exit_value = 0
+
+        webconfig.setup_nginx_config()
 
 
     def on_keep_alive(self, packet: packets.KeepAlive):

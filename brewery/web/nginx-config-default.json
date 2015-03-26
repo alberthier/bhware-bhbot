@@ -1,0 +1,5 @@
+{
+  "listen_port": 80,
+  "document_root": "/root/bhware/brewery/web"
+}
+
