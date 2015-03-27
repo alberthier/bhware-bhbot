@@ -1,0 +1,8 @@
+{% for servo, data in robot.servo|dictsort %}
+<!--<button class="servo{{ ' current' if current == servo }}" onclick="$.setServo">{{ servo }}</button>-->
+<button
+        class="servo{{ ' current' if current == servo }}{{ ' torqueDisabled' if data.torque == false else ' torqueEnabled' }}"
+        servoData='{{str(data)}}'>
+    {{ servo }}
+</button>
+{% endfor %}

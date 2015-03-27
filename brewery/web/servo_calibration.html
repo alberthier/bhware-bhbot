@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inputs</title>
+    <style type="text/css">
+        table {
+            font-family: "Monospace";
+        }
+    </style>
+    <script src="js/jquery-1.11.2.js" language="JavaScript"></script>
+    <script language="javascript" src="js/nunjucks.js"></script>
+    <style type="text/css">
+        .servo {
+            display: block;
+            float: left;
+            background-color: #0099cc;
+            margin-right: 2px;
+            margin-top: 2px;
+            padding: 5px;
+        }
+
+        .current {
+            font-weight: bold;
+            color: white;
+        }
+
+        .torqueEnabled {
+            background-color: brown;
+        }
+
+        .torqueDisabled {
+            background-color: darkgreen;
+        }
+
+        #servo_container #commands {
+            float: none;
+            clear: left;
+        }
+
+        .clear {
+            width: 100%;
+            clear: both !important;
+            display: inline-block;
+        }
+
+        .clear:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        * html .clear {
+            height: 1%;
+        }
+
+        .console {
+            font-family: monospace;
+            font-size: 10;
+            background-color: black;
+            color: white;
+            margin: 3px;
+            padding: 3px;
+        }
+
+
+    </style>
+</head>
+<body id="main">
+<h1>Servos calibration</h1>
+
+<div id="servo_container">
+    <div id="servos"></div>
+</div>
+<div class="clear"></div>
+<div id="commands">
+    <button id="torqueEnable">Torque enable</button>
+    <button id="torqueDisable">Torque disable</button>
+    <input id="servoValue" type="text"/>
+    <button id="setValue">Set value</button>
+</div>
+
+<div class="console" id="serverRequest">
+
+</div>
+
+
+<div class="console" id="serverReply">
+
+</div>
+
+<script>
+    $.fn.multiline = function (text) {
+        this.text(text);
+        this.html(this.html().replace(/\n/g, '<br/>'));
+        return this;
+    }
+
+
+    var nunjucks = parent.nunjucks;
+    var $$ = parent.$;
+
+    var current = null;
+    var currentData = null;
+
+
+    $(document).ready(function () {
+        $("#commands").hide();
+        $(".console").hide();
+
+        $$.sysinfoCallbacks.add(function (data) {
+            if(current && data["servo"][current]) {
+                if (data["servo"][current]["torque"] == true) {
+                    $("#torqueEnable").attr("disabled", "disabled");
+                    $("#torqueDisable").removeAttr("disabled");
+                } else {
+                    $("#torqueEnable").removeAttr("disabled");
+                    $("#torqueDisable").attr("disabled", "disabled");
+                }
+            }
+
+            nunjucks.render('servo_list.html', {
+                "current": current,
+                "robot": data,
+                "str": JSON.stringify
+            }, function (err, res) {
+                $("#servos").html(res);
+                if (err) {
+                    console.log(err);
+                }
+                /*console.log(err);*/
+                /*console.log(res);*/
+
+                $(".servo").click(function (elt) {
+                    //console.log(elt);
+                    current = elt.target.innerText;
+                    currentData = JSON.parse(elt.target.attributes.servoData.nodeValue);
+
+                });
+
+                if (current) {
+                    if (!$("#servoValue").is(":focus") && !$("#setValue").is(":focus")) {
+                        $("#servoValue").val(data["servo"][current].value);
+                        $("#commands").show();
+                    }
+                }
+            });
+        });
+    });
+
+    function request_move(servo, value) {
+        $(".console").show();
+        var code = "yield Trigger(makeServoMoveCommand( ( (" + servo + "), 1000)," + value + "))";
+        var req = new XMLHttpRequest();
+        req.open("POST", "/brewery/eval", true);
+        req.onreadystatechange = function (e) {
+            if (req.readyState == 4) {
+                $("#serverReply").multiline(e.target.response);
+                console.log(e);
+            }
+
+        }
+        $("#serverRequest").multiline(code);
+        req.send(code);
+    }
+
+    $("#torqueEnable").click(function () {
+        request_torque(currentData["typed_id"], "True");
+    })
+
+    $("#torqueDisable").click(function () {
+        request_torque(currentData["typed_id"], "False");
+    })
+
+    function request_torque(servo, value) {
+        $(".console").show();
+        var code = "yield Trigger(makeServoTorqueControl( ( (" + servo + "), 1000)," + value + "))";
+        var req = new XMLHttpRequest();
+        req.open("POST", "/brewery/eval", true);
+        req.onreadystatechange = function (e) {
+            if (req.readyState == 4) {
+                $("#serverReply").multiline(e.target.response);
+                console.log(e);
+            }
+
+        }
+        $("#serverRequest").multiline(code);
+        req.send(code);
+    }
+
+    $("#setValue").click(function () {
+        request_move(currentData["typed_id"], $("#servoValue").val());
+    })
+
+
+</script>
+
+</body>
+</html>

@@ -91,6 +91,7 @@ function fetchhostname() {
 
     </script>
     <script src="js/jquery-1.11.2.js" language="JavaScript"></script>
+    <script src="js/nunjucks.js" language="JavaScript"></script>
 </head>
 <body id="main" onload="fetchhostname()">
     <div id="toolbar">
@@ -109,6 +110,8 @@ function fetchhostname() {
             <li><a href="bhware/" target="linktarget">Bhware Dir</a></li>
             <li><a href="enginetests.html?pic=pic&speeds=Speeds" target="linktarget">Engines Speeds</a></li>
             <li><a href="enginetests.html?pic=pic&voltages=Voltages" target="linktarget">Engines Voltages</a></li>
+            <li><a href="servo_calibration.html" target="linktarget">Servo calibration</a></li>
+
         </ul>
     </div>
     <iframe id="content" name="linktarget" border="0" src="logs.html"></iframe>
@@ -125,6 +128,8 @@ function fetchhostname() {
             $.sysinfoCallbacks.fire(data);
         })
     },1000);
+
+    nunjucks.configure("/templates");
 </script>
 </body>
 </html>

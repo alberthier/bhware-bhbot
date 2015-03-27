@@ -80,6 +80,20 @@ class SysInfo:
                 self.last_write=datetime.datetime.now()
 
     def on_servo_control(self, packet):
-        self.data["servo"].setdefault(SERVOS_IDS.lookup_by_value[packet.id],{})["value"]=packet.value
+        print(packet)
+        lk=SERVOS_IDS.lookup_by_value[packet.id]
+        self.data["servo"].setdefault(lk,{"value":-1})
+        self.data["servo"][lk]["typed_id"]=packet.id
+
+        if packet.command in [SERVO_COMMAND_MOVE, SERVO_COMMAND_POSITION]:
+            self.data["servo"][lk]["value"]=packet.value
+
+        elif packet.command == SERVO_COMMAND_TORQUE_ENABLE:
+            self.data["servo"][lk]["torque"]=True if packet.value==1 else False
+
+        elif packet.command == SERVO_COMMAND_SETUP_SPEED:
+            self.data["servo"][lk]["speed"]=packet.value
+
+        print(self.data["servo"][lk])
 
 # d=DotNotation()
