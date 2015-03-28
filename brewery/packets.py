@@ -804,7 +804,7 @@ class StandAction(BasePacket):
 
 class CupGrabbed(BasePacket):
 
-    TYPE = 237
+    TYPE = 238
 
 
 ################################################################################
