@@ -267,7 +267,7 @@ class RobotController(object):
     def send_start_signal(self):
         packet = packets.InputStatus()
         packet.id = self.get_input_id("INPUT_START")
-        packet.value = 1
+        packet.value = 0
         self.send_packet(packet)
 
 
