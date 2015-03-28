@@ -71,12 +71,12 @@ class GraphicsRobotObject(QObject):
         self.team_indicator.setPen(QPen(0))
         self.item.addToGroup(self.team_indicator)
 
-        detection_radius = TURRET_SHORT_DISTANCE_DETECTION_RANGE * 1000.0
+        detection_radius = (TURRET_DETECTION_RANGE_START + TURRET_DETECTION_RANGE_END) / 2.0 * 100.0
         self.short_detection_circle = QGraphicsEllipseItem(-detection_radius, -detection_radius, 2.0 * detection_radius, 2.0 * detection_radius)
         self.short_detection_circle.setPen(QPen(QColor(self.layer.color), 2, Qt.DashLine))
         self.item.addToGroup(self.short_detection_circle)
 
-        detection_radius = TURRET_LONG_DISTANCE_DETECTION_RANGE * 1000.0
+        detection_radius = (TURRET_DETECTION_RANGE_START + TURRET_DETECTION_RANGE_END) / 2.0 * 100.0
         self.long_detection_circle = QGraphicsEllipseItem(-detection_radius, -detection_radius, 2.0 * detection_radius, 2.0 * detection_radius)
         self.long_detection_circle.setPen(QPen(QColor(self.layer.color), 2, Qt.DashLine))
         self.item.addToGroup(self.long_detection_circle)
@@ -373,25 +373,25 @@ class RobotLayer(fieldview.Layer):
             if team == TEAM_RIGHT and key == 'q' or team == TEAM_LEFT and key == 's':
                 # Main opponent - short distance
                 packet.robot = OPPONENT_ROBOT_MAIN
-                packet.distance = OPPONENT_DISTANCE_FAR
+                packet.distance = TURRET_DETECTION_RANGE_END
                 self.robot_controller.send_packet(packet)
-                packet.distance = OPPONENT_DISTANCE_NEAR
+                packet.distance = int((TURRET_DETECTION_RANGE_START + TURRET_DETECTION_RANGE_END) / 2.0)
                 self.robot_controller.send_packet(packet)
             elif team == TEAM_RIGHT and key == 'Q' or team == TEAM_LEFT and key == 'S':
                 # Main opponent - long distance
-                packet.distance = OPPONENT_DISTANCE_FAR
+                packet.distance = TURRET_DETECTION_RANGE_END
                 packet.robot = OPPONENT_ROBOT_MAIN
                 self.robot_controller.send_packet(packet)
             elif team == TEAM_RIGHT and key == 'w' or team == TEAM_LEFT and key == 'x':
                 # Secondary opponent - short distance
                 packet.robot = OPPONENT_ROBOT_SECONDARY
-                packet.distance = OPPONENT_DISTANCE_FAR
+                packet.distance = TURRET_DETECTION_RANGE_END
                 self.robot_controller.send_packet(packet)
-                packet.distance = OPPONENT_DISTANCE_NEAR
+                packet.distance = int((TURRET_DETECTION_RANGE_START + TURRET_DETECTION_RANGE_END) / 2.0)
                 self.robot_controller.send_packet(packet)
             elif team == TEAM_RIGHT and key == 'W' or team == TEAM_LEFT and key == 'X':
                 # Secondary opponent - long distance
-                packet.distance = OPPONENT_DISTANCE_FAR
+                packet.distance = TURRET_DETECTION_RANGE_END
                 packet.robot = OPPONENT_ROBOT_SECONDARY
                 self.robot_controller.send_packet(packet)
             elif team == TEAM_RIGHT and key == 'a' or team == TEAM_LEFT and key == 'z':
@@ -618,13 +618,10 @@ class GameElementsLayer(fieldview.Layer):
 
         if self.main_bar.opponent_detection.isChecked():
             if robot_a.item and robot_b.item :
-                distance = tools.distance(robot_a.item.x(), robot_a.item.y(), robot_b.item.x(), robot_b.item.y())
-                if distance < TURRET_SHORT_DISTANCE_DETECTION_RANGE * 1000.0:
-                    self.send_turret_detect(robot_a, robot_b, 0)
-                    self.send_turret_detect(robot_b, robot_a, 0)
-                elif distance < TURRET_LONG_DISTANCE_DETECTION_RANGE * 1000.0:
-                    self.send_turret_detect(robot_a, robot_b, 1)
-                    self.send_turret_detect(robot_b, robot_a, 1)
+                distance = tools.distance(robot_a.item.x(), robot_a.item.y(), robot_b.item.x(), robot_b.item.y()) / 100.0
+                if TURRET_DETECTION_RANGE_START <= distance and distance <= TURRET_DETECTION_RANGE_END:
+                    self.send_turret_detect(robot_a, robot_b, distance)
+                    self.send_turret_detect(robot_b, robot_a, distance)
 
 
     def send_turret_detect(self, detecting_robot, detected_robot, distance):

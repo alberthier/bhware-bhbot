@@ -549,8 +549,8 @@ class EventLoop(object):
         if self.turret_channel is not None:
             packet = packets.TurretInit()
             packet.mode = TURRET_INIT_MODE_WRITE
-            packet.short_distance = TURRET_SHORT_DISTANCE_DETECTION_ID
-            packet.long_distance = TURRET_LONG_DISTANCE_DETECTION_ID
+            packet.detection_range_start = TURRET_DETECTION_RANGE_START
+            packet.detection_range_end = TURRET_DETECTION_RANGE_END
             self.send_packet(packet)
 
 

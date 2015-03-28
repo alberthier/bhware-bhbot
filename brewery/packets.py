@@ -343,9 +343,9 @@ class TurretInit(BasePacket):
 
     TYPE = 33
     DEFINITION = (
-        ('mode'          , UEnum8(TURRET_INIT_MODE, TURRET_INIT_MODE_READ)),
-        ('short_distance', UInt8 (0, "Short distance detection range")),
-        ('long_distance' , UInt8 (0, "Long distance detection range")),
+        ('mode'                 , UEnum8(TURRET_INIT_MODE, TURRET_INIT_MODE_READ)),
+        ('detection_range_start', UInt8 (0, "Start of the detection range")),
+        ('detection_range_end'  , UInt8 (0, "End of the detection range")),
     )
 
 
@@ -737,9 +737,9 @@ class OpponentPosition(BasePacket):
 
     DEFINITION = (
         ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
-        ('distance' , UEnum8(OPPONENT_DISTANCE, OPPONENT_DISTANCE_NEAR)),
-        ('x'        , Float(0.0, "Opponent estimated X coordinate")),
-        ('y'        , Float(0.0, "Opponent estimated Y coordinate")),
+        ('distance' , UInt8 (0,   "Opponent distance")),
+        ('x'        , Float (0.0, "Opponent estimated X coordinate")),
+        ('y'        , Float (0.0, "Opponent estimated Y coordinate")),
     )
 
 

@@ -244,7 +244,7 @@ class Map:
         else:
             zone = self.secondary_opponent_zone
         if packet.x is not None and packet.y is not None:
-            self.enable_zone(zone, packet.distance == OPPONENT_DISTANCE_NEAR)
+            self.enable_zone(zone, True)
             zone.is_detected = True
             dx = packet.x - zone.x
             dy = packet.y - zone.y
