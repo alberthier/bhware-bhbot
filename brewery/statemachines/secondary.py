@@ -78,11 +78,12 @@ class Main(State):
 
 
     def on_start(self, packet):
-        self.yield_at(90000, EndOfMatch())
-        logger.log("Starting ...")
-        self.send_packet(packets.ServoControl(*CUP_GRIPPER_OPEN))
-        yield MoveLineTo(1.32, LEFT_START_Y)
-        yield ExecuteGoals()
+        if packet.value == 0:
+            self.yield_at(90000, EndOfMatch())
+            logger.log("Starting ...")
+            self.send_packet(packets.ServoControl(*CUP_GRIPPER_OPEN))
+            yield MoveLineTo(1.32, LEFT_START_Y)
+            yield ExecuteGoals()
 
 
 

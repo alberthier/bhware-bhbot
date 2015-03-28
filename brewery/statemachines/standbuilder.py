@@ -65,9 +65,10 @@ class Main(State):
 
 
     def on_start(self, packet):
-        self.yield_at(90000, EndOfMatch())
-        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
-        yield Build()
+        if packet.value == 0:
+            self.yield_at(90000, EndOfMatch())
+            yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+            yield Build()
 
 
 

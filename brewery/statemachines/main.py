@@ -102,11 +102,12 @@ class Main(State):
 
 
     def on_start(self, packet):
-        self.yield_at(90000, EndOfMatch())
-        logger.log("Starting ...")
-        yield PickupBulb()
-        yield StaticStrategy()
-        yield ExecuteGoals()
+        if packet.value == 0:
+            self.yield_at(90000, EndOfMatch())
+            logger.log("Starting ...")
+            yield PickupBulb()
+            yield StaticStrategy()
+            yield ExecuteGoals()
 
 
 
