@@ -442,7 +442,7 @@ class LookAtOpposite(AbstractMove):
 
 class MoveCurve(AbstractMove):
 
-    def __init__(self, angle, points, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
+    def __init__(self, angle, min_curve_radius, points, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
         super().__init__(chained, opponent_handling_config)
         apose = position.Pose(0.0, 0.0, angle, virtual)
         poses = []
@@ -451,7 +451,7 @@ class MoveCurve(AbstractMove):
                 poses.append(position.Pose(pt[0], pt[1], None, virtual))
             else:
                 poses.append(pt)
-        self.packet = packets.MoveCurve(direction = direction, angle = apose.angle, points = poses)
+        self.packet = packets.MoveCurve(direction, apose.angle, min_curve_radius, poses)
 
 
     def on_enter(self):
@@ -465,8 +465,8 @@ class MoveCurve(AbstractMove):
 
 class MoveCurveTo(MoveCurve):
 
-    def __init__(self, angle, pose, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
-        super().__init__(angle, [pose], direction, chained, virtual, opponent_handling)
+    def __init__(self, angle, min_curve_radius, pose, direction = DIRECTION_AUTO, chained = None, virtual = True, opponent_handling_config = OPPONENT_HANDLING):
+        super().__init__(angle, min_curve_radius, [pose], direction, chained, virtual, opponent_handling)
 
 
 

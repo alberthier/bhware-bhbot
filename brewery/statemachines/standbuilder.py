@@ -83,8 +83,9 @@ class Main(State):
             yield InitialPosition()
 
     def on_start(self, packet):
-        self.yield_at(90000, EndOfMatch())
-        if packet.value == 1:
+        if packet.value == 0:
+            self.yield_at(90000, EndOfMatch())
+        if packet.value == 0:
             yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
                           self.fsm.PLIERS_RIGHT_OPEN,
                           self.fsm.GRIPPER_LEFT_GUIDE,
