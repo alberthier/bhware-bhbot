@@ -7,6 +7,9 @@ import socket
 import string
 
 def gethostname():
+    hostname_file = os.path.join(os.path.dirname(__file__),"../.hostname")
+    if os.path.exists(hostname_file):
+        return open(hostname_file).read().strip()
     return socket.gethostname()
 
 def setup_nginx_config():

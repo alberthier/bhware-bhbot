@@ -30,7 +30,7 @@ http {
 
         # pass requests for PIC
         location /pic/ {
-            proxy_pass      http://localhost:42080/;
+            proxy_pass      ${pic_url};
         }
 
         # pass requests for brewery
