@@ -20,6 +20,7 @@ class Main(State):
     def on_start(self, packet):
         if packet.value == 0:
             self.yield_at(90000, EndOfMatch())
+            yield Trigger(CUP_GRIPPER_OPEN)
             yield GrabStand()
 
 
