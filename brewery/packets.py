@@ -404,9 +404,10 @@ class MoveCurve(BasePacket):
 
     TYPE = 53
     DEFINITION = (
-        ('direction', Enum8        (DIRECTION, DIRECTION_FORWARD)),
-        ('angle'    , OptionalAngle(None, "Destination angle")),
-        ('points'   , List         (61, Point(), [], "List of points to follow")),
+        ('direction'       , Enum8        (DIRECTION, DIRECTION_FORWARD)),
+        ('angle'           , OptionalAngle(None, "Destination angle")),
+        ('min_curve_radius', Float        (0.0,  "Minimum curve radius")),
+        ('points'          , List         (60, Point(), [], "List of points to follow")),
     )
 
 
