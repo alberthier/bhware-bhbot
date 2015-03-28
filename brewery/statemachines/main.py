@@ -373,23 +373,26 @@ class ScanAndBuildSpotlight(State):
             yield RotateTo(0.0)
             self.fsm.builders[SIDE_LEFT].enabled = False
             self.fsm.builders[SIDE_RIGHT].enabled = False
-            yield Trigger(LEFT_BUILDER_LIGHTER_OPEN, RIGHT_BUILDER_LIGHTER_OPEN)
-            yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE, RIGHT_BUILDER_LIGHTER_CLOSE)
-            yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE,
-                          RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)
-            yield Trigger(LEFT_BUILDER_ELEVATOR_UP, RIGHT_BUILDER_ELEVATOR_UP)
+            # yield Trigger(LEFT_BUILDER_LIGHTER_OPEN, RIGHT_BUILDER_LIGHTER_OPEN)
+            # yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE, RIGHT_BUILDER_LIGHTER_CLOSE)
+            # yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE,
+            #               RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)
+            # yield Trigger(LEFT_BUILDER_ELEVATOR_UP, RIGHT_BUILDER_ELEVATOR_UP)
+
+            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_START))
+
             yield MoveLineTo(1.77, center_y)
             yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
-            yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM, RIGHT_BUILDER_ELEVATOR_PLATFORM)
-            yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN,
-                          RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN,
-                          LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN,
-                          RIGHT_BUILDER_GRIPPER_LEFT_OPEN, RIGHT_BUILDER_GRIPPER_RIGHT_OPEN)
-            yield MoveLineTo(1.68, center_y)
-            self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_LEFT_CLOSE))
-            self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_RIGHT_CLOSE))
-            self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_LEFT_CLOSE))
-            self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE))
+            # yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM, RIGHT_BUILDER_ELEVATOR_PLATFORM)
+            # yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN,
+            #               RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN,
+            #               LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN,
+            #               RIGHT_BUILDER_GRIPPER_LEFT_OPEN, RIGHT_BUILDER_GRIPPER_RIGHT_OPEN)
+            # yield MoveLineTo(1.68, center_y)
+            # self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_LEFT_CLOSE))
+            # self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_RIGHT_CLOSE))
+            # self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_LEFT_CLOSE))
+            # self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE))
             self.fsm.builders[SIDE_LEFT].stand_count = 0
             self.fsm.builders[SIDE_RIGHT].stand_count = 0
             self.fsm.builders[SIDE_LEFT].enabled = True

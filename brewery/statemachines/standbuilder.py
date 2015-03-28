@@ -25,9 +25,11 @@ class Main(State):
         if self.fsm.side == SIDE_LEFT:
             self.fsm.PLIERS_LEFT_INIT = LEFT_BUILDER_PLIERS_LEFT_INIT
             self.fsm.PLIERS_LEFT_CLOSE = LEFT_BUILDER_PLIERS_LEFT_CLOSE
+            self.fsm.PLIERS_LEFT_HOLD = LEFT_BUILDER_PLIERS_LEFT_HOLD
             self.fsm.PLIERS_LEFT_OPEN = LEFT_BUILDER_PLIERS_LEFT_OPEN
             self.fsm.PLIERS_RIGHT_INIT = LEFT_BUILDER_PLIERS_RIGHT_INIT
             self.fsm.PLIERS_RIGHT_CLOSE = LEFT_BUILDER_PLIERS_RIGHT_CLOSE
+            self.fsm.PLIERS_RIGHT_HOLD = LEFT_BUILDER_PLIERS_RIGHT_HOLD
             self.fsm.PLIERS_RIGHT_OPEN = LEFT_BUILDER_PLIERS_RIGHT_OPEN
             self.fsm.GRIPPER_LEFT_INIT = LEFT_BUILDER_GRIPPER_LEFT_INIT
             self.fsm.GRIPPER_LEFT_CLOSE = LEFT_BUILDER_GRIPPER_LEFT_CLOSE
@@ -50,9 +52,11 @@ class Main(State):
         else:
             self.fsm.PLIERS_LEFT_INIT = RIGHT_BUILDER_PLIERS_LEFT_INIT
             self.fsm.PLIERS_LEFT_CLOSE = RIGHT_BUILDER_PLIERS_LEFT_CLOSE
+            self.fsm.PLIERS_LEFT_HOLD = RIGHT_BUILDER_PLIERS_LEFT_HOLD
             self.fsm.PLIERS_LEFT_OPEN = RIGHT_BUILDER_PLIERS_LEFT_OPEN
             self.fsm.PLIERS_RIGHT_INIT = RIGHT_BUILDER_PLIERS_RIGHT_INIT
             self.fsm.PLIERS_RIGHT_CLOSE = RIGHT_BUILDER_PLIERS_RIGHT_CLOSE
+            self.fsm.PLIERS_RIGHT_HOLD = RIGHT_BUILDER_PLIERS_RIGHT_HOLD
             self.fsm.PLIERS_RIGHT_OPEN = RIGHT_BUILDER_PLIERS_RIGHT_OPEN
             self.fsm.GRIPPER_LEFT_INIT = RIGHT_BUILDER_GRIPPER_LEFT_INIT
             self.fsm.GRIPPER_LEFT_CLOSE = RIGHT_BUILDER_GRIPPER_LEFT_CLOSE
@@ -76,31 +80,37 @@ class Main(State):
     def on_controller_status(self, packet):
         #TODO: handle not empty
         if packet.status == CONTROLLER_STATUS_READY:
-            yield Trigger(self.fsm.PLIERS_LEFT_INIT, self.fsm.PLIERS_RIGHT_INIT,
+            yield InitialPosition()
+
+    def on_start(self, packet):
+        self.yield_at(90000, EndOfMatch())
+        if packet.value == 1:
+            yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
+                          self.fsm.PLIERS_RIGHT_OPEN,
+                          self.fsm.GRIPPER_LEFT_GUIDE,
+                          self.fsm.GRIPPER_RIGHT_GUIDE
+            )
+            yield Build()
+
+
+class InitialPosition(State):
+    def on_enter(self):
+        yield Trigger(self.fsm.PLIERS_LEFT_INIT, self.fsm.PLIERS_RIGHT_INIT,
                           self.fsm.ELEVATOR_DOWN,
                           self.fsm.GRIPPER_LEFT_INIT, self.fsm.GRIPPER_RIGHT_INIT,
                           self.fsm.LIGHTER_WAIT
             )
 
-    def on_start(self, packet):
-        self.yield_at(90000, EndOfMatch())
-        yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
-                      self.fsm.PLIERS_RIGHT_OPEN,
-                      self.fsm.GRIPPER_LEFT_GUIDE,
-                      self.fsm.GRIPPER_RIGHT_GUIDE
-        )
-        yield Build()
-
-
+        yield None
 
 
 class Build(State):
 
     def on_input_status(self, packet):
-        # Dispatch manually
-        if packet.id == self.fsm.INPUT_BULB_PRESENCE:
-            yield from self.on_bulb_presence(packet)
-        elif packet.id == self.fsm.INPUT_STAND_PRESENCE and packet.kind == KIND_EVENT and packet.value == 1:
+        # Dispatch manually because there are 2 bulb detectors and 2 stand presence detectors
+        # if packet.id == self.fsm.INPUT_BULB_PRESENCE:
+        #     yield from self.on_bulb_presence(packet)
+        if packet.id == self.fsm.INPUT_STAND_PRESENCE and packet.kind == KIND_EVENT and packet.value == 0:
             yield from self.on_stand_presence(packet)
 
 
@@ -123,6 +133,48 @@ class Build(State):
             self.fsm.stand_count += 1
         self.fsm.building = False
         self.send_packet(packets.StandStored(self.fsm.side))
+
+
+    def on_stand_action(self, packet):
+        if packet.side == self.fsm.side and packet.status == STAND_ACTION_STATUS_TODO:
+            if packet.action == STAND_ACTION_START:
+                yield from self.on_stand_action_start(packet)
+
+            if packet.action == STAND_ACTION_DEPOSIT:
+                yield from self.on_stand_action_deposit(packet)
+
+            if packet.action == STAND_ACTION_END:
+                yield from self.on_stand_action_end(packet)
+
+
+    def on_stand_action_start(self, packet):
+        yield Trigger(self.fsm.LIGHTER_DEPOSIT)
+        yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
+        yield Trigger(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
+        yield Trigger(self.fsm.ELEVATOR_UP)
+
+        #TODO: handle errors
+
+        packet.status = STAND_ACTION_STATUS_DONE
+
+        self.send_packet(packet)
+
+    def on_stand_action_spot(self, packet):
+        yield Trigger(self.fsm.ELEVATOR_PLATFORM)
+        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN,
+                      self.fsm.GRIPPER_LEFT_OPEN, self.fsm.GRIPPER_RIGHT_OPEN,
+                      )
+
+        packet.status = STAND_ACTION_STATUS_DONE
+
+        self.send_packet(packet)
+
+    def on_stand_action_end(self):
+        yield InitialPosition()
+
+        packet.status = STAND_ACTION_STATUS_DONE
+
+        self.send_packet(packet)
 
 
 
