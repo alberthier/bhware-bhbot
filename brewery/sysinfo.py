@@ -107,6 +107,4 @@ class SysInfo:
         elif packet.command == SERVO_COMMAND_SETUP_SPEED:
             self.data["servo"][lk]["speed"]=packet.value
 
-        print(self.data["servo"][lk])
-
 # d=DotNotation()
