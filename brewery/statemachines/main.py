@@ -176,12 +176,18 @@ class WaitForStandGrabbed(WaitForStandStored):
 
 class PickupBulb(State):
 
+    def on_controller_ready(self):
+        yield Trigger(LIGHTER_GRIPPER_OPEN)
+
     def on_enter(self):
+        yield Trigger(makeServoSetupCommand(LIGHTER_GRIPPER, 1))
         yield Trigger(LIGHTER_ELEVATOR_BULB)
         yield Trigger(LIGHTER_GRIPPER_CLOSE)
+        yield Trigger(makeServoSetupCommand(LIGHTER_GRIPPER, 1024))
+        # TODO: add timer
         yield Trigger(LIGHTER_ELEVATOR_UP)
         yield Trigger(LIGHTER_GRIPPER_OPEN)
-        yield Trigger(LIGHTER_ELEVATOR_DOWN)
+        # yield Trigger(LIGHTER_ELEVATOR_DOWN)
         yield None
 
 
