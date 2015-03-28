@@ -792,6 +792,11 @@ class StandGrabbed(BasePacket):
     )
 
 
+class CupGrabbed(BasePacket):
+
+    TYPE = 237
+
+
 ################################################################################
 # Packets lookup setup
 

@@ -57,6 +57,7 @@ class Main(State):
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
+        StateMachine(self.event_loop, "cupgrabber")
 
         self.robot.holding_cup = False
 
@@ -125,13 +126,12 @@ class CalibratePosition(State):
 class GrabCup(State):
 
     def on_enter(self):
-        presence = yield GetInputStatus(SECONDARY_INPUT_CUP_PRESENCE)
-        if presence.value == 1:
-            self.log("A cup here, grabbing it")
-            yield Trigger(CUP_GRIPPER_ON_CUP)
-            self.robot.holding_cup = True
-        else:
-            self.log("No cup here")
+        if self.robot.holding_cup:
+            self.exit_reason = GOAL_DONE
+            yield None
+
+
+    def on_cup_grabbed(self, packet):
         self.exit_reason = GOAL_DONE
         yield None
 
@@ -149,7 +149,8 @@ class DepositCup(State):
         yield RotateTo(-math.pi / 2.0)
         yield MoveLineTo(goal.x, self.y)
         yield Trigger(CUP_GRIPPER_HALF_OPEN)
-        yield Timer(500)
+        yield Timer(300)
+        yield MoveLineRelative(-0.02)
         yield Trigger(CUP_GRIPPER_OPEN)
         yield MoveLineTo(goal.x, goal.y)
         self.robot.holding_cup = False
