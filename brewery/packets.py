@@ -329,10 +329,9 @@ INTERNAL_RANGE_END    = 256
 
 class TurretDetect(BasePacket):
 
-    DYNAMIC_SIZE = False
     TYPE = 32
     DEFINITION = (
-        ('distance', UEnum8(OPPONENT_DISTANCE, OPPONENT_DISTANCE_NEAR)),
+        ('distance', UInt8 (0, "Detection distance (cm)")),
         ('angle'   , UInt8 (0, "Detection angle index (0 <= angle <= 17; 20 deg resolution)")),
         ('robot'   , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
     )
@@ -342,7 +341,6 @@ class TurretDetect(BasePacket):
 
 class TurretInit(BasePacket):
 
-    DYNAMIC_SIZE = False
     TYPE = 33
     DEFINITION = (
         ('mode'          , UEnum8(TURRET_INIT_MODE, TURRET_INIT_MODE_READ)),
@@ -355,7 +353,6 @@ class TurretInit(BasePacket):
 
 class TurretDistances(BasePacket):
 
-    DYNAMIC_SIZE = False
     TYPE = 34
     DEFINITION = (
         ('short_distance', UInt8 (0, "Short distance detection range")),
@@ -367,7 +364,6 @@ class TurretDistances(BasePacket):
 
 class TurretBoot(BasePacket):
 
-    DYNAMIC_SIZE = False
     TYPE = 35
 
 
