@@ -114,15 +114,7 @@ class Main(State):
 class Initialize(State):
 
     def on_enter(self):
-        yield Trigger(LEFT_BUILDER_PLIERS_LEFT_CLOSE, LEFT_BUILDER_PLIERS_RIGHT_CLOSE,
-                      RIGHT_BUILDER_PLIERS_LEFT_CLOSE, RIGHT_BUILDER_PLIERS_RIGHT_CLOSE,
-                      LEFT_BUILDER_ELEVATOR_DOWN,
-                      RIGHT_BUILDER_ELEVATOR_DOWN,
-                      LEFT_BUILDER_GRIPPER_LEFT_CLOSE, LEFT_BUILDER_GRIPPER_RIGHT_CLOSE,
-                      RIGHT_BUILDER_GRIPPER_LEFT_CLOSE, RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE,
-                      LEFT_BUILDER_LIGHTER_CLOSE,
-                      RIGHT_BUILDER_LIGHTER_CLOSE,
-                      LIGHTER_GRIPPER_OPEN,
+        yield Trigger(LIGHTER_GRIPPER_OPEN,
                       LIGHTER_ELEVATOR_DOWN,
                       LEFT_CLAPMAN_CLOSE,
                       RIGHT_CLAPMAN_CLOSE)
