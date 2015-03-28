@@ -106,7 +106,7 @@
         })
     };
 
-    //The implementation
+    // Observer implementation
     (function ($) {
 
         var o = $({});
@@ -158,9 +158,8 @@
                 previousData = currentData;
                 currentData = data["servo"][current];
 
-                /*if (!currentData == previousData) {*/
                 $.publish("currentServoChange", currentData);
-                /*}*/
+
             }
 
             nunjucks.render('servo_list.html', {
@@ -172,8 +171,6 @@
                 if (err) {
                     console.log(err);
                 }
-                /*console.log(err);*/
-                /*console.log(res);*/
 
                 $(".servo").click(function (elt) {
                     //console.log(elt);
@@ -193,19 +190,7 @@
     });
 
     function request_move(servo, value) {
-        $(".console").show();
-        var code = "yield Trigger(makeServoMoveCommand( ( (" + servo + "), 1000)," + value + "))";
-        var req = new XMLHttpRequest();
-        req.open("POST", "/brewery/eval", true);
-        req.onreadystatechange = function (e) {
-            if (req.readyState == 4) {
-                $("#serverReply").multiline(e.target.response);
-                console.log(e);
-            }
-
-        };
-        $("#serverRequest").multiline(code);
-        req.send(code);
+        brewery_request("yield Trigger(makeServoMoveCommand( ( (" + servo + "), 1000)," + value + "))");
     }
 
     $("#torqueEnable").click(function () {
@@ -217,19 +202,7 @@
     });
 
     function request_torque(servo, value) {
-        $(".console").show();
-        var code = "yield Trigger(makeServoTorqueControl( ( (" + servo + "), 1000)," + value + "))";
-        var req = new XMLHttpRequest();
-        req.open("POST", "/brewery/eval", true);
-        req.onreadystatechange = function (e) {
-            if (req.readyState == 4) {
-                $("#serverReply").multiline(e.target.response);
-                console.log(e);
-            }
-
-        };
-        $("#serverRequest").multiline(code);
-        req.send(code);
+        brewery_request("yield Trigger(makeServoTorqueControl( ( (" + servo + "), 1000)," + value + "))");
     }
 
     function request_read_value(servo) {
@@ -238,17 +211,12 @@
 
     function brewery_request(code) {
         $(".console").show();
-        var req = new XMLHttpRequest();
-        req.open("POST", "/brewery/eval", true);
-        req.onreadystatechange = function (e) {
-            if (req.readyState == 4) {
-                $("#serverReply").multiline(e.target.response);
-                console.log(e);
-            }
-
-        };
         $("#serverRequest").multiline(code);
-        req.send(code);
+
+        $.ajax("/brewery/eval", { "type":"POST", "data": code }).complete(function(r) {
+            $("#serverReply").multiline(r.responseText);
+            console.log(r.responseText);
+        });
     }
 
     $("#setValue").click(function () {
