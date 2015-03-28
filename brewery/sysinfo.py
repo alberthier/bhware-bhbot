@@ -56,6 +56,11 @@ class SysInfo:
         self.event_loop.fsms.append(self)
 
         self.data = {
+            "pose" : {
+                "x": -0.0,
+                "y": -0.0,
+                "angle": -0.0
+            },
             "battery": {
                 "left": {
                     "voltage": 0
@@ -68,9 +73,14 @@ class SysInfo:
             }
         }
 
+        for name, servo_id in SERVOS_IDS:
+            self.init_servo_data(servo_id)
+
+
     def on_keep_alive(self, packet):
         self.data["battery"]["left"]["voltage"]=packet.left_battery_voltage
         self.data["battery"]["right"]["voltage"]=packet.right_battery_voltage
+        self.data["pose"]={"x": packet.current_pose.x, "y": packet.current_pose.y, "angle": packet.current_pose.angle}
 
 
         if not self.last_write or (datetime.datetime.now() - self.last_write).total_seconds() > 1 :
@@ -79,11 +89,14 @@ class SysInfo:
                 f.flush()
                 self.last_write=datetime.datetime.now()
 
+    def init_servo_data(self, servo_id):
+        lk = SERVOS_IDS.lookup_by_value[servo_id]
+        self.data["servo"].setdefault(lk, {"value": None, "torque": None, "speed": None})
+        self.data["servo"][lk]["typed_id"] = servo_id
+        return lk
+
     def on_servo_control(self, packet):
-        print(packet)
-        lk=SERVOS_IDS.lookup_by_value[packet.id]
-        self.data["servo"].setdefault(lk,{"value":-1})
-        self.data["servo"][lk]["typed_id"]=packet.id
+        lk = self.init_servo_data(packet.id)
 
         if packet.command in [SERVO_COMMAND_MOVE, SERVO_COMMAND_POSITION]:
             self.data["servo"][lk]["value"]=packet.value

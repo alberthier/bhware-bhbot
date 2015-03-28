@@ -57,7 +57,7 @@
 
         .console {
             font-family: monospace;
-            font-size: 10;
+            font-size: 10pt;
             background-color: black;
             color: white;
             margin: 3px;
@@ -95,7 +95,33 @@
         this.text(text);
         this.html(this.html().replace(/\n/g, '<br/>'));
         return this;
-    }
+    };
+
+    $.fn.observe = function (eventName, callback) {
+        return this.each(function () {
+            var el = this;
+            $(document).on(eventName, function () {
+                callback.apply(el, arguments);
+            })
+        })
+    };
+
+    //The implementation
+    (function ($) {
+
+        var o = $({});
+
+        $.each({
+            trigger: 'publish',
+            on: 'subscribe',
+            off: 'unsubscribe'
+        }, function (key, val) {
+            jQuery[val] = function () {
+                o[key].apply(o, arguments);
+            };
+        });
+
+    })(jQuery);
 
 
     var nunjucks = parent.nunjucks;
@@ -109,15 +135,32 @@
         $("#commands").hide();
         $(".console").hide();
 
+        $.subscribe("currentServoChange", function () {
+            $("#torqueEnable").attr("disabled", "disabled");
+            $("#torqueDisable").attr("disabled", "disabled");
+
+            if (currentData["torque"] == true) {
+                $("#torqueDisable").removeAttr("disabled");
+            } else {
+                $("#torqueEnable").removeAttr("disabled");
+            }
+
+            if (currentData["torque"] == null) {
+                $("#torqueDisable").removeAttr("disabled");
+                $("#torqueEnable").removeAttr("disabled");
+            }
+        });
+
+
         $$.sysinfoCallbacks.add(function (data) {
-            if(current && data["servo"][current]) {
-                if (data["servo"][current]["torque"] == true) {
-                    $("#torqueEnable").attr("disabled", "disabled");
-                    $("#torqueDisable").removeAttr("disabled");
-                } else {
-                    $("#torqueEnable").removeAttr("disabled");
-                    $("#torqueDisable").attr("disabled", "disabled");
-                }
+            if (current && data["servo"][current]) {
+
+                previousData = currentData;
+                currentData = data["servo"][current];
+
+                /*if (!currentData == previousData) {*/
+                $.publish("currentServoChange", currentData);
+                /*}*/
             }
 
             nunjucks.render('servo_list.html', {
@@ -160,18 +203,18 @@
                 console.log(e);
             }
 
-        }
+        };
         $("#serverRequest").multiline(code);
         req.send(code);
     }
 
     $("#torqueEnable").click(function () {
         request_torque(currentData["typed_id"], "True");
-    })
+    });
 
     $("#torqueDisable").click(function () {
         request_torque(currentData["typed_id"], "False");
-    })
+    });
 
     function request_torque(servo, value) {
         $(".console").show();
@@ -184,14 +227,43 @@
                 console.log(e);
             }
 
-        }
+        };
+        $("#serverRequest").multiline(code);
+        req.send(code);
+    }
+
+    function request_read_value(servo) {
+        brewery_request("yield Trigger(makeServoReadCommand( ( (" + servo + "), 1000)))");
+    }
+
+    function brewery_request(code) {
+        $(".console").show();
+        var req = new XMLHttpRequest();
+        req.open("POST", "/brewery/eval", true);
+        req.onreadystatechange = function (e) {
+            if (req.readyState == 4) {
+                $("#serverReply").multiline(e.target.response);
+                console.log(e);
+            }
+
+        };
         $("#serverRequest").multiline(code);
         req.send(code);
     }
 
     $("#setValue").click(function () {
         request_move(currentData["typed_id"], $("#servoValue").val());
-    })
+    });
+
+    function request_current_servo_value() {
+        if(current!=null) {
+            request_read_value(currentData["typed_id"]);
+        }
+    }
+
+    setInterval(function() {
+        request_current_servo_value();
+    }, 5000);
 
 
 </script>
