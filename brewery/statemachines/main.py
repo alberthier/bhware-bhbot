@@ -98,16 +98,16 @@ class Main(State):
         if packet.status == CONTROLLER_STATUS_READY:
             yield Initialize()
             yield GetInputStatus(MAIN_INPUT_TEAM)
-            yield CalibratePosition()
+            # yield CalibratePosition()
 
 
     def on_start(self, packet):
         if packet.value == 0:
             self.yield_at(90000, EndOfMatch())
             logger.log("Starting ...")
-            yield PickupBulb()
-            yield StaticStrategy()
-            yield ExecuteGoals()
+            # yield PickupBulb()
+            # yield StaticStrategy()
+            # yield ExecuteGoals()
 
 
 
