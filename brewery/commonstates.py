@@ -698,7 +698,7 @@ class Trigger(statemachine.State):
 
     def on_servo_control(self, packet):
         if packet.status != SERVO_STATUS_SUCCESS:
-            self.log("Servo #{} timed out".format(packet.id))
+            logger.error("Servo #{} (id={}) timed out".format(SERVOS_IDS.lookup_by_value[packet.id], packet.id))
         self.statuses[packet.id] = packet.status == SERVO_STATUS_SUCCESS
         yield from self.cleanup(packet.id, packet.command)
 
