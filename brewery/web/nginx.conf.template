@@ -18,6 +18,9 @@ http {
     sendfile     on;
     tcp_nopush   on;
 
+    limit_conn_zone $$binary_remote_addr zone=alpha:8m;
+    limit_req_zone  $$binary_remote_addr zone=delta:8m rate=2r/s;
+
     server {
         listen ${listen_port};
         access_log  off;
@@ -30,6 +33,9 @@ http {
 
         # pass requests for PIC
         location /pic/ {
+            limit_conn alpha 1;
+            limit_req  zone=delta burst=2;
+            proxy_http_version 1.1;
             proxy_pass      ${pic_url};
         }
 
