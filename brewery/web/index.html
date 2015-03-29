@@ -74,6 +74,11 @@
         #infos {
             margin: 3px;
         }
+
+        .critical {
+            color: crimson;
+            font-weight: bold;
+        }
     </style>
     <script type="text/javascript">
 
@@ -103,7 +108,7 @@
 
     <div id="infos">
         <div id="battery_level">
-            Battery <span id="bat1">N/A</span> <span id="bat2">N/A</span>
+            Battery voltage <span id="bat1">N/A</span> V
         </div>
         <div>
             Pose: <span id="current_pose">???</span>
@@ -129,8 +134,17 @@
     $.sysinfoCallbacks = $.Callbacks();
 
     $.sysinfoCallbacks.add(function (data) {
-        $("#bat1").text(data.battery.left.voltage.toFixed(3));
-        $("#bat2").text(data.battery.right.voltage.toFixed(3));
+
+        var batteryLevel = ((data.battery.left.voltage + data.battery.right.voltage) / 2.0).toFixed(3);
+
+        $("#bat1").text(batteryLevel);
+
+        if(batteryLevel<12.0) {
+            $("#bat1").addClass("critical");
+        } else {
+            $("#bat1").removeClass("critical");
+        }
+
         $("#current_pose").text(data.pose.x.toFixed(3) + " " + data.pose.y.toFixed(3) + " " + data.pose.angle.toFixed(3));
     });
 
