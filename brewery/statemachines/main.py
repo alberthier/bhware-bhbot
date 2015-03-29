@@ -356,6 +356,31 @@ class KickTheirClap(State):
         yield None
 
 
+class BuildSpotlight(State):
+
+    def on_enter(self):
+        # yield MoveLineTo(goal.x, center_y)
+        # yield RotateTo(0.0)
+
+        self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_START))
+        self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_START))
+
+        # yield MoveLineTo(1.77, center_y)
+        # yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
+
+        # self.exit_reason = GOAL_DONE
+        # yield None
+
+
+    def on_start(self, packet):
+        if packet.value == 1:
+            self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_DEPOSIT))
+            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_DEPOSIT))
+        else:
+            self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_END))
+            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_END))
+
+
 
 
 class ScanAndBuildSpotlight(State):
