@@ -98,16 +98,16 @@ class Main(State):
         if packet.status == CONTROLLER_STATUS_READY:
             yield Initialize()
             yield GetInputStatus(MAIN_INPUT_TEAM)
-            yield CalibratePosition()
+            # yield CalibratePosition()
 
 
     def on_start(self, packet):
         if packet.value == 0:
             self.yield_at(90000, EndOfMatch())
             logger.log("Starting ...")
-            yield PickupBulb()
-            yield StaticStrategy()
-            yield ExecuteGoals()
+            # yield PickupBulb()
+            # yield StaticStrategy()
+            # yield ExecuteGoals()
 
 
 
@@ -354,6 +354,31 @@ class KickTheirClap(State):
             yield Trigger(RIGHT_CLAPMAN_CLOSE)
         self.exit_reason = GOAL_DONE
         yield None
+
+
+class BuildSpotlight(State):
+
+    def on_enter(self):
+        # yield MoveLineTo(goal.x, center_y)
+        # yield RotateTo(0.0)
+
+        self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_START))
+        self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_START))
+
+        # yield MoveLineTo(1.77, center_y)
+        # yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
+
+        # self.exit_reason = GOAL_DONE
+        # yield None
+
+
+    def on_start(self, packet):
+        if packet.value == 1:
+            self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_DEPOSIT))
+            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_DEPOSIT))
+        else:
+            self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_END))
+            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_END))
 
 
 

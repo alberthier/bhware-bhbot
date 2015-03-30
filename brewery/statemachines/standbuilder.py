@@ -20,7 +20,6 @@ class Main(State):
     def on_enter(self):
         self.fsm.stand_count = 0
         self.fsm.building = False
-        self.fsm.enabled = True
 
         if self.fsm.side == SIDE_LEFT:
             self.fsm.PLIERS_LEFT_INIT = LEFT_BUILDER_PLIERS_LEFT_INIT
@@ -102,6 +101,8 @@ class InitialPosition(State):
                           self.fsm.LIGHTER_WAIT
             )
 
+        self.fsm.enabled = True
+
         yield None
 
 
@@ -149,6 +150,8 @@ class Build(State):
 
 
     def on_stand_action_start(self, packet):
+        self.fsm.enabled = False
+
         yield Trigger(self.fsm.LIGHTER_DEPOSIT)
         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
         yield Trigger(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
@@ -170,8 +173,10 @@ class Build(State):
 
         self.send_packet(packet)
 
-    def on_stand_action_end(self):
+    def on_stand_action_end(self, packet):
         yield InitialPosition()
+
+        self.fsm.stand_count = 0
 
         packet.status = STAND_ACTION_STATUS_DONE
 

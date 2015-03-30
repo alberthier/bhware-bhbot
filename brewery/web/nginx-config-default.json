@@ -1,5 +1,6 @@
 {
   "listen_port": 80,
-  "document_root": "/root/bhware/brewery/web"
+  "document_root": "/root/bhware/brewery/web",
+  "pic_url": "http://pic:80/"
 }
 
