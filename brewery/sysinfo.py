@@ -48,10 +48,8 @@ from definitions import *
 # #DEFAULT_DATA
 
 class SysInfo:
-    def __init__(self, event_loop, destination_filename="/tmp/sysinfo.json"):
+    def __init__(self, event_loop):
         # self.data=AutoVivification()
-        self.last_write=None
-        self.destination_filename=destination_filename
         self.event_loop = event_loop
         self.event_loop.fsms.append(self)
 
@@ -83,17 +81,12 @@ class SysInfo:
         self.data["pose"]={"x": packet.current_pose.x, "y": packet.current_pose.y, "angle": packet.current_pose.angle}
 
 
-        if not self.last_write or (datetime.datetime.now() - self.last_write).total_seconds() > 1 :
-            with open(self.destination_filename,"w") as f:
-                json.dump(self.data,f,indent=True)
-                f.flush()
-                self.last_write=datetime.datetime.now()
-
     def init_servo_data(self, servo_id):
         lk = SERVOS_IDS.lookup_by_value[servo_id]
         self.data["servo"].setdefault(lk, {"value": None, "torque": None, "speed": None})
         self.data["servo"][lk]["typed_id"] = servo_id
         return lk
+
 
     def on_servo_control(self, packet):
         lk = self.init_servo_data(packet.id)

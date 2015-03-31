@@ -7,16 +7,16 @@ import socket
 import string
 
 def gethostname():
-    hostname_file = os.path.join(os.path.dirname(__file__),"../.hostname")
+    hostname_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../.hostname")
     if os.path.exists(hostname_file):
         return open(hostname_file).read().strip()
     return socket.gethostname()
 
 def setup_nginx_config():
-    host_config_root = os.path.join(os.path.dirname(__file__), "web")
+    host_config_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
     host_config_filename = "nginx-config-{}.json".format(gethostname())
     host_config_file = os.path.join(host_config_root, host_config_filename)
-    host_config_file_default = "web/nginx-config-default.json"
+    host_config_file_default = os.path.join(host_config_root, "nginx-config-default.json")
     host_config_file_template = os.path.join(host_config_root, "nginx.conf.template")
     host_config_file_target = os.path.join(host_config_root, "nginx.conf")
 

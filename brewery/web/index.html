@@ -149,7 +149,7 @@
     });
 
     setInterval(function () {
-        $.ajax("/sysinfo.json").success(function (data) {
+        $.ajax("/brewery/sysinfo").success(function (data) {
             $.sysinfoCallbacks.fire(data);
         })
     }, 1000);

@@ -21,6 +21,7 @@ import logger
 import packets
 import robot
 import statemachine
+import sysinfo
 import webinterface
 import webconfig
 
@@ -517,6 +518,7 @@ class EventLoop(object):
         self.packet_queue = collections.deque()
         self.interbot_enabled = interbot_enabled
         self.exit_value = 0
+        self.sysinfo = sysinfo.SysInfo(self)
 
         webconfig.setup_nginx_config()
 
