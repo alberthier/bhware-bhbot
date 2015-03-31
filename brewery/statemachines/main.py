@@ -77,6 +77,7 @@ class Main(State):
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
+        StateMachine(self.event_loop, "bulbgrabber")
         self.fsm.builders = {
             SIDE_LEFT: StateMachine(self.event_loop, "standbuilder", side=SIDE_LEFT),
             SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
@@ -101,13 +102,10 @@ class Main(State):
             # yield CalibratePosition()
 
 
-    def on_start(self, packet):
-        if packet.value == 0:
-            self.yield_at(90000, EndOfMatch())
-            logger.log("Starting ...")
-            # yield PickupBulb()
-            # yield StaticStrategy()
-            # yield ExecuteGoals()
+    def on_bulb_grabbed(self, packet):
+        logger.log("Starting ...")
+        # yield StaticStrategy()
+        # yield ExecuteGoals()
 
 
 
@@ -171,25 +169,6 @@ class WaitForStandGrabbed(WaitForStandStored):
     def on_stand_grabbed(self, packet):
         if packet.side == self.side:
             yield None
-
-
-
-
-class PickupBulb(State):
-
-    def on_controller_ready(self):
-        yield Trigger(LIGHTER_GRIPPER_OPEN)
-
-    def on_enter(self):
-        yield Trigger(makeServoSetupCommand(LIGHTER_GRIPPER, 1))
-        yield Trigger(LIGHTER_ELEVATOR_BULB)
-        yield Trigger(LIGHTER_GRIPPER_CLOSE)
-        yield Trigger(makeServoSetupCommand(LIGHTER_GRIPPER, 1024))
-        # TODO: add timer
-        yield Trigger(LIGHTER_ELEVATOR_UP)
-        yield Trigger(LIGHTER_GRIPPER_OPEN)
-        # yield Trigger(LIGHTER_ELEVATOR_DOWN)
-        yield None
 
 
 

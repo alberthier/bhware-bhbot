@@ -807,6 +807,11 @@ class CupGrabbed(BasePacket):
     TYPE = 238
 
 
+class BulbGrabbed(BasePacket):
+
+    TYPE = 239
+
+
 ################################################################################
 # Packets lookup setup
 
