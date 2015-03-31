@@ -7,8 +7,8 @@ import sys
 import goalmanager
 import logger
 import packets
-import statemachine
 
+from statemachine import *
 from commonstates import *
 from definitions import *
 from position import *
