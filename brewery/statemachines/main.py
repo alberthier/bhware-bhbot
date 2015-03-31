@@ -279,7 +279,7 @@ class ResettleAfterSouthMineStands(State):
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_goals("KICK_MINE_CLAPS")[0]
-        yield MoveCurve(0.0, [(1.4, goal.y), (1.32, goal.y)])
+        yield MoveCurve(0.0, 0.10, [(1.4, goal.y), (1.32, goal.y)])
         yield DefinePosition(1.222 + ROBOT_CENTER_X, None, 0.0)
         yield None
 
