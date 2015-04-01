@@ -15,13 +15,13 @@ class Main(statemachine.Timer):
 
     OPPONENT_DETECTION_DISAPPEARING_MS = 800
 
-    MAIN_IN_FRONT_IDS = [  3,  4,  5,  6 ]
-    MAIN_IN_BACK_IDS  = [ 12, 13, 14, 15 ]
-    MAIN_ANGLES = [ 90, 70, 50, 30, 10, -10, -30, -50, -70, -90, -110, -130, -150, -170, 170, 150, 130, 110 ]
+    MAIN_IN_FRONT_IDS = [ 0, 1, 2, 16, 17 ]
+    MAIN_IN_BACK_IDS  = [ 7, 8, 9, 10, 11 ]
+    MAIN_ANGLES = [ 0, -20, -40, -60, -80, -100, -120, -140, -160, 180, 160, 140, 120, 100, 80, 60, 40, 20 ]
 
-    SECONDARY_IN_FRONT_IDS = [3,  4,  5,  6 ]
-    SECONDARY_IN_BACK_IDS  = [ 12, 13, 14, 15 ]
-    SECONDARY_ANGLES = [ 90, 70, 50, 30, 10, -10, -30, -50, -70, -90, -110, -130, -150, -170, 170, 150, 130, 110 ]
+    SECONDARY_IN_FRONT_IDS = [ 0, 1, 2, 16, 17 ]
+    SECONDARY_IN_BACK_IDS  = [ 7, 8, 9, 10, 11 ]
+    SECONDARY_ANGLES = [ 0, -20, -40, -60, -80, -100, -120, -140, -160, 180, 160, 140, 120, 100, 80, 60, 40, 20 ]
 
     PACKET_BUFFER_SIZE = 6
 
