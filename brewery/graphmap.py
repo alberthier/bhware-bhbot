@@ -45,6 +45,11 @@ class Map:
         self.ubo_zone_timer = eventloop.Timer(self.event_loop, 2000, self.disable_ubo_zone)
         self.use_interbot_position = TEAMMATE_POSITION_IN_MAP
 
+        self.main_opponent_zone = None
+        self.secondary_opponent_zone = None
+        self.teammate_zone = None
+        self.ubo_zone = None
+
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_BUSY:
@@ -243,17 +248,19 @@ class Map:
             zone = self.main_opponent_zone
         else:
             zone = self.secondary_opponent_zone
-        if packet.x is not None and packet.y is not None:
-            self.enable_zone(zone, True)
-            zone.is_detected = True
-            dx = packet.x - zone.x
-            dy = packet.y - zone.y
-            zone.x = packet.x
-            zone.y = packet.y
-            self.move_zone(zone.id, dx, dy)
-        else:
-            self.enable_zone(zone, False)
-            zone.is_detected = False
+
+        if zone is not None:
+            if packet.x is not None and packet.y is not None:
+                self.enable_zone(zone, True)
+                zone.is_detected = True
+                dx = packet.x - zone.x
+                dy = packet.y - zone.y
+                zone.x = packet.x
+                zone.y = packet.y
+                self.move_zone(zone.id, dx, dy)
+            else:
+                self.enable_zone(zone, False)
+                zone.is_detected = False
 
 
     def build_module(self):
