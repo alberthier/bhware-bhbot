@@ -61,7 +61,8 @@ class Main(State):
             DepositCupGoal("DEPOSIT_CUP_NORTH", 4, 0.9, 0.5, 0, DepositCup, (0.28,)),
             GrabCupGoal("GRAB_PLATFORM_CUP", 5, 1.65, 1.50, 0, GrabCup),
             DepositCupGoal("DEPOSIT_CUP_CENTER", 6, 1.0, 0.5, 0, DepositCup, (0.36,)),
-            goalmanager.Goal("DEPOSIT_CARPETS", 7, 0.7, 1.1, 0, DIRECTION_BACKWARDS, DepositCarpets),
+            goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 7, 0.7, 1.08, 0, DIRECTION_BACKWARDS, DepositCarpet, (SIDE_LEFT,)),
+            goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 8, 0.7, 1.40, 0, DIRECTION_BACKWARDS, DepositCarpet, (SIDE_RIGHT,)),
         )
 
     def on_controller_status(self, packet):
@@ -152,17 +153,29 @@ class DepositCup(State):
 
 
 
-class DepositCarpets(State):
+class DepositCarpet(State):
+
+    def __init__(self, side):
+        if side == SIDE_LEFT:
+            self.dropper_open  = LEFT_CARPET_DROPPER_OPEN
+            self.dropper_close = LEFT_CARPET_DROPPER_CLOSE
+            self.ejector_throw = LEFT_CARPET_EJECTOR_THROW
+            self.ejector_hold  = LEFT_CARPET_EJECTOR_HOLD
+        else:
+            self.dropper_open  = RIGHT_CARPET_DROPPER_OPEN
+            self.dropper_close = RIGHT_CARPET_DROPPER_CLOSE
+            self.ejector_throw = RIGHT_CARPET_EJECTOR_THROW
+            self.ejector_hold  = RIGHT_CARPET_EJECTOR_HOLD
+
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
         yield RotateTo(0.0)
         yield MoveLineTo(0.58 + ROBOT_CENTER_X, goal.y)
-        yield Trigger(LEFT_CARPET_DROPPER_OPEN, RIGHT_CARPET_DROPPER_OPEN)
-        yield Trigger(LEFT_CARPET_EJECTOR_THROW, RIGHT_CARPET_EJECTOR_THROW)
-        #FIXME : don't throw carpets at the same place
-        yield Trigger(LEFT_CARPET_DROPPER_CLOSE, RIGHT_CARPET_DROPPER_CLOSE)
-        yield Trigger(LEFT_CARPET_EJECTOR_HOLD, RIGHT_CARPET_EJECTOR_HOLD)
+        yield Trigger(self.dropper_open)
+        yield Trigger(self.ejector_throw)
+        yield Trigger(self.dropper_close)
+        yield Trigger(self.ejector_hold)
         self.exit_reason = GOAL_DONE
         yield None
 
