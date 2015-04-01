@@ -517,7 +517,7 @@ class MoveLineRelative(statemachine.State):
         current_pose = self.robot.pose
         x = current_pose.virt.x + math.cos(current_pose.virt.angle) * self.distance
         y = current_pose.virt.y + math.sin(current_pose.virt.angle) * self.distance
-        move = yield MoveLineTo(x, y, self.direction, self.chained, True, self.opponent_handling_config)
+        move = yield MoveLineTo(x, y, DIRECTION_AUTO, self.chained, True, self.opponent_handling_config)
         self.exit_reason = move.exit_reason
         yield None
 
