@@ -19,11 +19,6 @@ import statemachines.testssecondary as testssecondary
 
 
 
-CUP_OFFSET = ROBOT_CENTER_X + (0.095 / 2.0)
-
-
-
-
 class GrabCupGoal(goalmanager.Goal):
 
     def __init__(self, identifier, weight, x, y, offset, handler_state, ctor_parameters = None):
@@ -60,11 +55,11 @@ class Main(State):
         self.robot.holding_cup = False
 
         self.robot.goal_manager.add(
-            GrabCupGoal("GRAB_SOUTH_MINE_CUP", 1, 1.75, 0.25, -CUP_OFFSET, GrabCup),
+            GrabCupGoal("GRAB_SOUTH_MINE_CUP", 1, 1.75, 0.25, 0, GrabCup),
             DepositCupGoal("DEPOSIT_CUP_SOUTH", 2, 1.1, 0.5, 0, DepositCup, (0.28,)),
-            GrabCupGoal("GRAB_STAIRS_CUP", 3, 0.80, 0.91, -CUP_OFFSET, GrabCup),
+            GrabCupGoal("GRAB_STAIRS_CUP", 3, 0.80, 0.91, 0, GrabCup),
             DepositCupGoal("DEPOSIT_CUP_NORTH", 4, 0.9, 0.5, 0, DepositCup, (0.28,)),
-            GrabCupGoal("GRAB_PLATFORM_CUP", 5, 1.65, 1.50, -CUP_OFFSET, GrabCup),
+            GrabCupGoal("GRAB_PLATFORM_CUP", 5, 1.65, 1.50, 0, GrabCup),
             DepositCupGoal("DEPOSIT_CUP_CENTER", 6, 1.0, 0.5, 0, DepositCup, (0.36,)),
             goalmanager.Goal("DEPOSIT_CARPETS", 7, 0.7, 1.1, 0, DIRECTION_BACKWARDS, DepositCarpets),
         )
@@ -124,7 +119,7 @@ class CalibratePosition(State):
 class GrabCup(State):
 
     def on_enter(self):
-        if self.robot.holding_cup:
+        if self.robot.holding_cup or not self.robot.grabbing_in_progress:
             self.exit_reason = GOAL_DONE
             yield None
 
@@ -148,9 +143,8 @@ class DepositCup(State):
         yield MoveLineTo(goal.x, self.y)
         yield Trigger(CUP_GRIPPER_HALF_OPEN)
         yield Timer(300)
-        yield MoveLineRelative(-0.02)
         yield Trigger(CUP_GRIPPER_OPEN)
-        yield MoveLineTo(goal.x, goal.y)
+        yield MoveLineRelative(-0.12)
         self.robot.holding_cup = False
         self.exit_reason = GOAL_DONE
         yield None
