@@ -420,16 +420,3 @@ CUP_GRIPPER_CLOSE     = makeServoMoveCommand(CUP_GRIPPER, 796)
 CUP_GRIPPER_ON_CUP    = makeServoMoveCommand(CUP_GRIPPER, 740)
 CUP_GRIPPER_HALF_OPEN = makeServoMoveCommand(CUP_GRIPPER, 684)
 CUP_GRIPPER_OPEN      = makeServoMoveCommand(CUP_GRIPPER, 578)
-
-# Stand actions
-
-STAND_ACTIONS = Enum("Stand actions",
-    STAND_ACTION_START      = 1,
-    STAND_ACTION_DEPOSIT    = 2,
-    STAND_ACTION_END        = 3,
-)
-
-STAND_ACTION_STATUS = Enum("Stand action status",
-    STAND_ACTION_STATUS_TODO     = 1,
-    STAND_ACTION_STATUS_DONE     = 2,
-)

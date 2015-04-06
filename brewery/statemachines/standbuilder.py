@@ -84,7 +84,6 @@ class Main(State):
     def on_start(self, packet):
         if packet.value == 0:
             self.yield_at(90000, EndOfMatch())
-        if packet.value == 0:
             yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
                           self.fsm.PLIERS_RIGHT_OPEN,
                           self.fsm.GRIPPER_LEFT_GUIDE,
@@ -116,10 +115,6 @@ class Build(State):
             yield from self.on_stand_presence(packet)
 
 
-    def on_bulb_presence(self, packet):
-        pass
-
-
     def on_stand_presence(self, packet):
         if not self.fsm.enabled:
             return
@@ -137,50 +132,29 @@ class Build(State):
         self.send_packet(packets.StandStored(self.fsm.side))
 
 
-    def on_stand_action(self, packet):
-        if packet.side == self.fsm.side and packet.status == STAND_ACTION_STATUS_TODO:
-            if packet.action == STAND_ACTION_START:
-                yield from self.on_stand_action_start(packet)
-
-            if packet.action == STAND_ACTION_DEPOSIT:
-                yield from self.on_stand_action_deposit(packet)
-
-            if packet.action == STAND_ACTION_END:
-                yield from self.on_stand_action_end(packet)
+    def on_build_spotlight(self, packet):
+        if packet.side == self.fsm.side:
+            yield BuildSpotlight()
 
 
-    def on_stand_action_start(self, packet):
-        self.fsm.enabled = False
 
-        yield Trigger(self.fsm.LIGHTER_DEPOSIT)
+
+class BuildSpotlight(Timer):
+
+    def __init__(self):
+        # Spotlight builder must not trigger the stand sensor, so wait 200ms before to leave this state
+        super().__init__(200)
+
+
+    def on_enter(self):
+        bulb_presence = yield GetInputStatus(self.fsm.INPUT_BULB_PRESENCE)
+        if bulb_presence.value == 0:
+            yield Trigger(self.fsm.LIGHTER_DEPOSIT)
+            yield Timer(150)
         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
-        yield Trigger(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
-        yield Trigger(self.fsm.ELEVATOR_UP)
-
-        #TODO: handle errors
-
-        packet.status = STAND_ACTION_STATUS_DONE
-
-        self.send_packet(packet)
-
-    def on_stand_action_spot(self, packet):
-        yield Trigger(self.fsm.ELEVATOR_PLATFORM)
-        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN,
-                      self.fsm.GRIPPER_LEFT_OPEN, self.fsm.GRIPPER_RIGHT_OPEN,
-                      )
-
-        packet.status = STAND_ACTION_STATUS_DONE
-
-        self.send_packet(packet)
-
-    def on_stand_action_end(self, packet):
-        yield InitialPosition()
-
+        yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT, self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
         self.fsm.stand_count = 0
-
-        packet.status = STAND_ACTION_STATUS_DONE
-
-        self.send_packet(packet)
+        self.send_packet(packets.BuildSpotlight(self.fsm.side))
 
 
 

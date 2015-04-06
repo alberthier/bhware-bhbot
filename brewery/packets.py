@@ -791,14 +791,12 @@ class StandGrabbed(BasePacket):
         ('side', UEnum8(SIDE, SIDE_LEFT)),
     )
 
-class StandAction(BasePacket):
+class BuildSpotlight(BasePacket):
 
     TYPE = 237
 
     DEFINITION = (
         ('side', UEnum8(SIDE, SIDE_LEFT)),
-        ('action', UEnum8(STAND_ACTIONS, STAND_ACTION_START)),
-        ('status', UEnum8(STAND_ACTION_STATUS, STAND_ACTION_STATUS_TODO)),
     )
 
 
