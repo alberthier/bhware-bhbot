@@ -143,12 +143,7 @@ class Build(State):
 
 
 
-class BuildSpotlight(Timer):
-
-    def __init__(self):
-        # Spotlight builder must not trigger the stand sensor, so wait 200ms before to leave this state
-        super().__init__(200)
-
+class BuildSpotlight(State):
 
     def on_enter(self):
         bulb_presence = yield GetInputStatus(self.fsm.INPUT_BULB_PRESENCE)
@@ -159,6 +154,7 @@ class BuildSpotlight(Timer):
         yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT, self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
         self.fsm.stand_count = 0
         self.send_packet(packets.BuildSpotlight(self.fsm.side))
+        yield None
 
 
 

@@ -97,7 +97,7 @@ class Main(State):
         if packet.status == CONTROLLER_STATUS_READY:
             yield Initialize()
             yield GetInputStatus(MAIN_INPUT_TEAM)
-            # yield CalibratePosition()
+            yield CalibratePosition()
 
 
     def on_start(self, packet):
@@ -107,8 +107,8 @@ class Main(State):
 
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
-        # yield StaticStrategy()
-        # yield ExecuteGoals()
+        yield StaticStrategy()
+        yield ExecuteGoals()
 
 
 
@@ -179,39 +179,41 @@ class WaitForStandGrabbed(WaitForStandStored):
 class StaticStrategy(State):
 
     def on_enter(self):
-        # GRAB_NORTH_STAIRS_STANDS
-        yield MoveLineTo(LEFT_START_X, 0.53)
-        yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
-        yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
-        yield LookAtOpposite(0.42, 0.73)
-        yield MoveLineTo(0.42, 0.73)
+        try:
+            # GRAB_NORTH_STAIRS_STANDS
+            yield SafeMoveLineTo(LEFT_START_X, 0.53)
+            yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
+            yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
+            yield LookAtOpposite(0.42, 0.73)
+            yield SafeMoveLineTo(0.42, 0.73)
 
-        # GRAB_NORTH_MINE_STAND
-        yield RotateTo(-math.pi / 2.0)
-        yield MoveLineTo(0.42, 0.30)
-        yield from self.grab_stand("GRAB_NORTH_MINE_STAND", SIDE_LEFT, 0.200, 0.090, False)
-        x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
-        yield MoveLineTo(x, y)
+            # GRAB_NORTH_MINE_STAND
+            yield RotateTo(-math.pi / 2.0)
+            yield SafeMoveLineTo(0.42, 0.30)
+            yield from self.grab_stand("GRAB_NORTH_MINE_STAND", SIDE_LEFT, 0.200, 0.090, False)
+            x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
+            yield SafeMoveLineTo(x, y)
 
-        # GRAB_PLATFORM_1_STAND
-        yield LookAt(0.5, 0.62)
-        yield MoveLineTo(0.5, 0.62)
-        yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, False)
+            # GRAB_PLATFORM_1_STAND
+            yield LookAt(0.5, 0.62)
+            yield SafeMoveLineTo(0.5, 0.62)
+            yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, False)
 
-        # GRAB_PLATFORM_2_STAND
-        yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, False)
+            # GRAB_PLATFORM_2_STAND
+            yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, False)
 
-        # GRAB_PLATFORM_3_STAND
-        yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, False)
+            # GRAB_PLATFORM_3_STAND
+            yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, False)
 
-        # GRAB_SOUTH_MINE_STANDS
-        x, y = 1.45, 0.22
-        yield LookAt(x, y)
-        yield MoveLineTo(x, y)
-        yield from self.grab_stand(None, SIDE_RIGHT, 1.75, 0.09, True)
-        yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.85, 0.09, True)
-        yield ResettleAfterSouthMineStands()
-
+            # GRAB_SOUTH_MINE_STANDS
+            x, y = 1.45, 0.22
+            yield LookAt(x, y)
+            yield SafeMoveLineTo(x, y)
+            yield from self.grab_stand(None, SIDE_RIGHT, 1.75, 0.09, True)
+            yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.85, 0.09, True)
+            yield ResettleAfterSouthMineStands()
+        except OpponentInTheWay:
+            pass
         yield None
 
 
@@ -345,12 +347,14 @@ class BuildSpotlightPlatform(State):
 
     def on_enter(self):
         yield RotateTo(0.0)
+        self.fsm.builders[SIDE_LEFT].enabled = False
         self.send_packet(packets.BuildSpotlight(SIDE_LEFT))
 
 
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_LEFT:
             yield MoveLineRelative(-0.1)
+            self.fsm.builders[SIDE_LEFT].enabled = True
             self.exit_reason = GOAL_DONE
             yield None
 
@@ -362,12 +366,14 @@ class BuildSpotlightHome(State):
     def on_enter(self):
         yield RotateTo(-math.pi / 2)
         yield MoveLineTo(1.0, 0.5)
+        self.fsm.builders[SIDE_RIGHT].enabled = False
         self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
 
 
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_RIGHT:
             yield MoveLineRelative(-0.1)
+            self.fsm.builders[SIDE_RIGHT].enabled = True
             self.exit_reason = GOAL_DONE
             yield None
 
