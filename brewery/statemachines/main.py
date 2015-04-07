@@ -100,6 +100,11 @@ class Main(State):
             # yield CalibratePosition()
 
 
+    def on_start(self, packet):
+        if packet.value == 0:
+            self.yield_at(89500, EndOfMatch())
+
+
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
         # yield StaticStrategy()

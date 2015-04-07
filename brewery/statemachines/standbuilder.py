@@ -18,78 +18,83 @@ from tools import *
 class Main(State):
 
     def on_enter(self):
-        self.fsm.stand_count = 0
-        self.fsm.building = False
-
         if self.fsm.side == SIDE_LEFT:
-            self.fsm.PLIERS_LEFT_INIT = LEFT_BUILDER_PLIERS_LEFT_INIT
-            self.fsm.PLIERS_LEFT_CLOSE = LEFT_BUILDER_PLIERS_LEFT_CLOSE
-            self.fsm.PLIERS_LEFT_HOLD = LEFT_BUILDER_PLIERS_LEFT_HOLD
-            self.fsm.PLIERS_LEFT_OPEN = LEFT_BUILDER_PLIERS_LEFT_OPEN
-            self.fsm.PLIERS_RIGHT_INIT = LEFT_BUILDER_PLIERS_RIGHT_INIT
-            self.fsm.PLIERS_RIGHT_CLOSE = LEFT_BUILDER_PLIERS_RIGHT_CLOSE
-            self.fsm.PLIERS_RIGHT_HOLD = LEFT_BUILDER_PLIERS_RIGHT_HOLD
-            self.fsm.PLIERS_RIGHT_OPEN = LEFT_BUILDER_PLIERS_RIGHT_OPEN
-            self.fsm.GRIPPER_LEFT_INIT = LEFT_BUILDER_GRIPPER_LEFT_INIT
-            self.fsm.GRIPPER_LEFT_CLOSE = LEFT_BUILDER_GRIPPER_LEFT_CLOSE
-            self.fsm.GRIPPER_LEFT_GUIDE = LEFT_BUILDER_GRIPPER_LEFT_GUIDE
-            self.fsm.GRIPPER_LEFT_LIGHT = LEFT_BUILDER_GRIPPER_LEFT_LIGHT
-            self.fsm.GRIPPER_LEFT_DEPOSIT = LEFT_BUILDER_GRIPPER_LEFT_DEPOSIT
-            self.fsm.GRIPPER_RIGHT_INIT = LEFT_BUILDER_GRIPPER_RIGHT_INIT
-            self.fsm.GRIPPER_RIGHT_CLOSE = LEFT_BUILDER_GRIPPER_RIGHT_CLOSE
-            self.fsm.GRIPPER_RIGHT_GUIDE = LEFT_BUILDER_GRIPPER_RIGHT_GUIDE
-            self.fsm.GRIPPER_RIGHT_LIGHT = LEFT_BUILDER_GRIPPER_RIGHT_LIGHT
+            self.fsm.PLIERS_LEFT_INIT      = LEFT_BUILDER_PLIERS_LEFT_INIT
+            self.fsm.PLIERS_LEFT_CLOSE     = LEFT_BUILDER_PLIERS_LEFT_CLOSE
+            self.fsm.PLIERS_LEFT_HOLD      = LEFT_BUILDER_PLIERS_LEFT_HOLD
+            self.fsm.PLIERS_LEFT_OPEN      = LEFT_BUILDER_PLIERS_LEFT_OPEN
+            self.fsm.PLIERS_RIGHT_INIT     = LEFT_BUILDER_PLIERS_RIGHT_INIT
+            self.fsm.PLIERS_RIGHT_CLOSE    = LEFT_BUILDER_PLIERS_RIGHT_CLOSE
+            self.fsm.PLIERS_RIGHT_HOLD     = LEFT_BUILDER_PLIERS_RIGHT_HOLD
+            self.fsm.PLIERS_RIGHT_OPEN     = LEFT_BUILDER_PLIERS_RIGHT_OPEN
+            self.fsm.GRIPPER_LEFT_INIT     = LEFT_BUILDER_GRIPPER_LEFT_INIT
+            self.fsm.GRIPPER_LEFT_CLOSE    = LEFT_BUILDER_GRIPPER_LEFT_CLOSE
+            self.fsm.GRIPPER_LEFT_GUIDE    = LEFT_BUILDER_GRIPPER_LEFT_GUIDE
+            self.fsm.GRIPPER_LEFT_LIGHT    = LEFT_BUILDER_GRIPPER_LEFT_LIGHT
+            self.fsm.GRIPPER_LEFT_DEPOSIT  = LEFT_BUILDER_GRIPPER_LEFT_DEPOSIT
+            self.fsm.GRIPPER_RIGHT_INIT    = LEFT_BUILDER_GRIPPER_RIGHT_INIT
+            self.fsm.GRIPPER_RIGHT_CLOSE   = LEFT_BUILDER_GRIPPER_RIGHT_CLOSE
+            self.fsm.GRIPPER_RIGHT_GUIDE   = LEFT_BUILDER_GRIPPER_RIGHT_GUIDE
+            self.fsm.GRIPPER_RIGHT_LIGHT   = LEFT_BUILDER_GRIPPER_RIGHT_LIGHT
             self.fsm.GRIPPER_RIGHT_DEPOSIT = LEFT_BUILDER_GRIPPER_RIGHT_DEPOSIT
-            self.fsm.LIGHTER_WAIT = LEFT_BUILDER_LIGHTER_WAIT
-            self.fsm.LIGHTER_DEPOSIT = LEFT_BUILDER_LIGHTER_DEPOSIT
-            self.fsm.ELEVATOR_DOWN = LEFT_BUILDER_ELEVATOR_DOWN
-            self.fsm.ELEVATOR_PLATFORM = LEFT_BUILDER_ELEVATOR_PLATFORM
-            self.fsm.ELEVATOR_UP = LEFT_BUILDER_ELEVATOR_UP
+            self.fsm.LIGHTER_WAIT          = LEFT_BUILDER_LIGHTER_WAIT
+            self.fsm.LIGHTER_DEPOSIT       = LEFT_BUILDER_LIGHTER_DEPOSIT
+            self.fsm.ELEVATOR_DOWN         = LEFT_BUILDER_ELEVATOR_DOWN
+            self.fsm.ELEVATOR_PLATFORM     = LEFT_BUILDER_ELEVATOR_PLATFORM
+            self.fsm.ELEVATOR_UP           = LEFT_BUILDER_ELEVATOR_UP
 
             self.fsm.INPUT_BULB_PRESENCE   = MAIN_INPUT_LEFT_BULB_PRESENCE
             self.fsm.INPUT_STAND_PRESENCE  = MAIN_INPUT_LEFT_STAND_PRESENCE
         else:
-            self.fsm.PLIERS_LEFT_INIT = RIGHT_BUILDER_PLIERS_LEFT_INIT
-            self.fsm.PLIERS_LEFT_CLOSE = RIGHT_BUILDER_PLIERS_LEFT_CLOSE
-            self.fsm.PLIERS_LEFT_HOLD = RIGHT_BUILDER_PLIERS_LEFT_HOLD
-            self.fsm.PLIERS_LEFT_OPEN = RIGHT_BUILDER_PLIERS_LEFT_OPEN
-            self.fsm.PLIERS_RIGHT_INIT = RIGHT_BUILDER_PLIERS_RIGHT_INIT
-            self.fsm.PLIERS_RIGHT_CLOSE = RIGHT_BUILDER_PLIERS_RIGHT_CLOSE
-            self.fsm.PLIERS_RIGHT_HOLD = RIGHT_BUILDER_PLIERS_RIGHT_HOLD
-            self.fsm.PLIERS_RIGHT_OPEN = RIGHT_BUILDER_PLIERS_RIGHT_OPEN
-            self.fsm.GRIPPER_LEFT_INIT = RIGHT_BUILDER_GRIPPER_LEFT_INIT
-            self.fsm.GRIPPER_LEFT_CLOSE = RIGHT_BUILDER_GRIPPER_LEFT_CLOSE
-            self.fsm.GRIPPER_LEFT_GUIDE = RIGHT_BUILDER_GRIPPER_LEFT_GUIDE
-            self.fsm.GRIPPER_LEFT_LIGHT = RIGHT_BUILDER_GRIPPER_LEFT_LIGHT
-            self.fsm.GRIPPER_LEFT_DEPOSIT = RIGHT_BUILDER_GRIPPER_LEFT_DEPOSIT
-            self.fsm.GRIPPER_RIGHT_INIT = RIGHT_BUILDER_GRIPPER_RIGHT_INIT
-            self.fsm.GRIPPER_RIGHT_CLOSE = RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE
-            self.fsm.GRIPPER_RIGHT_GUIDE = RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE
-            self.fsm.GRIPPER_RIGHT_LIGHT = RIGHT_BUILDER_GRIPPER_RIGHT_LIGHT
+            self.fsm.PLIERS_LEFT_INIT      = RIGHT_BUILDER_PLIERS_LEFT_INIT
+            self.fsm.PLIERS_LEFT_CLOSE     = RIGHT_BUILDER_PLIERS_LEFT_CLOSE
+            self.fsm.PLIERS_LEFT_HOLD      = RIGHT_BUILDER_PLIERS_LEFT_HOLD
+            self.fsm.PLIERS_LEFT_OPEN      = RIGHT_BUILDER_PLIERS_LEFT_OPEN
+            self.fsm.PLIERS_RIGHT_INIT     = RIGHT_BUILDER_PLIERS_RIGHT_INIT
+            self.fsm.PLIERS_RIGHT_CLOSE    = RIGHT_BUILDER_PLIERS_RIGHT_CLOSE
+            self.fsm.PLIERS_RIGHT_HOLD     = RIGHT_BUILDER_PLIERS_RIGHT_HOLD
+            self.fsm.PLIERS_RIGHT_OPEN     = RIGHT_BUILDER_PLIERS_RIGHT_OPEN
+            self.fsm.GRIPPER_LEFT_INIT     = RIGHT_BUILDER_GRIPPER_LEFT_INIT
+            self.fsm.GRIPPER_LEFT_CLOSE    = RIGHT_BUILDER_GRIPPER_LEFT_CLOSE
+            self.fsm.GRIPPER_LEFT_GUIDE    = RIGHT_BUILDER_GRIPPER_LEFT_GUIDE
+            self.fsm.GRIPPER_LEFT_LIGHT    = RIGHT_BUILDER_GRIPPER_LEFT_LIGHT
+            self.fsm.GRIPPER_LEFT_DEPOSIT  = RIGHT_BUILDER_GRIPPER_LEFT_DEPOSIT
+            self.fsm.GRIPPER_RIGHT_INIT    = RIGHT_BUILDER_GRIPPER_RIGHT_INIT
+            self.fsm.GRIPPER_RIGHT_CLOSE   = RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE
+            self.fsm.GRIPPER_RIGHT_GUIDE   = RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE
+            self.fsm.GRIPPER_RIGHT_LIGHT   = RIGHT_BUILDER_GRIPPER_RIGHT_LIGHT
             self.fsm.GRIPPER_RIGHT_DEPOSIT = RIGHT_BUILDER_GRIPPER_RIGHT_DEPOSIT
-            self.fsm.LIGHTER_WAIT = RIGHT_BUILDER_LIGHTER_WAIT
-            self.fsm.LIGHTER_DEPOSIT = RIGHT_BUILDER_LIGHTER_DEPOSIT
-            self.fsm.ELEVATOR_DOWN = RIGHT_BUILDER_ELEVATOR_DOWN
-            self.fsm.ELEVATOR_PLATFORM = RIGHT_BUILDER_ELEVATOR_PLATFORM
-            self.fsm.ELEVATOR_UP = RIGHT_BUILDER_ELEVATOR_UP
+            self.fsm.LIGHTER_WAIT          = RIGHT_BUILDER_LIGHTER_WAIT
+            self.fsm.LIGHTER_DEPOSIT       = RIGHT_BUILDER_LIGHTER_DEPOSIT
+            self.fsm.ELEVATOR_DOWN         = RIGHT_BUILDER_ELEVATOR_DOWN
+            self.fsm.ELEVATOR_PLATFORM     = RIGHT_BUILDER_ELEVATOR_PLATFORM
+            self.fsm.ELEVATOR_UP           = RIGHT_BUILDER_ELEVATOR_UP
 
             self.fsm.INPUT_BULB_PRESENCE  = MAIN_INPUT_RIGHT_BULB_PRESENCE
             self.fsm.INPUT_STAND_PRESENCE = MAIN_INPUT_RIGHT_STAND_PRESENCE
+
 
     def on_controller_status(self, packet):
         #TODO: handle not empty
         if packet.status == CONTROLLER_STATUS_READY:
             yield InitialPosition()
 
+
     def on_start(self, packet):
         if packet.value == 0:
-            self.yield_at(90000, EndOfMatch())
+            self.fsm.stand_count = 0
+            self.fsm.building = False
+            self.fsm.enabled = True
+
+            self.yield_at(89500, EndOfMatch())
             yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
                           self.fsm.PLIERS_RIGHT_OPEN,
                           self.fsm.GRIPPER_LEFT_GUIDE,
                           self.fsm.GRIPPER_RIGHT_GUIDE
             )
             yield Build()
+
+
 
 
 class InitialPosition(State):
@@ -99,10 +104,9 @@ class InitialPosition(State):
                           self.fsm.GRIPPER_LEFT_INIT, self.fsm.GRIPPER_RIGHT_INIT,
                           self.fsm.LIGHTER_WAIT
             )
-
-        self.fsm.enabled = True
-
         yield None
+
+
 
 
 class Build(State):
@@ -166,4 +170,6 @@ class BuildSpotlight(Timer):
 
 
 class EndOfMatch(statemachine.State):
-    pass
+
+    def on_enter(self):
+        yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT, self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
