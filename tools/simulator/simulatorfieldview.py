@@ -357,10 +357,9 @@ class RobotLayer(fieldview.Layer):
             # convert to brewery's coordinates
             angle = -math.atan2(math.cos(angle), math.sin(angle))
             angle %= 2.0 * math.pi
-            angle = int(round(angle / (2.0 * math.pi) * 18.0))
+            angle = 18 - int(round(angle / (2.0 * math.pi) * 18.0))
 
             # Rotate the turret:
-            angle += 4
             if angle >= 18:
                 angle -= 18
 
