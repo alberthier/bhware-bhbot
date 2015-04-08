@@ -674,7 +674,11 @@ class FollowPath(statemachine.State):
             else:
                 if not self.robot.is_looking_at_opposite(pose):
                     move = yield LookAtOpposite(pose.virt.x, pose.virt.y, DIRECTION_FORWARD)
-            move = yield SafeMoveLine([pose], self.direction)
+            try:
+                move = SafeMoveLine([pose], self.direction)
+                yield move
+            except OpponentInTheWay:
+                break
         self.robot.destination = None
         self.exit_reason = move.exit_reason
         yield None
