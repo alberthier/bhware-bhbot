@@ -95,13 +95,16 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
+            yield ServoTorqueControl(SERVOS_IDS, True)
             yield Initialize()
+            yield ServoTorqueControl(SERVOS_IDS, False)
             yield GetInputStatus(MAIN_INPUT_TEAM)
             yield CalibratePosition()
 
 
     def on_start(self, packet):
         if packet.value == 0:
+            yield ServoTorqueControl(SERVOS_IDS, True)
             self.yield_at(89500, EndOfMatch())
 
 
@@ -390,3 +393,4 @@ class EndOfMatch(statemachine.State):
 
     def on_enter(self):
         self.send_packet(packets.Stop())
+        yield ServoTorqueControl(SERVOS_IDS, False)

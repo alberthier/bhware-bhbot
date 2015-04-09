@@ -817,6 +817,24 @@ class Trigger(statemachine.State):
 
 
 
+class ServoTorqueControl(statemachine.State):
+
+    def __init__(self, servos, enabled):
+        self.servos = servos
+        self.enabled = enabled
+
+
+    def on_enter(self):
+        cmds = []
+        for servo in self.servos:
+            cmds.append(makeServoTorqueControl((servo[1], 0), self.enabled))
+        if len(cmds) != 0:
+            yield Trigger(*cmds)
+        yield None
+
+
+
+
 class GetInputStatus(statemachine.State):
 
     def __init__(self, id):
