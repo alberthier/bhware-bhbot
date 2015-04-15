@@ -82,9 +82,9 @@ class Main(State):
 
         self.robot.goal_manager.add(
                            # identifier, order, x, y, offset, direction, handler_state
-            goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False)),
+            goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False)),
             StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
-            goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False)),
+            goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False, False)),
             StandGoal("GRAB_PLATFORM_3_STAND", 5, SIDE_LEFT, 1.400, 1.300, GoalGrabStand),
             goalmanager.Goal("GRAB_SOUTH_MINE_STANDS", 6, 1.45, 0.22, 0, DIRECTION_FORWARD, GrabSouthMineStands),
             goalmanager.Goal("KICK_MINE_CLAPS", 7, 1.77, 0.22, 0, DIRECTION_FORWARD, KickMineClaps),
@@ -233,27 +233,30 @@ class StaticStrategy(State):
 
 class GrabStand(State):
 
-    def __init__(self, side, x, y, store_stand):
+    def __init__(self, side, x, y, store_stand, raise_on_error = True):
         super().__init__()
         self.side = side
         self.x = x
         self.y = y
         self.store_stand = store_stand
+        self.raise_on_error = raise_on_error
 
 
     def on_enter(self):
         x, y, angle = builder_at_point(self.side, self.robot.pose, self.x, self.y)
         yield RotateTo(angle)
         x, y = get_offset_position(self.robot.pose, x, y, STAND_GRAB_OFFSET)
-        move = yield MoveLineTo(x, y)
-        if move.exit_reason == TRAJECTORY_DESTINATION_REACHED:
+        self.exit_reason = GOAL_FAILED
+        try:
+            move = yield SafeMoveLineTo(x, y)
             if self.store_stand:
                 yield WaitForStandStored(self.side)
             else:
                 yield WaitForStandGrabbed(self.side)
             self.exit_reason = GOAL_DONE
-        else:
-            self.exit_reason = GOAL_FAILED
+        except OpponentInTheWay as e:
+            if self.raise_on_error:
+                raise e
         yield None
 
 
@@ -262,7 +265,7 @@ class GrabStand(State):
 class GoalGrabStand(GrabStand):
 
     def __init__(self):
-        super().__init__(SIDE_LEFT, 0, 0, False)
+        super().__init__(SIDE_LEFT, 0, 0, False, False)
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
