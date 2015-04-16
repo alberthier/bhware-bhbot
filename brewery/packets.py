@@ -302,18 +302,20 @@ class BasePacket(object):
 ################################################################################
 # Packet type ranges
 
-PROCESS_RANGE_START   = 1
-PROCESS_RANGE_END     = 32
-TURRET_RANGE_START    = PROCESS_RANGE_END
-TURRET_RANGE_END      = 50
-PIC32_RANGE_START     = TURRET_RANGE_END
-PIC32_RANGE_END       = 150
-SIMULATOR_RANGE_START = PIC32_RANGE_END
-SIMULATOR_RANGE_END   = 200
-INTERBOT_RANGE_START  = SIMULATOR_RANGE_END
-INTERBOT_RANGE_END    = 230
-INTERNAL_RANGE_START  = INTERBOT_RANGE_END
-INTERNAL_RANGE_END    = 256
+PROCESS_RANGE_START     = 1
+PROCESS_RANGE_END       = 32
+TURRET_RANGE_START      = PROCESS_RANGE_END
+TURRET_RANGE_END        = 50
+PIC32_RANGE_START       = TURRET_RANGE_END
+PIC32_RANGE_END         = 150
+SIMULATOR_RANGE_START   = PIC32_RANGE_END
+SIMULATOR_RANGE_END     = 200
+INTERBOT_RANGE_START    = SIMULATOR_RANGE_END
+INTERBOT_RANGE_END      = 230
+INTERNAL_RANGE_START    = INTERBOT_RANGE_END
+INTERNAL_RANGE_END      = 250
+MEDIAPLAYER_RANGE_START = INTERNAL_RANGE_END
+MEDIAPLAYER_RANGE_END   = 256
 
 ################################################################################
 # Packet classes
@@ -808,6 +810,29 @@ class CupGrabbed(BasePacket):
 class BulbGrabbed(BasePacket):
 
     TYPE = 239
+
+
+# Media Player
+
+
+class PlayMedia(BasePacket):
+
+    TYPE = 250
+
+    DEFINITION = (
+        ('path', String(254, "", "Path to the media to play")),
+    )
+
+
+
+
+class Say(BasePacket):
+
+    TYPE = 251
+
+    DEFINITION = (
+        ('text', String(254, "", "Text to say")),
+    )
 
 
 ################################################################################

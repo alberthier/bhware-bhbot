@@ -503,6 +503,7 @@ class EventLoop(object):
         self.turret_channel = None
         self.interbot_channel = None
         self.interbot_server = None
+        self.mediaplayer_channel = None
         self.web_server = None
         self.robot = robot.Robot(self)
         self.fsms = []
@@ -597,7 +598,9 @@ class EventLoop(object):
             return
         elif self.do_send_packet(packet, packets.INTERBOT_RANGE_START, packets.INTERBOT_RANGE_END, self.interbot_channel):
             return
-        elif packet.TYPE < packets.INTERNAL_RANGE_END:
+        elif self.do_send_packet(packet, packets.MEDIAPLAYER_RANGE_START, packets.MEDIAPLAYER_RANGE_END, self.mediaplayer_channel):
+            return
+        elif packet.TYPE >= packets.INTERBOT_RANGE_START and packet.TYPE < packets.INTERNAL_RANGE_END:
             # add the packet to send to the list of packets to dispatch
             logger.log_packet(packet, "ARM" + (":" + sender.name if sender is not None else ""))
             self.packet_queue.appendleft((packet, sender))
@@ -625,6 +628,7 @@ class EventLoop(object):
                 InterbotServer(self)
             else:
                 self.interbot_channel = InterbotControlChannel(self, "IBT", (MAIN_INTERBOT_IP, MAIN_INTERBOT_PORT))
+        self.mediaplayer_channel = PacketClientSocketChannel(self, "MPL", (MEDIAPLAYER_IP, MEDIAPLAYER_PORT))
         self.web_server = asyncwsgiserver.WsgiServer("", self.webserver_port, webinterface.WebInterface(self))
         if SERIAL_PORT_PATH is not None:
             try:
@@ -664,5 +668,7 @@ class EventLoop(object):
             self.interbot_channel.close()
         if self.interbot_server is not None:
             self.interbot_server.close()
+        if self.mediaplayer_channel is not None:
+            self.mediaplayer_channel.close()
 
         self.exit_value = exit_value

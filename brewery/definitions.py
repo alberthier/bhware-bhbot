@@ -77,6 +77,9 @@ else:
     MAIN_INTERBOT_IP                   = "localhost"
 MAIN_INTERBOT_PORT                     = 7002
 
+MEDIAPLAYER_IP                         = "mediaplayer"
+MEDIAPLAYER_PORT                       = 7003
+
 # Serial port
 if IS_HOST_DEVICE_ARM:
     SERIAL_PORT_PATH                   = "/dev/ttyUSB0"
