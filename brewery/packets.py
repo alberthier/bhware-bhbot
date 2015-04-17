@@ -311,11 +311,11 @@ PIC32_RANGE_END         = 150
 SIMULATOR_RANGE_START   = PIC32_RANGE_END
 SIMULATOR_RANGE_END     = 200
 INTERBOT_RANGE_START    = SIMULATOR_RANGE_END
-INTERBOT_RANGE_END      = 230
-INTERNAL_RANGE_START    = INTERBOT_RANGE_END
-INTERNAL_RANGE_END      = 250
-MEDIAPLAYER_RANGE_START = INTERNAL_RANGE_END
+INTERBOT_RANGE_END      = 250
+MEDIAPLAYER_RANGE_START = INTERBOT_RANGE_END
 MEDIAPLAYER_RANGE_END   = 256
+INTERNAL_RANGE_START    = MEDIAPLAYER_RANGE_END
+INTERNAL_RANGE_END      = 65535
 
 ################################################################################
 # Packet classes
@@ -708,6 +708,8 @@ class InterbotGoalStatus(BasePacket):
     )
 
 
+
+
 class InterbotGeneric(BasePacket):
 
     TYPE = 203
@@ -715,101 +717,6 @@ class InterbotGeneric(BasePacket):
     DEFINITION = (
         ('data', String(255, "", "Data")),
     )
-
-
-# Internal
-
-
-class InterbotConnected(BasePacket):
-
-    TYPE = 230
-
-
-
-
-class InterbotDisconnected(BasePacket):
-
-    TYPE = 231
-
-
-
-
-class OpponentPosition(BasePacket):
-
-    TYPE = 232
-
-    DEFINITION = (
-        ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
-        ('distance' , UInt8 (0,   "Opponent distance")),
-        ('x'        , Float (0.0, "Opponent estimated X coordinate")),
-        ('y'        , Float (0.0, "Opponent estimated Y coordinate")),
-    )
-
-
-
-
-class OpponentDetected(BasePacket):
-
-    TYPE = 233
-
-    DEFINITION = (
-        ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
-        ('direction', UEnum8(DIRECTION, DIRECTION_FORWARD)),
-        ('x'        , Float(0.0, "Opponent estimated X coordinate")),
-        ('y'        , Float(0.0, "Opponent estimated Y coordinate")),
-    )
-
-
-
-
-class OpponentDisappeared(BasePacket):
-
-    TYPE = 234
-
-    DEFINITION = (
-        ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
-        ('direction', UEnum8(DIRECTION, DIRECTION_FORWARD)),
-    )
-
-
-
-
-class StandStored(BasePacket):
-
-    TYPE = 235
-
-    DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
-    )
-
-
-
-
-class StandGrabbed(BasePacket):
-
-    TYPE = 236
-
-    DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
-    )
-
-class BuildSpotlight(BasePacket):
-
-    TYPE = 237
-
-    DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
-    )
-
-
-class CupGrabbed(BasePacket):
-
-    TYPE = 238
-
-
-class BulbGrabbed(BasePacket):
-
-    TYPE = 239
 
 
 # Media Player
@@ -833,6 +740,143 @@ class Say(BasePacket):
     DEFINITION = (
         ('text', String(254, "", "Text to say")),
     )
+
+
+# Internal
+
+
+class Internal(BasePacket):
+
+    TYPE = 256
+
+    def __init__(self, event_name, **kwargs):
+        super().__init__()
+        self.event_name = event_name
+        self.properties = kwargs.keys()
+        self.packet_method = "on"
+        for c in event_name:
+            if c.isupper():
+                self.packet_method += "_" + c.lower()
+            else:
+                self.packet_method += c
+        for k in self.properties:
+            setattr(self, k, kwargs[k])
+
+
+    @property
+    def name(self):
+        return "Internal(" + self.event_name + ")"
+
+
+    def handler_methods(self):
+        yield self.packet_method
+        yield "on_packet"
+
+
+    def to_dump(self):
+        dump = ', '.join(map(lambda k: "('" + k + "', '" + str(getattr(self, k)) + "')", self.properties))
+        return "(" + dump + ")"
+
+
+
+
+class InterbotConnected(BasePacket):
+
+    TYPE = 257
+
+
+
+
+class InterbotDisconnected(BasePacket):
+
+    TYPE = 258
+
+
+
+
+class OpponentPosition(BasePacket):
+
+    TYPE = 259
+
+    DEFINITION = (
+        ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
+        ('distance' , UInt8 (0,   "Opponent distance")),
+        ('x'        , Float (0.0, "Opponent estimated X coordinate")),
+        ('y'        , Float (0.0, "Opponent estimated Y coordinate")),
+    )
+
+
+
+
+class OpponentDetected(BasePacket):
+
+    TYPE = 260
+
+    DEFINITION = (
+        ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
+        ('direction', UEnum8(DIRECTION, DIRECTION_FORWARD)),
+        ('x'        , Float(0.0, "Opponent estimated X coordinate")),
+        ('y'        , Float(0.0, "Opponent estimated Y coordinate")),
+    )
+
+
+
+
+class OpponentDisappeared(BasePacket):
+
+    TYPE = 261
+
+    DEFINITION = (
+        ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
+        ('direction', UEnum8(DIRECTION, DIRECTION_FORWARD)),
+    )
+
+
+
+
+class StandStored(BasePacket):
+
+    TYPE = 262
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
+
+
+
+
+class StandGrabbed(BasePacket):
+
+    TYPE = 263
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
+
+
+
+
+class BuildSpotlight(BasePacket):
+
+    TYPE = 264
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
+
+
+
+
+class CupGrabbed(BasePacket):
+
+    TYPE = 265
+
+
+
+
+class BulbGrabbed(BasePacket):
+
+    TYPE = 266
 
 
 ################################################################################

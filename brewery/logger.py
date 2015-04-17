@@ -147,7 +147,7 @@ def log_packet(packet, sender = "ARM"):
     global start_time
     delta = datetime.datetime.now() - start_time
     time = "'{:=0.02f}'".format(delta.total_seconds())
-    text = "'" + sender + "'," + type(packet).__name__ + ",\"" + packet.to_dump() + "\"]"
+    text = "'" + sender + "'," + packet.name + ",\"" + packet.to_dump() + "\"]"
     ignore = False
     if not ignore and log_file is not None:
         try:
