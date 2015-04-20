@@ -79,6 +79,7 @@ def get_direction(robot_pose, x, y):
     dx = x - robot_pose.virt.x
     dy = y - robot_pose.virt.y
     a = math.atan2(dy, dx) - robot_pose.virt.angle
+    a = normalize_angle(a)
     if -math.pi / 2.0 <= a and a <= math.pi / 2.0:
         return 1 # DIRECTION_FORWARD
     else:
