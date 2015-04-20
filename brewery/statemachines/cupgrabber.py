@@ -22,12 +22,12 @@ class Main(State):
             self.robot.grabbing_in_progress = False
             self.yield_at(90000, EndOfMatch())
             yield Trigger(CUP_GRIPPER_OPEN)
-            yield GrabStand()
+            yield GrabCup()
 
 
 
 
-class GrabStand(State):
+class GrabCup(State):
 
     def on_cup_presence(self, packet):
         if packet.value == 1 and not self.robot.holding_cup:
