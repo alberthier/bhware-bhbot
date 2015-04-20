@@ -361,15 +361,16 @@ class AbstractMove(statemachine.State):
         elif packet.reason == REASON_BLOCKED_FRONT or packet.reason == REASON_BLOCKED_BACK:
             self.exit_reason = TRAJECTORY_BLOCKED
             yield None
-        elif self.current_opponent is not None:
-            if hasattr(self.packet, "points"):
-                index = packet.current_point_index
+        elif packet.reason == REASON_STOP_REQUESTED:
+            if self.current_opponent is not None:
+                if hasattr(self.packet, "points"):
+                    index = packet.current_point_index
+                else:
+                    index = None
+                yield from self.handle_opponent_detected(index)
             else:
-                index = None
-            yield from self.handle_opponent_detected(index)
-        else:
-            self.exit_reason = TRAJECTORY_OPPONENT_DETECTED
-            yield None
+                self.exit_reason = TRAJECTORY_STOP_REQUESTED
+                yield None
 
 
     def handle_opponent_detected(self, point_index):
@@ -890,7 +891,7 @@ class ExecuteGoals(statemachine.State):
                     move = yield Navigate(goal.x, goal.y, goal.direction, goal.offset)
                     logger.log('End of navigation : {}'.format(TRAJECTORY.lookup_by_value[move.exit_reason]))
 
-                    current_navigation_succeeded = move.exit_reason == TRAJECTORY_DESTINATION_REACHED
+                    current_navigation_succeeded = move.exit_reason in [ TRAJECTORY_DESTINATION_REACHED, TRAJECTORY_STOP_REQUESTED ]
                     if current_navigation_succeeded:
                         navigation_failures = 0
                         logger.log('Navigation was successful')

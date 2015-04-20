@@ -198,6 +198,7 @@ TRAJECTORY = Enum("Navigation result",
     TRAJECTORY_BLOCKED                 = 1,
     TRAJECTORY_OPPONENT_DETECTED       = 2,
     TRAJECTORY_DESTINATION_UNREACHABLE = 3,
+    TRAJECTORY_STOP_REQUESTED          = 4,
 )
 
 OPPONENT_ROBOT = Enum("Detected opponent robot",
