@@ -28,9 +28,6 @@ def setup_definitions(is_main_robot):
         globals()["ROBOT_CENTER_X"]        = 0.150
         globals()["ROBOT_CENTER_Y"]        = 0.145
         globals()["ROBOT_GYRATION_RADIUS"] = MAIN_ROBOT_GYRATION_RADIUS
-        globals()["LEFT_START_Y"]          = 0.07 + ROBOT_CENTER_X
-        globals()["LEFT_START_X"]          = 1.0
-        globals()["LEFT_START_ANGLE"]      = 0.0
         globals()["INPUT"]                 = MAIN_INPUT
         globals()["SERVOS_IDS"]            = MAIN_SERVO_IDS
     else:
@@ -39,9 +36,6 @@ def setup_definitions(is_main_robot):
         globals()["ROBOT_CENTER_X"]        = 0.0775
         globals()["ROBOT_CENTER_Y"]        = 0.0825
         globals()["ROBOT_GYRATION_RADIUS"] = SECONDARY_ROBOT_GYRATION_RADIUS
-        globals()["LEFT_START_Y"]          = 0.55
-        globals()["LEFT_START_X"]          = 1.0
-        globals()["LEFT_START_ANGLE"]      = math.pi / 2.0
         globals()["INPUT"]                 = SECONDARY_INPUT
         globals()["SERVOS_IDS"]            = SECONDARY_SERVO_IDS
 

@@ -20,6 +20,11 @@ import statemachines.testsmain as testsmain
 
 
 
+WEDGE_SIZE = 0.014
+LEFT_START_X = 0.8 + WEDGE_SIZE + ROBOT_CENTER_X
+LEFT_START_Y = 0.07 + ROBOT_CENTER_Y
+LEFT_START_ANGLE = math.pi / 2.0
+
 STAND_GRAB_OFFSET = 0.01
 STAND_GOAL_OFFSET = -0.25
 
@@ -131,16 +136,8 @@ class Initialize(State):
 class CalibratePosition(State):
 
     def on_enter(self):
-        if IS_HOST_DEVICE_ARM:
-            yield DefinePosition(FIELD_X_SIZE - ROBOT_CENTER_X, 2.0, math.pi)
-            yield MoveLineTo(LEFT_START_X, 2.0)
-            yield RotateTo(math.pi / 2.0)
-            yield SpeedControl(0.2)
-            yield MoveLineTo(LEFT_START_X, 0.0)
-            yield DefinePosition(None, LEFT_START_Y, math.pi / 2.0)
-            yield SpeedControl()
-        else:
-            yield DefinePosition(LEFT_START_X, LEFT_START_Y, math.pi / 2.0)
+        wedge_size = 0.01
+        yield DefinePosition(0.8 + wedge_size + ROBOT_CENTER_X, 0.07 + ROBOT_CENTER_Y, math.pi / 2.0)
         yield None
 
 

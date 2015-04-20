@@ -80,7 +80,7 @@ class Main(State):
             self.yield_at(90000, EndOfMatch())
             logger.log("Starting ...")
             self.send_packet(packets.ServoControl(*CUP_GRIPPER_OPEN))
-            yield MoveLineTo(1.32, LEFT_START_Y)
+            yield MoveLineTo(1.32, 0.55)
             yield ExecuteGoals()
 
 
@@ -100,21 +100,19 @@ class Initialize(State):
 class CalibratePosition(State):
 
     def on_enter(self):
-        if IS_HOST_DEVICE_ARM:
-            yield SpeedControl(0.2)
-            xinit = 0.778 - ROBOT_CENTER_X
-            xmove = xinit - 0.05
-            yield DefinePosition(xinit, 1.0, -math.pi)
-            yield MoveLineTo(xmove, 1.0)
-            yield RotateTo(math.pi / 2.0)
-            yield MoveLineTo(xmove, 0.0)
-            yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)
-            yield SpeedControl()
-            yield MoveLineTo(xmove, LEFT_START_Y)
-            yield RotateTo(0.0)
-            yield MoveLineTo(LEFT_START_X, LEFT_START_Y)
+        start_x = 1.0
+        start_y = 0.55
+        start_angle = math.pi
+        if True or IS_HOST_DEVICE_ARM:
+            wedge_size = 0.014
+            setup_x = 0.8 + wedge_size + ROBOT_CENTER_X
+            setup_y = 0.07 + 0.30 + ROBOT_CENTER_Y
+            yield DefinePosition(setup_x, setup_y, math.pi / 2.0)
+            yield MoveLineTo(setup_x, start_y)
+            yield RotateTo(start_angle)
+            yield MoveLineTo(start_x, start_y)
         else:
-            yield DefinePosition(LEFT_START_X, LEFT_START_Y, 0.0)
+            yield DefinePosition(start_x, start_y, start_angle)
         yield None
 
 
