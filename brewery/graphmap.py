@@ -90,6 +90,12 @@ class Map:
                        (FIELD_X_SIZE - 0.1 - offset, FIELD_Y_SIZE - platfrom_loc),
                        (FIELD_X_SIZE, FIELD_Y_SIZE - platfrom_loc)])
 
+        if not IS_MAIN_ROBOT:
+            self.add_zone([(1.355 - 0.030 - offset, 0.870 - 0.030 - offset),
+                           (1.355 - 0.030 - offset, 1.300 + 0.030 + offset),
+                           (1.770 + 0.030 + offset, 1.300 + 0.030 + offset),
+                           (1.770 + 0.030 + offset, 0.870 - 0.030 - offset)])
+
         self.pathfinder.field_config_done()
 
         self.enable_zone(self.main_opponent_zone, False)
