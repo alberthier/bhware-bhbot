@@ -774,7 +774,11 @@ class Internal(BasePacket):
 
 
     def to_dump(self):
-        dump = ', '.join(map(lambda k: "('" + k + "', '" + str(getattr(self, k)) + "')", self.properties))
+        dump = ""
+        for key in self.properties:
+            if len(dump) != 0:
+                dump += ', '
+            dump += "('" + key + "', '" + getattr(self, key) + "')"
         return "(" + dump + ")"
 
 
