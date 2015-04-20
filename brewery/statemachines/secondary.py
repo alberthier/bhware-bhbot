@@ -22,7 +22,7 @@ import statemachines.testssecondary as testssecondary
 class GrabCupGoal(goalmanager.Goal):
 
     def __init__(self, identifier, weight, x, y, offset, handler_state, ctor_parameters = None):
-        super().__init__(identifier, weight, x, y, offset, DIRECTION_FORWARD, handler_state, ctor_parameters)
+        super().__init__(identifier, weight, x, y, offset, DIRECTION_BACKWARDS, handler_state, ctor_parameters)
 
 
     def is_available(self):
@@ -34,7 +34,7 @@ class GrabCupGoal(goalmanager.Goal):
 class DepositCupGoal(goalmanager.Goal):
 
     def __init__(self, identifier, weight, x, y, offset, handler_state, ctor_parameters = None):
-        super().__init__(identifier, weight, x, y, offset, DIRECTION_FORWARD, handler_state, ctor_parameters)
+        super().__init__(identifier, weight, x, y, offset, DIRECTION_BACKWARDS, handler_state, ctor_parameters)
 
 
     def is_available(self):
@@ -61,8 +61,8 @@ class Main(State):
             DepositCupGoal("DEPOSIT_CUP_NORTH", 4, 0.9, 0.5, 0, DepositCup, (0.28,)),
             GrabCupGoal("GRAB_PLATFORM_CUP", 5, 1.65, 1.50, 0, GrabCup),
             DepositCupGoal("DEPOSIT_CUP_CENTER", 6, 1.0, 0.5, 0, DepositCup, (0.36,)),
-            goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 7, 0.7, 1.08, 0, DIRECTION_BACKWARDS, DepositCarpet, (SIDE_LEFT,)),
-            goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 8, 0.7, 1.40, 0, DIRECTION_BACKWARDS, DepositCarpet, (SIDE_RIGHT,)),
+            goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 7, 0.7, 1.08, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_LEFT,)),
+            goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 8, 0.7, 1.40, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_RIGHT,)),
         )
 
     def on_controller_status(self, packet):
@@ -173,12 +173,13 @@ class DepositCarpet(State):
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
-        yield RotateTo(0.0)
+        yield RotateTo(math.pi)
         yield MoveLineTo(0.58 + ROBOT_CENTER_X, goal.y)
         yield Trigger(self.dropper_open)
         yield Trigger(self.ejector_throw)
         yield Trigger(self.dropper_close)
         yield Trigger(self.ejector_hold)
+        yield MoveLineTo(goal.x, goal.y)
         self.exit_reason = GOAL_DONE
         yield None
 

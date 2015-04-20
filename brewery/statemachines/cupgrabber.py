@@ -18,6 +18,7 @@ from tools import *
 class Main(State):
 
     def on_start(self, packet):
+        self.robot.holding_cup = False
         if packet.value == 0:
             self.robot.grabbing_in_progress = False
             self.yield_at(90000, EndOfMatch())
