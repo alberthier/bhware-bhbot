@@ -55,14 +55,14 @@ class Main(State):
         self.robot.holding_cup = False
 
         self.robot.goal_manager.add(
-            GrabCupGoal("GRAB_SOUTH_MINE_CUP", 1, 1.75, 0.25, 0, GrabCup),
-            DepositCupGoal("DEPOSIT_CUP_SOUTH", 2, 1.1, 0.5, 0, DepositCup, (0.28,)),
-            GrabCupGoal("GRAB_STAIRS_CUP", 3, 0.80, 0.91, 0, GrabCup),
-            DepositCupGoal("DEPOSIT_CUP_NORTH", 4, 0.9, 0.5, 0, DepositCup, (0.28,)),
-            GrabCupGoal("GRAB_PLATFORM_CUP", 5, 1.65, 1.50, 0, GrabCup),
-            DepositCupGoal("DEPOSIT_CUP_CENTER", 6, 1.0, 0.5, 0, DepositCup, (0.36,)),
-            goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 7, 0.7, 1.08, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_LEFT,)),
-            goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 8, 0.7, 1.40, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_RIGHT,)),
+            GrabCupGoal("GRAB_STAIRS_CUP", 1, 0.80, 0.91, -ROBOT_CENTER_X, GrabCup),
+            goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 2, 0.725, 1.08, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_LEFT,)),
+            goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 3, 0.725, 1.40, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_RIGHT,)),
+            DepositCupGoal("DEPOSIT_CUP_HOME", 4, 1.0, 0.5, 0, DepositCup, (True,)),
+            GrabCupGoal("GRAB_SOUTH_MINE_CUP", 5, 1.75, 0.25, -ROBOT_CENTER_X, GrabCup),
+            DepositCupGoal("DEPOSIT_OPP_NORTH", 6, 0.67, 2.70, 0, DepositCup, (False,)),
+            GrabCupGoal("GRAB_PLATFORM_CUP", 7, 1.65, 1.50, -ROBOT_CENTER_X, GrabCup),
+            DepositCupGoal("DEPOSIT_OPP_SOUTH", 8, 1.33, 2.70, 0, DepositCup, (False,)),
         )
 
     def on_controller_status(self, packet):
@@ -80,7 +80,6 @@ class Main(State):
             self.yield_at(90000, EndOfMatch())
             logger.log("Starting ...")
             self.send_packet(packets.ServoControl(*CUP_GRIPPER_OPEN))
-            yield MoveLineTo(1.32, 0.55)
             yield ExecuteGoals()
 
 
@@ -101,16 +100,21 @@ class CalibratePosition(State):
 
     def on_enter(self):
         start_x = 1.0
-        start_y = 0.55
-        start_angle = math.pi
-        if True or IS_HOST_DEVICE_ARM:
+        start_y = 0.54
+
+        apose = position.Pose(0.80, 0.91, None, True)
+        start_angle = math.atan2(apose.y - start_y, apose.x - start_x) + math.pi
+        start_angle = tools.normalize_angle(start_angle)
+
+        if IS_HOST_DEVICE_ARM:
             wedge_size = 0.014
             setup_x = 0.8 + wedge_size + ROBOT_CENTER_X
-            setup_y = 0.07 + 0.30 + ROBOT_CENTER_Y
+            setup_y = 0.07 + 0.30 + ROBOT_CENTER_X
             yield DefinePosition(setup_x, setup_y, math.pi / 2.0)
             yield MoveLineTo(setup_x, start_y)
-            yield RotateTo(start_angle)
+            yield RotateTo(0.0)
             yield MoveLineTo(start_x, start_y)
+            yield RotateTo(start_angle)
         else:
             yield DefinePosition(start_x, start_y, start_angle)
         yield None
@@ -135,18 +139,22 @@ class GrabCup(State):
 
 class DepositCup(State):
 
-    def __init__(self, y):
-        self.y = y
+    def __init__(self, home):
+        self.home = home
 
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
-        yield RotateTo(-math.pi / 2.0)
-        yield MoveLineTo(goal.x, self.y)
+        if self.home:
+            yield RotateTo(math.pi / 2.0)
+            yield MoveLineTo(goal.x, 0.30)
         yield Trigger(CUP_GRIPPER_HALF_OPEN)
         yield Timer(300)
         yield Trigger(CUP_GRIPPER_OPEN)
-        yield MoveLineRelative(-0.12)
+        if self.home:
+            yield MoveLineTo(goal.x, goal.y)
+        else:
+            yield MoveLineRelative(0.05)
         self.robot.holding_cup = False
         self.exit_reason = GOAL_DONE
         yield None
@@ -172,12 +180,10 @@ class DepositCarpet(State):
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
         yield RotateTo(math.pi)
-        yield MoveLineTo(0.58 + ROBOT_CENTER_X, goal.y)
         yield Trigger(self.dropper_open)
         yield Trigger(self.ejector_throw)
         yield Trigger(self.dropper_close)
         yield Trigger(self.ejector_hold)
-        yield MoveLineTo(goal.x, goal.y)
         self.exit_reason = GOAL_DONE
         yield None
 

@@ -35,6 +35,7 @@ class GrabCup(State):
             self.robot.grabbing_in_progress = True
             self.send_packet(packets.Stop())
             yield Trigger(CUP_GRIPPER_ON_CUP)
+            yield Timer(150)
             self.robot.holding_cup = True
             self.robot.grabbing_in_progress = False
             self.send_packet(packets.CupGrabbed())
