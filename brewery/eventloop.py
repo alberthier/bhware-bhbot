@@ -569,6 +569,7 @@ class EventLoop(object):
             packet, sender = self.packet_queue.pop()
             packet.dispatch(self.robot)
             packet.dispatch(self.map)
+            packet.dispatch(self.sysinfo)
             for fsm in self.fsms:
                 # avoid sending internal packets to the emitter, only other FSMs will receive the packet
                 if fsm is not sender:
