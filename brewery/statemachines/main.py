@@ -103,6 +103,7 @@ class Main(State):
             yield ServoTorqueControl(SERVOS_IDS, True)
             yield Initialize()
             yield ServoTorqueControl(SERVOS_IDS, False)
+            yield AntiBlocking(True)
             yield GetInputStatus(MAIN_INPUT_TEAM)
             yield CalibratePosition()
 
