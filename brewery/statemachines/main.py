@@ -136,7 +136,7 @@ class CalibratePosition(State):
 
     def on_enter(self):
         wedge_size = 0.01
-        yield DefinePosition(0.8 + wedge_size + ROBOT_CENTER_X, 0.07 + ROBOT_CENTER_Y, math.pi / 2.0)
+        yield DefinePosition(1.0, 0.07 + ROBOT_CENTER_Y, math.pi / 2.0)
         yield None
 
 

@@ -106,7 +106,7 @@ class CalibratePosition(State):
         start_angle = tools.normalize_angle(start_angle)
 
         if IS_HOST_DEVICE_ARM:
-            wedge_size = 0.014
+            wedge_size = 0.055
             setup_x = 0.8 + wedge_size + ROBOT_CENTER_X
             setup_y = 0.07 + 0.30 + ROBOT_CENTER_X
             yield DefinePosition(setup_x, setup_y, math.pi / 2.0)
