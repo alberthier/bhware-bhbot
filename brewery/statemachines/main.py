@@ -100,7 +100,6 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
-            yield ServoTorqueControl(SERVOS_IDS, True)
             yield Initialize()
             yield ServoTorqueControl(SERVOS_IDS, False)
             yield AntiBlocking(True)
@@ -110,7 +109,6 @@ class Main(State):
 
     def on_start(self, packet):
         if packet.value == 0:
-            yield ServoTorqueControl(SERVOS_IDS, True)
             self.yield_at(89500, EndOfMatch())
 
 
