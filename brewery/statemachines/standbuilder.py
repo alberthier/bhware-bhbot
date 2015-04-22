@@ -110,10 +110,9 @@ class Main(State):
 class InitialPosition(State):
 
     def on_enter(self):
-        yield Trigger(self.fsm.PLIERS_LEFT_INIT, self.fsm.PLIERS_RIGHT_INIT,
-                          self.fsm.ELEVATOR_DOWN,
-                          self.fsm.GRIPPER_LEFT_INIT, self.fsm.GRIPPER_RIGHT_INIT,
-                          self.fsm.LIGHTER_WAIT)
+        yield Trigger(self.fsm.PLIERS_LEFT_INIT, self.fsm.PLIERS_RIGHT_INIT)
+        yield Trigger(self.fsm.ELEVATOR_DOWN, self.fsm.LIGHTER_WAIT)
+        yield Trigger(self.fsm.GRIPPER_LEFT_INIT, self.fsm.GRIPPER_RIGHT_INIT)
         yield None
 
 
@@ -122,11 +121,9 @@ class InitialPosition(State):
 class IdlePosition(State):
 
     def on_enter(self):
-        yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
-                      self.fsm.PLIERS_RIGHT_OPEN,
-                      self.fsm.GRIPPER_LEFT_GUIDE,
-                      self.fsm.GRIPPER_RIGHT_GUIDE,
-                      self.fsm.ELEVATOR_DOWN)
+        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+        yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
+        yield Trigger(self.fsm.ELEVATOR_DOWN)
         yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID,
                                   self.fsm.PLIERS_RIGHT_ID,
                                   self.fsm.GRIPPER_LEFT_ID,
@@ -203,4 +200,5 @@ class BuildSpotlight(State):
 class EndOfMatch(statemachine.State):
 
     def on_enter(self):
-        yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT, self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+        yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
+        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
