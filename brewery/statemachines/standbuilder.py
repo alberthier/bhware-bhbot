@@ -43,6 +43,13 @@ class Main(State):
             self.fsm.ELEVATOR_PLATFORM     = LEFT_BUILDER_ELEVATOR_PLATFORM
             self.fsm.ELEVATOR_UP           = LEFT_BUILDER_ELEVATOR_UP
 
+            self.fsm.LIGHTER_ID            = LEFT_BUILDER_LIGHTER_ID
+            self.fsm.PLIERS_LEFT_ID        = LEFT_BUILDER_PLIERS_LEFT_ID
+            self.fsm.PLIERS_RIGHT_ID       = LEFT_BUILDER_PLIERS_RIGHT_ID
+            self.fsm.GRIPPER_LEFT_ID       = LEFT_BUILDER_GRIPPER_LEFT_ID
+            self.fsm.GRIPPER_RIGHT_ID      = LEFT_BUILDER_GRIPPER_RIGHT_ID
+            self.fsm.ELEVATOR_ID           = LEFT_BUILDER_ELEVATOR_ID
+
             self.fsm.INPUT_BULB_PRESENCE   = MAIN_INPUT_LEFT_BULB_PRESENCE
             self.fsm.INPUT_STAND_PRESENCE  = MAIN_INPUT_LEFT_STAND_PRESENCE
         else:
@@ -70,6 +77,13 @@ class Main(State):
             self.fsm.ELEVATOR_PLATFORM     = RIGHT_BUILDER_ELEVATOR_PLATFORM
             self.fsm.ELEVATOR_UP           = RIGHT_BUILDER_ELEVATOR_UP
 
+            self.fsm.LIGHTER_ID            = RIGHT_BUILDER_LIGHTER_ID
+            self.fsm.PLIERS_LEFT_ID        = RIGHT_BUILDER_PLIERS_LEFT_ID
+            self.fsm.PLIERS_RIGHT_ID       = RIGHT_BUILDER_PLIERS_RIGHT_ID
+            self.fsm.GRIPPER_LEFT_ID       = RIGHT_BUILDER_GRIPPER_LEFT_ID
+            self.fsm.GRIPPER_RIGHT_ID      = RIGHT_BUILDER_GRIPPER_RIGHT_ID
+            self.fsm.ELEVATOR_ID           = RIGHT_BUILDER_ELEVATOR_ID
+
             self.fsm.INPUT_BULB_PRESENCE  = MAIN_INPUT_RIGHT_BULB_PRESENCE
             self.fsm.INPUT_STAND_PRESENCE = MAIN_INPUT_RIGHT_STAND_PRESENCE
 
@@ -87,23 +101,37 @@ class Main(State):
             self.fsm.enabled = True
 
             self.yield_at(89500, EndOfMatch())
-            yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
-                          self.fsm.PLIERS_RIGHT_OPEN,
-                          self.fsm.GRIPPER_LEFT_GUIDE,
-                          self.fsm.GRIPPER_RIGHT_GUIDE
-            )
+            yield IdlePosition()
             yield Build()
 
 
 
 
 class InitialPosition(State):
+
     def on_enter(self):
         yield Trigger(self.fsm.PLIERS_LEFT_INIT, self.fsm.PLIERS_RIGHT_INIT,
                           self.fsm.ELEVATOR_DOWN,
                           self.fsm.GRIPPER_LEFT_INIT, self.fsm.GRIPPER_RIGHT_INIT,
-                          self.fsm.LIGHTER_WAIT
-            )
+                          self.fsm.LIGHTER_WAIT)
+        yield None
+
+
+
+
+class IdlePosition(State):
+
+    def on_enter(self):
+        yield Trigger(self.fsm.PLIERS_LEFT_OPEN,
+                      self.fsm.PLIERS_RIGHT_OPEN,
+                      self.fsm.GRIPPER_LEFT_GUIDE,
+                      self.fsm.GRIPPER_RIGHT_GUIDE,
+                      self.fsm.ELEVATOR_DOWN)
+        yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID,
+                                  self.fsm.PLIERS_RIGHT_ID,
+                                  self.fsm.GRIPPER_LEFT_ID,
+                                  self.fsm.GRIPPER_RIGHT_ID,
+                                  self.fsm.ELEVATOR_ID], False)
         yield None
 
 
@@ -131,6 +159,7 @@ class Build(State):
                 yield Trigger(self.fsm.ELEVATOR_UP)
                 yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
                 yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, self.fsm.ELEVATOR_DOWN)
+                yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID, self.fsm.ELEVATOR_ID], False)
             self.fsm.stand_count += 1
         self.fsm.building = False
         self.send_packet(packets.StandStored(self.fsm.side))
@@ -141,6 +170,11 @@ class Build(State):
             yield BuildSpotlight()
 
 
+    def on_standbuilder_idle(self, packet):
+        if packet.side == self.fsm.side:
+            yield IdlePosition()
+
+
 
 
 class BuildSpotlight(State):
@@ -149,7 +183,8 @@ class BuildSpotlight(State):
         bulb_presence = yield GetInputStatus(self.fsm.INPUT_BULB_PRESENCE)
         if bulb_presence.value == 0:
             yield Trigger(self.fsm.LIGHTER_DEPOSIT)
-            yield Timer(150)
+            yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
+            yield Timer(500)
         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
         yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT, self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
         self.fsm.stand_count = 0

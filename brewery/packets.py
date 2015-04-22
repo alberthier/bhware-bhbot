@@ -883,6 +883,17 @@ class BulbGrabbed(BasePacket):
     TYPE = 266
 
 
+
+
+class StandbuilderIdle(BasePacket):
+
+    TYPE = 267
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
+
+
 ################################################################################
 # Packets lookup setup
 

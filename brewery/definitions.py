@@ -128,6 +128,11 @@ class Enum(object):
         yield from self.lookup_by_name.items()
 
 
+    def values(self):
+        return self.lookup_by_name.values()
+
+
+
 
 REMOTE_DEVICE = Enum("Remote hardware type",
     REMOTE_DEVICE_PIC       = 0,

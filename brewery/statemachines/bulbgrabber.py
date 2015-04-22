@@ -27,4 +27,5 @@ class Main(State):
              yield Trigger(LIGHTER_GRIPPER_OPEN)
              yield Timer(500)
              yield Trigger(LIGHTER_ELEVATOR_DOWN)
+             yield ServoTorqueControl([LIGHTER_ELEVATOR_ID, LIGHTER_GRIPPER_ID], False)
              yield None

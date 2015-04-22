@@ -101,7 +101,7 @@ class Main(State):
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
             yield Initialize()
-            yield ServoTorqueControl(SERVOS_IDS, False)
+            yield ServoTorqueControl(SERVOS_IDS.values(), False)
             yield AntiBlocking(True)
             yield GetInputStatus(MAIN_INPUT_TEAM)
             yield CalibratePosition()
@@ -135,7 +135,6 @@ class Initialize(State):
 class CalibratePosition(State):
 
     def on_enter(self):
-        wedge_size = 0.01
         yield DefinePosition(1.0, 0.07 + ROBOT_CENTER_Y, math.pi / 2.0)
         yield None
 
@@ -357,6 +356,7 @@ class BuildSpotlightPlatform(State):
         if packet.side == SIDE_LEFT:
             yield MoveLineRelative(-0.1)
             self.fsm.builders[SIDE_LEFT].enabled = True
+            self.send_packet(packets.StandbuilderIdle(SIDE_LEFT))
             self.exit_reason = GOAL_DONE
             yield None
 
@@ -376,6 +376,7 @@ class BuildSpotlightHome(State):
         if packet.side == SIDE_RIGHT:
             yield MoveLineRelative(-0.1)
             self.fsm.builders[SIDE_RIGHT].enabled = True
+            self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
             self.exit_reason = GOAL_DONE
             yield None
 
@@ -392,4 +393,4 @@ class EndOfMatch(statemachine.State):
 
     def on_enter(self):
         self.send_packet(packets.Stop())
-        yield ServoTorqueControl(SERVOS_IDS, False)
+        yield ServoTorqueControl(SERVOS_IDS.values(), False)
