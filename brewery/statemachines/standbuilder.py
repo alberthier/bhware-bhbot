@@ -182,8 +182,11 @@ class BuildSpotlight(State):
         if bulb_presence.value == 0:
             yield Trigger(self.fsm.LIGHTER_DEPOSIT)
             yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
-            yield Timer(500)
+            yield Timer(200)
         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
+        yield Timer(200)
+        yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
+        yield Timer(500)
         yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT, self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
         self.fsm.stand_count = 0
         self.send_packet(packets.BuildSpotlight(self.fsm.side))
