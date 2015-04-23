@@ -17,6 +17,12 @@ from tools import *
 
 class Main(State):
 
+    def on_controller_status(self, packet):
+        if packet.status == CONTROLLER_STATUS_READY:
+            yield Trigger(LIGHTER_GRIPPER_OPEN, LIGHTER_ELEVATOR_DOWN)
+            yield ServoTorqueControl([LIGHTER_GRIPPER_ID, LIGHTER_ELEVATOR_ID], False)
+
+
     def on_start(self, packet):
         if packet.value == 0:
              yield Trigger(LIGHTER_ELEVATOR_BULB)

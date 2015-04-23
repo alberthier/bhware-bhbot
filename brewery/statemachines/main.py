@@ -101,7 +101,6 @@ class Main(State):
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
             yield Initialize()
-            yield ServoTorqueControl(SERVOS_IDS.values(), False)
             yield AntiBlocking(True)
             yield GetInputStatus(MAIN_INPUT_TEAM)
             yield CalibratePosition()
@@ -123,10 +122,8 @@ class Main(State):
 class Initialize(State):
 
     def on_enter(self):
-        yield Trigger(LIGHTER_GRIPPER_OPEN,
-                      LIGHTER_ELEVATOR_DOWN,
-                      LEFT_CLAPMAN_CLOSE,
-                      RIGHT_CLAPMAN_CLOSE)
+        yield Trigger(LEFT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_CLOSE)
+        yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
         yield None
 
 
@@ -393,4 +390,4 @@ class EndOfMatch(statemachine.State):
 
     def on_enter(self):
         self.send_packet(packets.Stop())
-        yield ServoTorqueControl(SERVOS_IDS.values(), False)
+        yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)

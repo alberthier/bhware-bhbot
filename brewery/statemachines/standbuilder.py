@@ -43,11 +43,11 @@ class Main(State):
             self.fsm.ELEVATOR_PLATFORM     = LEFT_BUILDER_ELEVATOR_PLATFORM
             self.fsm.ELEVATOR_UP           = LEFT_BUILDER_ELEVATOR_UP
 
-            self.fsm.LIGHTER_ID            = LEFT_BUILDER_LIGHTER_ID
             self.fsm.PLIERS_LEFT_ID        = LEFT_BUILDER_PLIERS_LEFT_ID
             self.fsm.PLIERS_RIGHT_ID       = LEFT_BUILDER_PLIERS_RIGHT_ID
             self.fsm.GRIPPER_LEFT_ID       = LEFT_BUILDER_GRIPPER_LEFT_ID
             self.fsm.GRIPPER_RIGHT_ID      = LEFT_BUILDER_GRIPPER_RIGHT_ID
+            self.fsm.LIGHTER_ID            = LEFT_BUILDER_LIGHTER_ID
             self.fsm.ELEVATOR_ID           = LEFT_BUILDER_ELEVATOR_ID
 
             self.fsm.INPUT_BULB_PRESENCE   = MAIN_INPUT_LEFT_BULB_PRESENCE
@@ -77,15 +77,15 @@ class Main(State):
             self.fsm.ELEVATOR_PLATFORM     = RIGHT_BUILDER_ELEVATOR_PLATFORM
             self.fsm.ELEVATOR_UP           = RIGHT_BUILDER_ELEVATOR_UP
 
-            self.fsm.LIGHTER_ID            = RIGHT_BUILDER_LIGHTER_ID
             self.fsm.PLIERS_LEFT_ID        = RIGHT_BUILDER_PLIERS_LEFT_ID
             self.fsm.PLIERS_RIGHT_ID       = RIGHT_BUILDER_PLIERS_RIGHT_ID
             self.fsm.GRIPPER_LEFT_ID       = RIGHT_BUILDER_GRIPPER_LEFT_ID
             self.fsm.GRIPPER_RIGHT_ID      = RIGHT_BUILDER_GRIPPER_RIGHT_ID
+            self.fsm.LIGHTER_ID            = RIGHT_BUILDER_LIGHTER_ID
             self.fsm.ELEVATOR_ID           = RIGHT_BUILDER_ELEVATOR_ID
 
-            self.fsm.INPUT_BULB_PRESENCE  = MAIN_INPUT_RIGHT_BULB_PRESENCE
-            self.fsm.INPUT_STAND_PRESENCE = MAIN_INPUT_RIGHT_STAND_PRESENCE
+            self.fsm.INPUT_BULB_PRESENCE   = MAIN_INPUT_RIGHT_BULB_PRESENCE
+            self.fsm.INPUT_STAND_PRESENCE  = MAIN_INPUT_RIGHT_STAND_PRESENCE
 
 
     def on_controller_status(self, packet):
@@ -110,9 +110,12 @@ class Main(State):
 class InitialPosition(State):
 
     def on_enter(self):
-        yield Trigger(self.fsm.PLIERS_LEFT_INIT, self.fsm.PLIERS_RIGHT_INIT)
-        yield Trigger(self.fsm.ELEVATOR_DOWN, self.fsm.LIGHTER_WAIT)
-        yield Trigger(self.fsm.GRIPPER_LEFT_INIT, self.fsm.GRIPPER_RIGHT_INIT)
+        yield Trigger(self.fsm.PLIERS_LEFT_INIT, self.fsm.PLIERS_RIGHT_INIT,
+                      self.fsm.GRIPPER_LEFT_INIT, self.fsm.GRIPPER_RIGHT_INIT,
+                      self.fsm.ELEVATOR_DOWN, self.fsm.LIGHTER_WAIT)
+        yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID,
+                                  self.fsm.GRIPPER_LEFT_ID, self.fsm.GRIPPER_RIGHT_ID,
+                                  self.fsm.ELEVATOR_ID, self.fsm.LIGHTER_ID], False)
         yield None
 
 
@@ -121,13 +124,11 @@ class InitialPosition(State):
 class IdlePosition(State):
 
     def on_enter(self):
-        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
-        yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
-        yield Trigger(self.fsm.ELEVATOR_DOWN)
-        yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID,
-                                  self.fsm.PLIERS_RIGHT_ID,
-                                  self.fsm.GRIPPER_LEFT_ID,
-                                  self.fsm.GRIPPER_RIGHT_ID,
+        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN,
+                      self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE,
+                      self.fsm.ELEVATOR_DOWN)
+        yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID,
+                                  self.fsm.GRIPPER_LEFT_ID, self.fsm.GRIPPER_RIGHT_ID,
                                   self.fsm.ELEVATOR_ID], False)
         yield None
 
@@ -202,3 +203,6 @@ class EndOfMatch(statemachine.State):
     def on_enter(self):
         yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
         yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+        yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID,
+                                  self.fsm.GRIPPER_LEFT_ID, self.fsm.GRIPPER_RIGHT_ID,
+                                  self.fsm.ELEVATOR_ID, self.fsm.LIGHTER_ID], False)

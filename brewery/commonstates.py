@@ -826,8 +826,11 @@ class ServoTorqueControl(statemachine.State):
 
 
     def on_enter(self):
+        cmds = []
         for servo in self.servos:
-            yield Trigger(makeServoTorqueControl((servo, 0), self.enabled))
+            cmds.append(makeServoTorqueControl((servo, 0), self.enabled))
+        if len(cmds) != 0:
+            yield Trigger(*cmds)
         yield None
 
 
