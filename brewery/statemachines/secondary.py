@@ -147,8 +147,9 @@ class DepositCup(State):
         if self.home:
             yield RotateTo(math.pi / 2.0)
             yield MoveLineTo(goal.x, 0.30)
+        yield Timer(500)
         yield Trigger(CUP_GRIPPER_HALF_OPEN)
-        yield Timer(300)
+        yield Timer(500)
         yield Trigger(CUP_GRIPPER_OPEN)
         if self.home:
             yield MoveLineTo(goal.x, goal.y)
