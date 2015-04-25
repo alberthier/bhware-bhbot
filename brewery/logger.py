@@ -32,7 +32,7 @@ filepath = None
 log_file = None
 start_time = None
 term_enable_colors = False
-term_color = ""
+term_color = TERM_MAGENTA
 
 
 def initialize(args = None):
