@@ -433,3 +433,5 @@ STAND_ACTION_STATUS = Enum("Stand action status",
     STAND_ACTION_STATUS_TODO     = 1,
     STAND_ACTION_STATUS_DONE     = 2,
 )
+
+STAND_GOAL_OFFSET = -0.25

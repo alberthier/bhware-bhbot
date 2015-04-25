@@ -15,8 +15,21 @@ from definitions import *
 
 
 
-
 class Goal:
+    __slots__ = ["identifier",
+                 "weight",
+                 "x",
+                 "y",
+                 "offset",
+                 "direction",
+                 "handler_state",
+                 "navigation_cost",
+                 "ctor_parameters",
+                 "score",
+                 "penality",
+                 "status", "shared", "navigate", "trial_count","last_try",
+                 "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration"
+                 ]
 
     def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
         self.identifier = identifier
@@ -39,6 +52,26 @@ class Goal:
         self.is_current = False
         self.is_blacklisted = False
         self.uid = self.identifier
+        self.estimated_duration = None
+
+    def clone(self):
+        n = Goal(self.identifier, self.weight, self.x, self.y, self.offset, self.direction,
+                 self.handler_state, self.ctor_parameters, self.shared, self.navigate)
+        n.score = self.score
+        n.penality = self.penality
+        n.status = self.status
+        n.trial_count = self.trial_count
+        n.last_try = datetime.datetime(self.last_try) if self.last_try else None
+        n.goal_manager = self.goal_manager
+        n.is_current = self.is_current
+        n.is_blacklisted = self.is_blacklisted
+        n.uid = self.uid
+        n.estimated_duration = self.estimated_duration
+        return n
+
+    @property
+    def pose(self):
+        return position.Pose(self.x, self.y)
 
 
     def increment_trials(self):
@@ -95,6 +128,11 @@ class Goal:
         pass
 
 
+class StandGoal(Goal):
+
+    def __init__(self, identifier, weight, side, x, y, handler_state, ctor_parameters = None):
+        super().__init__(identifier, weight, x, y, STAND_GOAL_OFFSET, DIRECTION_FORWARD, handler_state, ctor_parameters)
+        self.side = side
 
 
 class GoalManager:
@@ -107,6 +145,13 @@ class GoalManager:
         self.last_goal = None
         self.goal_ids = set()
 
+    @property
+    def available_goals(self):
+        return [ g for g in self.goals if g.is_available() ]
+
+    @property
+    def doable_goals(self):
+        return [ g for g in self.goals if g.is_available() and not g.is_blacklisted ]
 
     def add(self, *args):
         for goal in args :
@@ -220,9 +265,9 @@ class GoalManager:
 
 
     def get_least_recent_tried_goal(self):
-        available_goals = [ g for g in self.goals if g.is_available() ]
 
-        never_tried = [ g for g in available_goals if g.last_try is None ]
+
+        never_tried = [ g for g in self.available_goals if g.last_try is None ]
 
         if len(never_tried) > 0:
             goals = never_tried
@@ -349,3 +394,66 @@ class GoalManager:
     def on_interbot_goal_status(self, packet):
         logger.log('Got goal status : {} = {}'.format(packet.goal_identifier, packet.goal_status))
         self.internal_goal_update(packet.goal_identifier, packet.goal_status)
+
+import inspect
+
+class GoalBuilder:
+    def __init__(self, goal_id, ctor=Goal):
+        self.goal_id = goal_id
+        self.ctor = ctor
+        self._estimated_time = None
+        self.params = {"identifier":goal_id}
+        self.default_values={"offset": 0}
+
+    @tools.newobj
+    def identifier(self, identifier):
+        self.params["identifier"]=identifier
+
+    @tools.newobj
+    def weight(self, weight):
+        self.params["weight"]=weight
+
+    @tools.newobj
+    def coords(self, x, y):
+        self.params["x"]=x
+        self.params["y"]=y
+
+    @tools.newobj
+    def offset(self, offset):
+        self.params["offset"]=offset
+
+    @tools.newobj
+    def direction(self, direction):
+        self.params["direction"]=direction
+
+    @tools.newobj
+    def side(self, side):
+        self.params["side"]=side
+
+    @tools.newobj
+    def state(self, handler_state, ctor_parameters=None):
+        self.params["handler_state"]=handler_state
+        if ctor_parameters:
+            self.params["ctor_parameters"]=ctor_parameters
+
+    @tools.newobj
+    def estimated_duration(self, estimated_duration):
+        self._estimated_duration = estimated_time
+
+    def build(self):
+        logger.log("Building goal {}".format(self.goal_id))
+
+        #inspecting params
+        ctor_params=inspect.getargspec(self.ctor)
+        passed_params={}
+        passed_params.update(self.params)
+
+        for p in ctor_params[0]:
+            if p not in passed_params.keys() and p in self.default_values:
+                passed_params[p]=self.default_values[p]
+
+        logger.log("Calling {} with {}".format(self.ctor, passed_params))
+        g = self.ctor(**passed_params)
+        if self._estimated_time:
+            g.estimated_duration = self._estimated_duration
+        return g

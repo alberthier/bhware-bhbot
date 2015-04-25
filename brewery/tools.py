@@ -105,3 +105,17 @@ def get_crossing_point(x1, y1, angle1, x2, y2, angle2):
     xc = (b2 - b1) / (a1 - a2)
     yc = a1 * xc + b1
     return xc, yc
+
+# from http://kracekumar.com/post/100897281440/fluent-interface-in-python
+from functools import wraps
+
+def newobj(method):
+    @wraps(method)
+    # Well, newobj can be decorated with function, but we will cover the case
+    # where it decorated with method
+    def inner(self, *args, **kwargs):
+        obj = self.__class__.__new__(self.__class__)
+        obj.__dict__ = self.__dict__.copy()
+        method(obj, *args, **kwargs)
+        return obj
+    return inner
