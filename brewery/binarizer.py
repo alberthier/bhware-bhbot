@@ -2,7 +2,7 @@
 
 
 import copy
-
+import logger
 
 
 
@@ -284,12 +284,16 @@ class Struct(AbstractItem):
 
 
     def to_dump(self, value):
-        dump = ""
-        for name, item in self.content:
-            if len(dump) != 0:
-                dump += ', '
-            dump += "('" + name + "', '" + item.to_dump(getattr(value, name)) + "')"
-        return "(" + dump + ")"
+        try:
+            dump = ""
+            for name, item in self.content:
+                if len(dump) != 0:
+                    dump += ', '
+                dump += "('" + name + "', '" + item.to_dump(getattr(value, name)) + "')"
+            return "(" + dump + ")"
+        except TypeError as e:
+            logger.error("name: {} content: {} value: {} get_attr: {} to_dump: {}".format(name, item, value, getattr(value, name), item.to_dump(getattr(value, name))))
+            raise e
 
 
     def from_dump(self, value):

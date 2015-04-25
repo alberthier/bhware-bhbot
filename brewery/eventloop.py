@@ -609,7 +609,7 @@ class EventLoop(object):
                 Timer(self, 0, self.process_packets_and_dispatch).start()
 
 
-    def do_send_packet(self, packet, packet_range_start, packet_range_end, channel):
+    def do_send_packet(self, packet: packets.BasePacket, packet_range_start, packet_range_end, channel):
         if packet.TYPE >= packet_range_start and packet.TYPE < packet_range_end:
             if channel is not None and channel.connected:
                 logger.log_packet(packet, "ARM")

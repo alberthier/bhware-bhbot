@@ -13,6 +13,7 @@ import position
 import statemachine
 import tools
 import goaldecider
+import checks
 
 from definitions import *
 
@@ -524,6 +525,7 @@ class SafeMoveCurveTo(MoveCurveTo):
 class MoveLine(AbstractMove):
 
     def __init__(self, points, direction = DIRECTION_AUTO, virtual = True, opponent_handling_config = OPPONENT_HANDLING_STOP):
+        checks.check_type(direction, int)
         super().__init__(opponent_handling_config)
         poses = []
         for pt in points:
@@ -670,6 +672,7 @@ class FollowPath(statemachine.State):
             first_point = self.path[0]
             self.direction = tools.get_direction(self.robot.pose, first_point.virt.x, first_point.virt.y)
         for pose in self.path:
+            assert isinstance(pose, position.Pose)
             if self.direction == DIRECTION_FORWARD:
                 if not self.robot.is_looking_at(pose):
                     move = yield LookAt(pose.virt.x, pose.virt.y, DIRECTION_FORWARD)
