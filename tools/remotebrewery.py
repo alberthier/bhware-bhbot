@@ -16,7 +16,7 @@ if args.push:
     subprocess.call(["rsync",
                      "--archive",
                      "--verbose",
-                     "--checksum",
+                     "--ignore-times",
                      "--exclude-from", os.path.join(bhware, ".hgignore"),
                      "brewery",
                      "root@{}:/root/bhware".format(args.remote)], cwd = bhware)
