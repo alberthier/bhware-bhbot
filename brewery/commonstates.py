@@ -13,6 +13,7 @@ import position
 import statemachine
 import tools
 import goaldecider
+import metrics
 import checks
 
 from definitions import *
@@ -948,9 +949,12 @@ class ExecuteGoalsV2(statemachine.State):
             if navigation_failures < 10:
                 goal=None
                 logger.log("Choosing the best goal")
-                identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=1, max_depth=3)
-                if identifier:
-                    goal=gm.get_goals(identifier)[0]
+                with metrics.STATS.duration.time():
+                    identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=1, max_depth=3)
+                    if identifier:
+                        goal=gm.get_goals(identifier)[0]
+
+                metrics.write("metrics.json")
             else:
                 logger.log("Escaping to anywhere !!")
                 yield EscapeToAnywhere()
@@ -990,7 +994,8 @@ class ExecuteGoalsV2(statemachine.State):
                     state.goal = goal
                     state.exit_reason = GOAL_FAILED
 
-                    yield state
+                    with goal.stats.real_duration.acquire():
+                        yield state
 
                     logger.log('State exit reason : {}'.format(GOAL_STATUS.lookup_by_value[state.exit_reason]))
 

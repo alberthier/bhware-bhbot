@@ -13,7 +13,14 @@ import tools
 
 from definitions import *
 
+import greplin
+import greplin.scales as scales
 
+class GoalStats(object):
+    real_duration = scales.StateTimeStat('real_duration')
+
+    def __init__(self,id):
+        scales.init(self, '/goals/'+id)
 
 class Goal:
     __slots__ = ["identifier",
@@ -28,7 +35,7 @@ class Goal:
                  "score",
                  "penality",
                  "status", "shared", "navigate", "trial_count","last_try",
-                 "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration"
+                 "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration","stats"
                  ]
 
     def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
@@ -53,6 +60,9 @@ class Goal:
         self.is_blacklisted = False
         self.uid = self.identifier
         self.estimated_duration = None
+        self.stats=GoalStats(identifier)
+
+
 
     def clone(self):
         n = Goal(self.identifier, self.weight, self.x, self.y, self.offset, self.direction,
