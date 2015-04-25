@@ -145,8 +145,8 @@ class Main(State):
             G("DEPOSIT_SPOTLIGHT_PLATFORM")
                 .weight(8)
                 .coords(1.69, 1.3)
-                .direction(BuildSpotlightPlatform)
-                .state(KickTheirClap)
+                .direction(DIRECTION_FORWARD)
+                .state(BuildSpotlightPlatform)
                 .build()
 
 
