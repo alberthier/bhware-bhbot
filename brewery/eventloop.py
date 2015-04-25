@@ -73,7 +73,7 @@ class ClientSocketChannel(asyncore.dispatcher_with_send):
         self.close()
         if self.existing_socket is None:
             if self.show_reconnect_error_log:
-                logger.log("{}: *** WARNING *** Connection closed, reconnecting".format(self.origin))
+                logger.log("{}: *** WARNING *** Connection closed, reconnecting to {}:{}".format(self.origin, *self.address))
             self.try_connect()
 
 
