@@ -15,13 +15,13 @@ class Main(statemachine.Timer):
 
     OPPONENT_DETECTION_DISAPPEARING_MS = 800
 
-    MAIN_IN_FRONT_IDS = [  3,  4,  5,  6 ]
-    MAIN_IN_BACK_IDS  = [ 12, 13, 14, 15 ]
-    MAIN_ANGLES = [ 90, 70, 50, 30, 10, -10, -30, -50, -70, -90, -110, -130, -150, -170, 170, 150, 130, 110 ]
+    MAIN_IN_FRONT_IDS = [ 0, 1, 2, 16, 17 ]
+    MAIN_IN_BACK_IDS  = [ 7, 8, 9, 10, 11 ]
+    MAIN_ANGLES = [ 0, -20, -40, -60, -80, -100, -120, -140, -160, 180, 160, 140, 120, 100, 80, 60, 40, 20 ]
 
-    SECONDARY_IN_FRONT_IDS = [3,  4,  5,  6 ]
-    SECONDARY_IN_BACK_IDS  = [ 12, 13, 14, 15 ]
-    SECONDARY_ANGLES = [ 90, 70, 50, 30, 10, -10, -30, -50, -70, -90, -110, -130, -150, -170, 170, 150, 130, 110 ]
+    SECONDARY_IN_FRONT_IDS = [ 0, 1, 2, 16, 17 ]
+    SECONDARY_IN_BACK_IDS  = [ 7, 8, 9, 10, 11 ]
+    SECONDARY_ANGLES = [ 0, -20, -40, -60, -80, -100, -120, -140, -160, 180, 160, 140, 120, 100, 80, 60, 40, 20 ]
 
     PACKET_BUFFER_SIZE = 6
 
@@ -30,6 +30,7 @@ class Main(statemachine.Timer):
         self.in_front_ids = self.MAIN_IN_FRONT_IDS if IS_MAIN_ROBOT else self.SECONDARY_IN_FRONT_IDS
         self.in_back_ids  = self.MAIN_IN_BACK_IDS  if IS_MAIN_ROBOT else self.SECONDARY_IN_BACK_IDS
         self.angles       = self.MAIN_ANGLES       if IS_MAIN_ROBOT else self.SECONDARY_ANGLES
+        self.detections = collections.deque()
 
 
     def on_enter(self):
@@ -49,22 +50,33 @@ class Main(statemachine.Timer):
         if packet.robot != self.fsm.opponent_type:
             return
 
-        distance_m = packet.distance / 100.0
+        self.detections.append(packet)
+        if len(self.detections) < self.PACKET_BUFFER_SIZE:
+            return
+        elif len(self.detections) > self.PACKET_BUFFER_SIZE:
+            self.detections.popleft()
+
+        nearest_detection = None
+        for detection in self.detections:
+            if nearest_detection is None or detection.distance < nearest_detection.distance:
+                nearest_detection = detection
+
+        distance_m = nearest_detection.distance / 100.0
 
         robot_pose = self.robot.pose
-        real_angle = math.radians(self.angles[packet.angle]) + robot_pose.angle
+        real_angle = math.radians(self.angles[nearest_detection.angle]) + robot_pose.angle
         self.x = robot_pose.x + distance_m * math.cos(real_angle)
         self.y = robot_pose.y + distance_m * math.sin(real_angle)
 
         previous_direction = self.opponent_direction
-        if packet.angle in self.in_front_ids:
+        if nearest_detection.angle in self.in_front_ids:
             self.opponent_direction = DIRECTION_FORWARD
-        elif packet.angle in self.in_back_ids:
+        elif nearest_detection.angle in self.in_back_ids:
             self.opponent_direction = DIRECTION_BACKWARDS
         else:
             self.opponent_direction = None
 
-        self.send_packet(packets.OpponentPosition(robot = self.fsm.opponent_type, distance = packet.distance, x = self.x, y = self.y))
+        self.send_packet(packets.OpponentPosition(robot = self.fsm.opponent_type, distance = nearest_detection.distance, x = self.x, y = self.y))
         self.restart()
 
         if self.opponent_direction is not None:
@@ -84,7 +96,7 @@ class Main(statemachine.Timer):
         self.log("{} opponent disappeared".format(self.opponent_name()))
         self.set_detected(None)
         self.stop()
-        self.detections = collections.deque()
+        self.detections.clear()
         self.send_packet(packets.OpponentPosition(robot = self.fsm.opponent_type, x = None, y = None))
         if self.opponent_direction is not None:
             self.send_packet(packets.OpponentDisappeared(robot = self.fsm.opponent_type, direction = self.opponent_direction))

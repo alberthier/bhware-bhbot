@@ -13,7 +13,6 @@ from definitions import *
 from commonstates import *
 from position import *
 from tools import *
-from sysinfo import *
 
 import statemachines.testscommon as testscommon
 import statemachines.testsmain as testsmain
@@ -21,7 +20,12 @@ import statemachines.testsmain as testsmain
 
 
 
-STAND_GRAB_OFFSET = 0.01
+WEDGE_SIZE = 0.014
+LEFT_START_X = 0.8 + WEDGE_SIZE + ROBOT_CENTER_X
+LEFT_START_Y = 0.07 + ROBOT_CENTER_Y
+LEFT_START_ANGLE = math.pi / 2.0
+
+STAND_GRAB_OFFSET = 0.0
 STAND_GOAL_OFFSET = -0.25
 
 STAND_PRESENCE_SENSOR_OFFSET = 0.0
@@ -68,11 +72,10 @@ def right_builder_at_point(robot_pose, x, y):
 class Main(State):
 
     def on_enter(self):
-        # TODO : maybe created at the wrong place
-        SysInfo(self.event_loop)
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
+        StateMachine(self.event_loop, "bulbgrabber")
         self.fsm.builders = {
             SIDE_LEFT: StateMachine(self.event_loop, "standbuilder", side=SIDE_LEFT),
             SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
@@ -83,78 +86,36 @@ class Main(State):
 
         self.robot.goal_manager.add(
                            # identifier, order, x, y, offset, direction, handler_state
-            #goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False)),
-            G("GRAB_NORTH_MINE_STAND")
-                .weight(2)
-                .coords(0.42, 0.30)
-                .direction(DIRECTION_FORWARD)
-                .state(GrabStand, (SIDE_LEFT, 0.200, 0.090, False))
-                .build(),
-            #StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
-            SG("GRAB_PLATFORM_1_STAND")
-                .weight(3)
-                .side(SIDE_LEFT)
-                .coords(1.355, 0.870)
-                .state(GoalGrabStand)
-                .build(),
-            #goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False)),
-            G("GRAB_PLATFORM_2_STAND")
-                .weight(4)
-                .coords(1.600, 0.900)
-                .direction(DIRECTION_FORWARD)
-                .state(GrabStand, (SIDE_LEFT, 1.770, 1.100, False))
-                .build(),
-            #goalmanager.StandGoal("GRAB_PLATFORM_3_STAND", 5, SIDE_LEFT, 1.400, 1.300, GoalGrabStand),
-            SG("GRAB_PLATFORM_3_STAND")
-                .weight(5)
-                .side(SIDE_LEFT)
-                .coords(1.400, 1.300)
-                .state(GoalGrabStand)
-                .build(),
-            #goalmanager.Goal("GRAB_SOUTH_MINE_STANDS", 6, 1.45, 0.22, 0, DIRECTION_FORWARD, GrabSouthMineStands),
-            G("GRAB_SOUTH_MINE_STANDS")
-                .weight(6)
-                .coords(1.45, 0.22)
-                .direction(DIRECTION_FORWARD)
-                .state(GrabSouthMineStands)
-                .build(),
-            #goalmanager.Goal("KICK_MINE_CLAPS", 7, 1.77, 0.22, 0, DIRECTION_FORWARD, KickMineClaps),
-            G("KICK_MINE_CLAPS")
-                .weight(7)
-                .coords(1.77, 0.22)
-                .direction(DIRECTION_FORWARD)
-                .state(KickMineClaps)
-                .build(),
-            #goalmanager.Goal("SCAN_AND_BUILD_SPOTLIGHT", 8, 1.67, 1.2 - STAND_PRESENCE_SENSOR_OFFSET, 0, DIRECTION_FORWARD, ScanAndBuildSpotlight),
-            G("SCAN_AND_BUILD_SPOTLIGHT")
-                .weight(8)
-                .coords(1.67, 1.2 - STAND_PRESENCE_SENSOR_OFFSET)
-                .direction(DIRECTION_FORWARD)
-                .state(ScanAndBuildSpotlight)
-                .build(),
-            #goalmanager.Goal("KICK_THEIR_CLAP", 9, 1.77, 2.62, 0, DIRECTION_FORWARD, KickTheirClap),
-            G("KICK_THEIR_CLAP")
-                .weight(9)
-                .coords(1.77, 2.62)
-                .direction(DIRECTION_FORWARD)
-                .state(KickTheirClap)
-                .build(),
+            goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False)),
+            goalmanager.StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
+            goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False, False)),
+            goalmanager.StandGoal("GRAB_PLATFORM_3_STAND", 5, SIDE_LEFT, 1.400, 1.300, GoalGrabStand),
+            goalmanager.Goal("GRAB_SOUTH_MINE_STANDS", 6, 1.45, 0.22, 0, DIRECTION_FORWARD, GrabSouthMineStands),
+            goalmanager.Goal("KICK_MINE_CLAPS", 7, 1.77, 0.22, 0, DIRECTION_FORWARD, KickMineClaps),
+            goalmanager.Goal("DEPOSIT_SPOTLIGHT_PLATFORM", 8, 1.69, 1.3, 0, DIRECTION_FORWARD, BuildSpotlightPlatform),
+            goalmanager.Goal("KICK_THEIR_CLAP", 9, 1.77, 2.62, 0, DIRECTION_FORWARD, KickTheirClap),
+            goalmanager.Goal("DEPOSIT_SPOTLIGHT_HOME", 10, 1.0, 0.58, 0, DIRECTION_FORWARD, BuildSpotlightHome),
         )
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
             yield Initialize()
+            yield AntiBlocking(True)
             yield GetInputStatus(MAIN_INPUT_TEAM)
-            # yield CalibratePosition()
+            yield CalibratePosition()
 
 
     def on_start(self, packet):
         if packet.value == 0:
-            self.yield_at(90000, EndOfMatch())
-            logger.log("Starting ...")
-            # yield ExecuteGoalsV2()
+            self.yield_at(89500, EndOfMatch())
 
-            yield Tmp()
+
+    def on_bulb_grabbed(self, packet):
+        logger.log("Starting ...")
+        yield StaticStrategy()
+        yield ExecuteGoals()
+        # yield ExecuteGoalsV2()
+        #yield Tmp()
 
 class Tmp(State):
     def on_start(self, packet):
@@ -165,10 +126,8 @@ class Tmp(State):
 class Initialize(State):
 
     def on_enter(self):
-        yield Trigger(LIGHTER_GRIPPER_OPEN,
-                      LIGHTER_ELEVATOR_DOWN,
-                      LEFT_CLAPMAN_CLOSE,
-                      RIGHT_CLAPMAN_CLOSE)
+        yield Trigger(LEFT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_CLOSE)
+        yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
         yield None
 
 
@@ -177,16 +136,7 @@ class Initialize(State):
 class CalibratePosition(State):
 
     def on_enter(self):
-        if IS_HOST_DEVICE_ARM:
-            yield DefinePosition(FIELD_X_SIZE - ROBOT_CENTER_X, 2.0, math.pi)
-            yield MoveLineTo(LEFT_START_X, 2.0)
-            yield RotateTo(math.pi / 2.0)
-            yield SpeedControl(0.2)
-            yield MoveLineTo(LEFT_START_X, 0.0)
-            yield DefinePosition(None, LEFT_START_Y, math.pi / 2.0)
-            yield SpeedControl()
-        else:
-            yield DefinePosition(LEFT_START_X, LEFT_START_Y, math.pi / 2.0)
+        yield DefinePosition(1.0, 0.07 + ROBOT_CENTER_Y, math.pi / 2.0)
         yield None
 
 
@@ -225,61 +175,44 @@ class WaitForStandGrabbed(WaitForStandStored):
 
 
 
-class PickupBulb(State):
-
-    def on_controller_ready(self):
-        yield Trigger(LIGHTER_GRIPPER_OPEN)
-
-    def on_enter(self):
-        yield Trigger(makeServoSetupCommand(LIGHTER_GRIPPER, 1))
-        yield Trigger(LIGHTER_ELEVATOR_BULB)
-        yield Trigger(LIGHTER_GRIPPER_CLOSE)
-        yield Trigger(makeServoSetupCommand(LIGHTER_GRIPPER, 1024))
-        # TODO: add timer
-        yield Trigger(LIGHTER_ELEVATOR_UP)
-        yield Trigger(LIGHTER_GRIPPER_OPEN)
-        # yield Trigger(LIGHTER_ELEVATOR_DOWN)
-        yield None
-
-
-
-
 class StaticStrategy(State):
 
     def on_enter(self):
-        # GRAB_NORTH_STAIRS_STANDS
-        yield MoveLineTo(LEFT_START_X, 0.53)
-        yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
-        yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
-        yield LookAtOpposite(0.42, 0.73)
-        yield MoveLineTo(0.42, 0.73)
+        try:
+            # GRAB_NORTH_STAIRS_STANDS
+            yield SafeMoveLineTo(LEFT_START_X, 0.53)
+            yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
+            yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
+            yield LookAtOpposite(0.42, 0.73)
+            yield SafeMoveLineTo(0.42, 0.73)
 
-        # GRAB_NORTH_MINE_STAND
-        yield RotateTo(-math.pi / 2.0)
-        yield MoveLineTo(0.42, 0.30)
-        yield from self.grab_stand("GRAB_NORTH_MINE_STAND", SIDE_LEFT, 0.200, 0.090, False)
-        x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
-        yield MoveLineTo(x, y)
+            # GRAB_NORTH_MINE_STAND
+            yield RotateTo(-math.pi / 2.0)
+            yield SafeMoveLineTo(0.42, 0.30)
+            yield from self.grab_stand("GRAB_NORTH_MINE_STAND", SIDE_LEFT, 0.200, 0.090, False)
+            x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
+            yield SafeMoveLineTo(x, y)
 
-        # GRAB_PLATFORM_1_STAND
-        yield LookAt(0.5, 0.62)
-        yield MoveLineTo(0.5, 0.62)
-        yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, False)
+            # GRAB_PLATFORM_1_STAND
+            yield LookAt(0.5, 0.62)
+            yield SafeMoveLineTo(0.5, 0.62)
+            yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, False)
 
-        # GRAB_PLATFORM_2_STAND
-        yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, False)
+            # GRAB_PLATFORM_2_STAND
+            yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, False)
 
-        # GRAB_PLATFORM_3_STAND
-        yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, False)
+            # GRAB_PLATFORM_3_STAND
+            yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, False)
 
-        # GRAB_SOUTH_MINE_STANDS
-        x, y = 1.45, 0.22
-        yield LookAt(x, y)
-        yield MoveLineTo(x, y)
-        yield from self.grab_stand(None, SIDE_RIGHT, 1.75, 0.09, True)
-        yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.85, 0.09, True)
-        yield ResettleAfterSouthMineStands()
-
+            # GRAB_SOUTH_MINE_STANDS
+            x, y = 1.45, 0.22
+            yield LookAt(x, y)
+            yield SafeMoveLineTo(x, y)
+            yield from self.grab_stand(None, SIDE_RIGHT, 1.75, 0.09, True)
+            yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.85, 0.09, True)
+            yield ResettleAfterSouthMineStands()
+        except OpponentInTheWay:
+            pass
         yield None
 
 
@@ -296,35 +229,39 @@ class StaticStrategy(State):
 
 class GrabStand(State):
 
-    def __init__(self, side, x, y, store_stand):
+    def __init__(self, side, x, y, store_stand, raise_on_error = True):
         super().__init__()
         self.side = side
         self.x = x
         self.y = y
         self.store_stand = store_stand
+        self.raise_on_error = raise_on_error
 
 
     def on_enter(self):
         x, y, angle = builder_at_point(self.side, self.robot.pose, self.x, self.y)
         yield RotateTo(angle)
         x, y = get_offset_position(self.robot.pose, x, y, STAND_GRAB_OFFSET)
-        move = yield MoveLineTo(x, y)
-        if move.exit_reason == TRAJECTORY_DESTINATION_REACHED:
+        self.exit_reason = GOAL_FAILED
+        try:
+            move = yield SafeMoveLineTo(x, y)
             if self.store_stand:
                 yield WaitForStandStored(self.side)
             else:
                 yield WaitForStandGrabbed(self.side)
             self.exit_reason = GOAL_DONE
-        else:
-            self.exit_reason = GOAL_FAILED
+        except OpponentInTheWay as e:
+            if self.raise_on_error:
+                raise e
         yield None
+
 
 
 
 class GoalGrabStand(GrabStand):
 
     def __init__(self):
-        super().__init__(SIDE_LEFT, 0, 0, False)
+        super().__init__(SIDE_LEFT, 0, 0, False, False)
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
@@ -352,7 +289,7 @@ class ResettleAfterSouthMineStands(State):
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_goals("KICK_MINE_CLAPS")[0]
-        yield MoveCurve(0.0, [(1.4, goal.y), (1.32, goal.y)])
+        yield MoveCurve(0.0, 0.10, [(1.4, goal.y), (1.32, goal.y)])
         yield DefinePosition(1.222 + ROBOT_CENTER_X, None, 0.0)
         yield None
 
@@ -406,106 +343,43 @@ class KickTheirClap(State):
         yield None
 
 
-class BuildSpotlight(State):
+
+
+class BuildSpotlightPlatform(State):
 
     def on_enter(self):
-        # yield MoveLineTo(goal.x, center_y)
-        # yield RotateTo(0.0)
-
-        self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_START))
-        self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_START))
-
-        # yield MoveLineTo(1.77, center_y)
-        # yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
-
-        # self.exit_reason = GOAL_DONE
-        # yield None
+        yield RotateTo(0.0)
+        self.fsm.builders[SIDE_LEFT].enabled = False
+        self.send_packet(packets.BuildSpotlight(SIDE_LEFT))
 
 
-    def on_start(self, packet):
-        if packet.value == 1:
-            self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_DEPOSIT))
-            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_DEPOSIT))
-        else:
-            self.send_packet(packets.StandAction(side=SIDE_LEFT,action=STAND_ACTION_END))
-            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_END))
-
-
-
-
-class ScanAndBuildSpotlight(State):
-
-    def on_enter(self):
-        goal = self.robot.goal_manager.get_current_goal()
-        yield RotateTo(math.pi / 2.0)
-        self.start_pose = self.robot.pose
-        self.stop_pose = None
-        move = MoveLineTo(goal.x, 1.8 - STAND_PRESENCE_SENSOR_OFFSET)
-        move.on_keep_alive = self.on_keep_alive
-        if self.robot.team == TEAM_LEFT:
-            move.on_right_scanner = self.on_scanner
-        else:
-            move.on_left_scanner = self.on_scanner
-        yield move
-        if self.start_pose is not None:
-            if self.stop_pose is None:
-                self.stop_pose = self.robot.pose
-            center_y = STAND_PRESENCE_SENSOR_OFFSET + (self.start_pose.virt.y + self.stop_pose.virt.y) / 2.0
-            yield MoveLineTo(goal.x, center_y)
-            yield RotateTo(0.0)
-            self.fsm.builders[SIDE_LEFT].enabled = False
-            self.fsm.builders[SIDE_RIGHT].enabled = False
-            # yield Trigger(LEFT_BUILDER_LIGHTER_OPEN, RIGHT_BUILDER_LIGHTER_OPEN)
-            # yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE, RIGHT_BUILDER_LIGHTER_CLOSE)
-            # yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE,
-            #               RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)
-            # yield Trigger(LEFT_BUILDER_ELEVATOR_UP, RIGHT_BUILDER_ELEVATOR_UP)
-
-            self.send_packet(packets.StandAction(side=SIDE_RIGHT,action=STAND_ACTION_START))
-
-            yield MoveLineTo(1.77, center_y)
-            yield DefinePosition(1.9 - ROBOT_CENTER_X, None, 0.0)
-            # yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM, RIGHT_BUILDER_ELEVATOR_PLATFORM)
-            # yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN,
-            #               RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN,
-            #               LEFT_BUILDER_GRIPPER_LEFT_OPEN, LEFT_BUILDER_GRIPPER_RIGHT_OPEN,
-            #               RIGHT_BUILDER_GRIPPER_LEFT_OPEN, RIGHT_BUILDER_GRIPPER_RIGHT_OPEN)
-            # yield MoveLineTo(1.68, center_y)
-            # self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_LEFT_CLOSE))
-            # self.send_packet(packets.ServoControl(*LEFT_BUILDER_GRIPPER_RIGHT_CLOSE))
-            # self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_LEFT_CLOSE))
-            # self.send_packet(packets.ServoControl(*RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE))
-            self.fsm.builders[SIDE_LEFT].stand_count = 0
-            self.fsm.builders[SIDE_RIGHT].stand_count = 0
+    def on_build_spotlight(self, packet):
+        if packet.side == SIDE_LEFT:
+            yield MoveLineRelative(-0.1)
             self.fsm.builders[SIDE_LEFT].enabled = True
+            self.send_packet(packets.StandbuilderIdle(SIDE_LEFT))
+            self.exit_reason = GOAL_DONE
+            yield None
+
+
+
+
+class BuildSpotlightHome(State):
+
+    def on_enter(self):
+        yield RotateTo(-math.pi / 2)
+        yield MoveLineTo(1.0, 0.5)
+        self.fsm.builders[SIDE_RIGHT].enabled = False
+        self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
+
+
+    def on_build_spotlight(self, packet):
+        if packet.side == SIDE_RIGHT:
+            yield MoveLineRelative(-0.1)
             self.fsm.builders[SIDE_RIGHT].enabled = True
-
-        self.exit_reason = GOAL_DONE
-        yield None
-
-
-    def on_scanner(self, packet):
-        if packet.value == 1:
-            if not self.check_distance():
-                self.start_pose = None
-        else:
-            self.start_pose = self.robot.pose
-
-
-    def on_keep_alive(self, packet):
-        self.check_distance()
-
-
-    def check_distance(self):
-        required_space = ROBOT_CENTER_Y * 2
-        if self.start_pose is not None:
-            d = distance(self.start_pose.x, self.start_pose.y, self.robot.pose.x, self.robot.pose.y)
-            if d >= required_space:
-                self.log("Deposit position found (distance = {})".format(d))
-                self.stop_pose = self.robot.pose
-                self.send_packet(packets.Stop())
-                return True
-        return False
+            self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
+            self.exit_reason = GOAL_DONE
+            yield None
 
 
 
@@ -520,3 +394,4 @@ class EndOfMatch(statemachine.State):
 
     def on_enter(self):
         self.send_packet(packets.Stop())
+        yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)

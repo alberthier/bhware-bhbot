@@ -357,10 +357,9 @@ class RobotLayer(fieldview.Layer):
             # convert to brewery's coordinates
             angle = -math.atan2(math.cos(angle), math.sin(angle))
             angle %= 2.0 * math.pi
-            angle = int(round(angle / (2.0 * math.pi) * 18.0))
+            angle = 18 - int(round(angle / (2.0 * math.pi) * 18.0))
 
             # Rotate the turret:
-            angle += 4
             if angle >= 18:
                 angle -= 18
 
@@ -616,7 +615,7 @@ class GameElementsLayer(fieldview.Layer):
                         elif ref > 7.0 * math.pi / 4.0:
                             robot.layer.robot_controller.send_packet(packets.InputStatus(MAIN_INPUT_LEFT_STAND_PRESENCE, KIND_EVENT, 1))
                     elif isinstance(elt, Cup) and not robot.layer.robot_controller.is_main:
-                        if ref < math.pi / 4.0 or ref > 7.0 * math.pi / 4.0:
+                        if 3 * math.pi / 4.0 < ref and ref < 5.0 * math.pi / 4.0:
                             robot.layer.robot_controller.send_packet(packets.InputStatus(SECONDARY_INPUT_CUP_PRESENCE, KIND_EVENT, 1))
 
         if self.main_bar.opponent_detection.isChecked():

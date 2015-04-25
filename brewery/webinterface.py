@@ -192,3 +192,7 @@ class WebInterface:
             return LAST_WEB_FSM.output
         else:
             return ""
+
+
+    def sysinfo(self, environ):
+        return json.dumps(self.event_loop.sysinfo.data)

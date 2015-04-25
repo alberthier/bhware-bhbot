@@ -18,20 +18,26 @@ from tools import *
 class Main(State):
 
     def on_start(self, packet):
+        self.robot.holding_cup = False
         if packet.value == 0:
+            self.robot.grabbing_in_progress = False
             self.yield_at(90000, EndOfMatch())
-            yield GrabStand()
+            yield Trigger(CUP_GRIPPER_OPEN)
+            yield GrabCup()
 
 
 
 
-class GrabStand(State):
+class GrabCup(State):
 
     def on_cup_presence(self, packet):
         if packet.value == 1 and not self.robot.holding_cup:
+            self.robot.grabbing_in_progress = True
             self.send_packet(packets.Stop())
             yield Trigger(CUP_GRIPPER_ON_CUP)
+            yield Timer(150)
             self.robot.holding_cup = True
+            self.robot.grabbing_in_progress = False
             self.send_packet(packets.CupGrabbed())
 
 

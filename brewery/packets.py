@@ -302,18 +302,20 @@ class BasePacket(object):
 ################################################################################
 # Packet type ranges
 
-PROCESS_RANGE_START   = 1
-PROCESS_RANGE_END     = 32
-TURRET_RANGE_START    = PROCESS_RANGE_END
-TURRET_RANGE_END      = 50
-PIC32_RANGE_START     = TURRET_RANGE_END
-PIC32_RANGE_END       = 150
-SIMULATOR_RANGE_START = PIC32_RANGE_END
-SIMULATOR_RANGE_END   = 200
-INTERBOT_RANGE_START  = SIMULATOR_RANGE_END
-INTERBOT_RANGE_END    = 230
-INTERNAL_RANGE_START  = INTERBOT_RANGE_END
-INTERNAL_RANGE_END    = 256
+PROCESS_RANGE_START     = 1
+PROCESS_RANGE_END       = 32
+TURRET_RANGE_START      = PROCESS_RANGE_END
+TURRET_RANGE_END        = 50
+PIC32_RANGE_START       = TURRET_RANGE_END
+PIC32_RANGE_END         = 150
+SIMULATOR_RANGE_START   = PIC32_RANGE_END
+SIMULATOR_RANGE_END     = 200
+INTERBOT_RANGE_START    = SIMULATOR_RANGE_END
+INTERBOT_RANGE_END      = 250
+MEDIAPLAYER_RANGE_START = INTERBOT_RANGE_END
+MEDIAPLAYER_RANGE_END   = 256
+INTERNAL_RANGE_START    = MEDIAPLAYER_RANGE_END
+INTERNAL_RANGE_END      = 65535
 
 ################################################################################
 # Packet classes
@@ -706,6 +708,8 @@ class InterbotGoalStatus(BasePacket):
     )
 
 
+
+
 class InterbotGeneric(BasePacket):
 
     TYPE = 203
@@ -715,26 +719,88 @@ class InterbotGeneric(BasePacket):
     )
 
 
+# Media Player
+
+
+class PlayMedia(BasePacket):
+
+    TYPE = 250
+
+    DEFINITION = (
+        ('path', String(254, "", "Path to the media to play")),
+    )
+
+
+
+
+class Say(BasePacket):
+
+    TYPE = 251
+
+    DEFINITION = (
+        ('text', String(254, "", "Text to say")),
+    )
+
+
 # Internal
+
+
+class Internal(BasePacket):
+
+    TYPE = 256
+
+    def __init__(self, event_name, **kwargs):
+        super().__init__()
+        self.event_name = event_name
+        self.properties = kwargs.keys()
+        self.packet_method = "on"
+        for c in event_name:
+            if c.isupper():
+                self.packet_method += "_" + c.lower()
+            else:
+                self.packet_method += c
+        for k in self.properties:
+            setattr(self, k, kwargs[k])
+
+
+    @property
+    def name(self):
+        return "Internal(" + self.event_name + ")"
+
+
+    def handler_methods(self):
+        yield self.packet_method
+        yield "on_packet"
+
+
+    def to_dump(self):
+        dump = ""
+        for key in self.properties:
+            if len(dump) != 0:
+                dump += ', '
+            dump += "('" + key + "', '" + getattr(self, key) + "')"
+        return "(" + dump + ")"
+
+
 
 
 class InterbotConnected(BasePacket):
 
-    TYPE = 230
+    TYPE = 257
 
 
 
 
 class InterbotDisconnected(BasePacket):
 
-    TYPE = 231
+    TYPE = 258
 
 
 
 
 class OpponentPosition(BasePacket):
 
-    TYPE = 232
+    TYPE = 259
 
     DEFINITION = (
         ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
@@ -748,7 +814,7 @@ class OpponentPosition(BasePacket):
 
 class OpponentDetected(BasePacket):
 
-    TYPE = 233
+    TYPE = 260
 
     DEFINITION = (
         ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
@@ -762,7 +828,7 @@ class OpponentDetected(BasePacket):
 
 class OpponentDisappeared(BasePacket):
 
-    TYPE = 234
+    TYPE = 261
 
     DEFINITION = (
         ('robot'    , UEnum8(OPPONENT_ROBOT, OPPONENT_ROBOT_MAIN)),
@@ -774,7 +840,7 @@ class OpponentDisappeared(BasePacket):
 
 class StandStored(BasePacket):
 
-    TYPE = 235
+    TYPE = 262
 
     DEFINITION = (
         ('side', UEnum8(SIDE, SIDE_LEFT)),
@@ -785,26 +851,47 @@ class StandStored(BasePacket):
 
 class StandGrabbed(BasePacket):
 
-    TYPE = 236
+    TYPE = 263
 
     DEFINITION = (
         ('side', UEnum8(SIDE, SIDE_LEFT)),
     )
 
-class StandAction(BasePacket):
 
-    TYPE = 237
+
+
+class BuildSpotlight(BasePacket):
+
+    TYPE = 264
 
     DEFINITION = (
         ('side', UEnum8(SIDE, SIDE_LEFT)),
-        ('action', UEnum8(STAND_ACTIONS, STAND_ACTION_START)),
-        ('status', UEnum8(STAND_ACTION_STATUS, STAND_ACTION_STATUS_TODO)),
     )
+
+
 
 
 class CupGrabbed(BasePacket):
 
-    TYPE = 238
+    TYPE = 265
+
+
+
+
+class BulbGrabbed(BasePacket):
+
+    TYPE = 266
+
+
+
+
+class StandbuilderIdle(BasePacket):
+
+    TYPE = 267
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
 
 
 ################################################################################

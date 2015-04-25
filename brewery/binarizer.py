@@ -284,12 +284,12 @@ class Struct(AbstractItem):
 
 
     def to_dump(self, value):
-        return '({})'.format(
-            ', '.join("('{name}', {val})".format(
-                name=name,
-                val=item.to_dump(getattr(value,name))) for name,item in self.content
-            )
-        )
+        dump = ""
+        for name, item in self.content:
+            if len(dump) != 0:
+                dump += ', '
+            dump += "('" + name + "', '" + item.to_dump(getattr(value, name)) + "')"
+        return "(" + dump + ")"
 
 
     def from_dump(self, value):
