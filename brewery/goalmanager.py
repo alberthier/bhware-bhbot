@@ -71,7 +71,11 @@ class Goal:
         n.penality = self.penality
         n.status = self.status
         n.trial_count = self.trial_count
-        n.last_try = datetime.datetime(self.last_try) if self.last_try else None
+        if self.last_try:
+            l=self.last_try
+            n.last_try = datetime.datetime(l.year,l.month,l.day,l.hour,l.minute,l.second,l.microsecond)
+        else:
+            n.last_try = None
         n.goal_manager = self.goal_manager
         n.is_current = self.is_current
         n.is_blacklisted = self.is_blacklisted
