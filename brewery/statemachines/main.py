@@ -64,11 +64,7 @@ def right_builder_at_point(robot_pose, x, y):
 
 
 
-class StandGoal(goalmanager.Goal):
 
-    def __init__(self, identifier, weight, side, x, y, handler_state, ctor_parameters = None):
-        super().__init__(identifier, weight, x, y, STAND_GOAL_OFFSET, DIRECTION_FORWARD, handler_state, ctor_parameters)
-        self.side = side
 
 
 
@@ -85,17 +81,75 @@ class Main(State):
             SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
         }
 
+        G=goalmanager.GoalBuilder
+        SG=functools.partial(goalmanager.GoalBuilder, ctor=goalmanager.StandGoal)
+
         self.robot.goal_manager.add(
-                           # identifier, order, x, y, offset, direction, handler_state
-            goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False)),
-            StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
-            goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False, False)),
-            StandGoal("GRAB_PLATFORM_3_STAND", 5, SIDE_LEFT, 1.400, 1.300, GoalGrabStand),
-            goalmanager.Goal("GRAB_SOUTH_MINE_STANDS", 6, 1.45, 0.22, 0, DIRECTION_FORWARD, GrabSouthMineStands),
-            goalmanager.Goal("KICK_MINE_CLAPS", 7, 1.77, 0.22, 0, DIRECTION_FORWARD, KickMineClaps),
-            goalmanager.Goal("DEPOSIT_SPOTLIGHT_PLATFORM", 8, 1.69, 1.3, 0, DIRECTION_FORWARD, BuildSpotlightPlatform),
-            goalmanager.Goal("KICK_THEIR_CLAP", 9, 1.77, 2.62, 0, DIRECTION_FORWARD, KickTheirClap),
-            goalmanager.Goal("DEPOSIT_SPOTLIGHT_HOME", 10, 1.0, 0.58, 0, DIRECTION_FORWARD, BuildSpotlightHome),
+            #goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False)),
+            G("GRAB_NORTH_MINE_STAND")
+                .weight(2)
+                .coords(0.42, 0.30)
+                .direction(DIRECTION_FORWARD)
+                .state(GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False))
+                .build(),
+            #StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
+            SG("GRAB_PLATFORM_1_STAND")
+                .weight(3)
+                .side(SIDE_LEFT)
+                .coords(1.355, 0.870)
+                .state(GoalGrabStand)
+                .build(),
+            #goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False, False)),,
+            G("GRAB_PLATFORM_2_STAND")
+                .weight(4)
+                .coords(1.600, 0.900)
+                .direction(DIRECTION_FORWARD)
+                .state(GrabStand, (SIDE_LEFT, 1.770, 1.100, False, False))
+                .build(),
+            #goalmanager.StandGoal("GRAB_PLATFORM_3_STAND", 5, SIDE_LEFT, 1.400, 1.300, GoalGrabStand),
+            SG("GRAB_PLATFORM_3_STAND")
+                .weight(5)
+                .side(SIDE_LEFT)
+                .coords(1.400, 1.300)
+                .state(GoalGrabStand)
+                .build(),
+            #goalmanager.Goal("GRAB_SOUTH_MINE_STANDS", 6, 1.45, 0.22, 0, DIRECTION_FORWARD, GrabSouthMineStands),
+            G("GRAB_SOUTH_MINE_STANDS")
+                .weight(6)
+                .coords(1.45, 0.22)
+                .direction(DIRECTION_FORWARD)
+                .state(GrabSouthMineStands)
+                .build(),
+            #goalmanager.Goal("KICK_MINE_CLAPS", 7, 1.77, 0.22, 0, DIRECTION_FORWARD, KickMineClaps),
+            G("KICK_MINE_CLAPS")
+                .weight(7)
+                .coords(1.77, 0.22)
+                .direction(DIRECTION_FORWARD)
+                .state(KickMineClaps)
+                .build(),
+            #goalmanager.Goal("DEPOSIT_SPOTLIGHT_HOME", 10, 1.0, 0.58, 0, DIRECTION_FORWARD, BuildSpotlightHome),
+            G("DEPOSIT_SPOTLIGHT_HOME")
+                .weight(10)
+                .coords(1.0, 0.58)
+                .direction(DIRECTION_FORWARD)
+                .state(BuildSpotlightHome)
+                .build(),
+            #goalmanager.Goal("KICK_THEIR_CLAP", 9, 1.77, 2.62, 0, DIRECTION_FORWARD, KickTheirClap),
+            G("KICK_THEIR_CLAP")
+                .weight(9)
+                .coords(1.77, 2.62)
+                .direction(DIRECTION_FORWARD)
+                .state(KickTheirClap)
+                .build(),
+            #goalmanager.Goal("DEPOSIT_SPOTLIGHT_PLATFORM", 8, 1.69, 1.3, 0, DIRECTION_FORWARD, BuildSpotlightPlatform),
+            G("DEPOSIT_SPOTLIGHT_PLATFORM")
+                .weight(8)
+                .coords(1.69, 1.3)
+                .direction(BuildSpotlightPlatform)
+                .state(KickTheirClap)
+                .build()
+
+
         )
 
     def on_controller_status(self, packet):
@@ -113,10 +167,15 @@ class Main(State):
 
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
-        yield StaticStrategy()
-        yield ExecuteGoals()
+        # yield StaticStrategy()
+        # yield ExecuteGoals()
+        yield ExecuteGoalsV2()
+        #yield Tmp()
 
-
+class Tmp(State):
+    def on_start(self, packet):
+        #yield BuildSpotlight()
+        pass
 
 
 class Initialize(State):

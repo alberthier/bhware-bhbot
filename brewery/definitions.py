@@ -423,3 +423,6 @@ CUP_GRIPPER_CLOSE     = makeServoMoveCommand(CUP_GRIPPER, 796)
 CUP_GRIPPER_ON_CUP    = makeServoMoveCommand(CUP_GRIPPER, 740)
 CUP_GRIPPER_HALF_OPEN = makeServoMoveCommand(CUP_GRIPPER, 684)
 CUP_GRIPPER_OPEN      = makeServoMoveCommand(CUP_GRIPPER, 550)
+
+
+STAND_GOAL_OFFSET = -0.25

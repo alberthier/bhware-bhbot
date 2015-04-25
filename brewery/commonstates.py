@@ -12,6 +12,7 @@ import packets
 import position
 import statemachine
 import tools
+import goaldecider
 
 from definitions import *
 
@@ -859,8 +860,6 @@ class GetInputStatus(statemachine.State):
 ##################################################
 
 
-
-
 class ExecuteGoals(statemachine.State):
 
     def on_enter(self):
@@ -932,7 +931,81 @@ class ExecuteGoals(statemachine.State):
 
         yield None
 
+import graphmap
 
+class ExecuteGoalsV2(statemachine.State):
+
+    def on_enter(self):
+        gm = self.robot.goal_manager
+
+        navigation_failures = 0
+
+        while True:
+
+            if navigation_failures < 10:
+                goal=None
+                logger.log("Choosing the best goal")
+                identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=1, max_depth=3)
+                if identifier:
+                    goal=gm.get_goals(identifier)[0]
+            else:
+                logger.log("Escaping to anywhere !!")
+                yield EscapeToAnywhere()
+                gm.whitelist_all()
+                navigation_failures = 0
+                continue
+
+            if goal:
+                logger.log('Next goal is {}'.format(goal.identifier))
+
+                goal.doing()
+
+                current_navigation_succeeded = True
+                if goal.navigate :
+                    logger.log('Navigating to goal')
+                    move = yield Navigate(goal.x, goal.y, goal.direction, goal.offset)
+                    logger.log('End of navigation : {}'.format(TRAJECTORY.lookup_by_value[move.exit_reason]))
+
+                    current_navigation_succeeded = move.exit_reason == TRAJECTORY_DESTINATION_REACHED
+                    if current_navigation_succeeded:
+                        navigation_failures = 0
+                        logger.log('Navigation was successful')
+                    else:
+                        navigation_failures += 1
+                        logger.log('Cannot navigate to goal -> picking another')
+                        goal.is_blacklisted = True
+                        goal.available()
+                    if move.exit_reason == TRAJECTORY_BLOCKED:
+                        direction = DIRECTION_BACKWARDS if move.direction == DIRECTION_FORWARD else DIRECTION_FORWARD
+                        dist = ROBOT_GYRATION_RADIUS - ROBOT_CENTER_X + 0.02
+                        yield MoveLineRelative(dist, direction)
+                        self.event_loop.map.robot_blocked(goal.direction)
+
+                if current_navigation_succeeded:
+                    gm.whitelist_all()
+                    state = goal.get_state()
+                    state.goal = goal
+                    state.exit_reason = GOAL_FAILED
+
+                    yield state
+
+                    logger.log('State exit reason : {}'.format(GOAL_STATUS.lookup_by_value[state.exit_reason]))
+
+                    if state.exit_reason == GOAL_DONE :
+                        goal.done()
+                    else :
+                        goal.increment_trials()
+                        goal.available()
+
+            else:
+                navigation_failures += 1
+                if not gm.has_blacklisted_goals():
+                    break
+            self.log('Goal statuses: {}'.format({ g.identifier : g.is_available() for g in gm.goals}))
+
+        self.log('No more goals available')
+
+        yield None
 
 
 class EscapeToAnywhere(statemachine.Timer):

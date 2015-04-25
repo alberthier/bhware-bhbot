@@ -8,6 +8,7 @@ from definitions import *
 
 
 class Pose(object):
+    __slots__ = ["virt", "x", "y", "angle", "is_virtual"]
 
     match_team = TEAM_UNKNOWN
 
@@ -16,6 +17,7 @@ class Pose(object):
         self.x = 0.0
         self.y = 0.0
         self.angle = 0.0
+        self.is_virtual=virtual
         if not virtual :
             self.x = x
             self.y = y
@@ -38,11 +40,14 @@ class Pose(object):
             return False
         return self.x == other.x and self.y == other.y and self.angle == other.angle
 
+    def clone(self):
+        return Pose(self.x, self.y, self.angle, self.is_virtual)
+
 
 
 
 class VirtualPose(object):
-
+    __slots__=["real_pose"]
     def __init__(self, virt_pose):
 
         """
