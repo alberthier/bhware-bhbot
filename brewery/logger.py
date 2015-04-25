@@ -34,12 +34,25 @@ start_time = None
 term_enable_colors = False
 term_color = ""
 
+LEVEL_TRACE=0
+LEVEL_DEBUG=1
+LEVEL_INFO=2
+LEVEL_WARNING=3
+LEVEL_ERROR=4
+
+DEFAULT_LEVEL=LEVEL_DEBUG
+
+disabled=False
+
 
 def initialize(args = None):
     global filepath
     global log_file
     global start_time
     global term_enable_colors
+
+    set_level(DEFAULT_LEVEL)
+
     if filepath is None:
         start_time = datetime.datetime.now()
         filepath = get_next_log_filepath()
@@ -132,6 +145,10 @@ def dbg(obj, sender = "ARM"):
     pass
     #log(obj, sender)
 
+def trace(obj, sender = "ARM"):
+    # pass
+    log(obj, sender)
+
 
 def log_exception(exc):
     log("")
@@ -180,3 +197,13 @@ def get_next_log_filepath():
             except:
                 pass
     return os.path.join(LOG_DIR, "brewerylog_{:=#04}.py".format(max_index))
+
+def _disabled(*args, **kwargs): pass
+
+def set_level(level):
+    if level>LEVEL_TRACE:
+        trace=_disabled
+    if level>LEVEL_DEBUG:
+        dbg=_disabled
+    if level>LEVEL_INFO:
+        pass
