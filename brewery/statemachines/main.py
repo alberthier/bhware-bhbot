@@ -204,8 +204,8 @@ class StaticStrategy(State):
             x, y = 1.45, 0.22
             yield LookAt(x, y)
             yield SafeMoveLineTo(x, y)
-            yield from self.grab_stand(None, SIDE_RIGHT, 1.75, 0.09, True)
-            yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.85, 0.09, True)
+            yield from self.grab_stand(None, SIDE_RIGHT, 1.750, 0.090, True)
+            yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.850, 0.090, True)
             yield ResettleAfterSouthMineStands()
         except OpponentInTheWay:
             pass
