@@ -279,21 +279,17 @@ class Struct(AbstractItem):
     def serialize_as_text(self, instance):
         text = ""
         for name, item in self.content:
-            text += " " + item.to_dump_as_text(getattr(instance, name))
+            text += " " + str(item.to_dump_as_text(getattr(instance, name)))
         return text
 
 
     def to_dump(self, value):
-        try:
-            dump = ""
-            for name, item in self.content:
-                if len(dump) != 0:
-                    dump += ', '
-                dump += "('" + name + "', '" + item.to_dump(getattr(value, name)) + "')"
-            return "(" + dump + ")"
-        except TypeError as e:
-            logger.error("name: {} content: {} value: {} get_attr: {} to_dump: {}".format(name, item, value, getattr(value, name), item.to_dump(getattr(value, name))))
-            raise e
+        dump = ""
+        for name, item in self.content:
+            if len(dump) != 0:
+                dump += ', '
+            dump += "('" + name + "', '" + str(item.to_dump(getattr(value, name))) + "')"
+        return "(" + dump + ")"
 
 
     def from_dump(self, value):

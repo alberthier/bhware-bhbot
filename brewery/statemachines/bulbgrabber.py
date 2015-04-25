@@ -26,8 +26,9 @@ class Main(State):
     def on_start(self, packet):
         if packet.value == 0:
              yield Trigger(LIGHTER_ELEVATOR_BULB)
+             yield Timer(200)
              yield Trigger(LIGHTER_GRIPPER_CLOSE)
-             yield Timer(500)
+             yield Timer(250)
              self.send_packet(packets.BulbGrabbed())
              yield Trigger(LIGHTER_ELEVATOR_UP)
              yield Trigger(LIGHTER_GRIPPER_OPEN)
