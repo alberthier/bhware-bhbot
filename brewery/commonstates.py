@@ -943,6 +943,7 @@ class ExecuteGoalsV2(statemachine.State):
         while True:
 
             if navigation_failures < 10:
+                goal=None
                 logger.log("Choosing the best goal")
                 identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=1, max_depth=3)
                 if identifier:
