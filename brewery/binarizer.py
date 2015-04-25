@@ -279,7 +279,7 @@ class Struct(AbstractItem):
     def serialize_as_text(self, instance):
         text = ""
         for name, item in self.content:
-            text += " " + item.to_dump_as_text(getattr(instance, name))
+            text += " " + str(item.to_dump_as_text(getattr(instance, name)))
         return text
 
 
@@ -288,7 +288,7 @@ class Struct(AbstractItem):
         for name, item in self.content:
             if len(dump) != 0:
                 dump += ', '
-            dump += "('" + name + "', '" + item.to_dump(getattr(value, name)) + "')"
+            dump += "('" + name + "', '" + str(item.to_dump(getattr(value, name))) + "')"
         return "(" + dump + ")"
 
 
