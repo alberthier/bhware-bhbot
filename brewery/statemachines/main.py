@@ -92,6 +92,12 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False))
                 .build(),
+            G("GRAB_STAIRS_STAND")
+                .weight(2)
+                .coords(0.4, 0.77)
+                .direction(DIRECTION_FORWARD)
+                .state(GrabNorthMineStands)
+                .build(),
             #StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
             SG("GRAB_PLATFORM_1_STAND")
                 .weight(3)
@@ -169,6 +175,7 @@ class Main(State):
         logger.log("Starting ...")
         # yield StaticStrategy()
         # yield ExecuteGoals()
+        yield SafeMoveLineTo(LEFT_START_X, 0.53)
         yield ExecuteGoalsV2()
         #yield Tmp()
 
@@ -324,7 +331,16 @@ class GoalGrabStand(GrabStand):
         self.y = goal.y
         yield from super().on_enter()
 
+class GrabNorthMineStands(State):
 
+    def on_enter(self):
+
+        grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
+        if grab.exit_reason == GOAL_DONE:
+            yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
+
+        self.exit_reason = grab.exit_reason
+        yield None
 
 
 class GrabSouthMineStands(State):
@@ -335,6 +351,7 @@ class GrabSouthMineStands(State):
             grab = yield GrabStand(SIDE_RIGHT, 1.85, 0.09, False)
         self.exit_reason = grab.exit_reason
         yield ResettleAfterSouthMineStands()
+
         yield None
 
 
