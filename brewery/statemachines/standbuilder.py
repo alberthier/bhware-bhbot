@@ -137,6 +137,9 @@ class IdlePosition(State):
 
 class Build(State):
 
+    def on_enter(self):
+        self.building = False
+
     def on_input_status(self, packet):
         # Dispatch manually because there are 2 bulb detectors and 2 stand presence detectors
         # if packet.id == self.fsm.INPUT_BULB_PRESENCE:
@@ -145,21 +148,34 @@ class Build(State):
             yield from self.on_stand_presence(packet)
 
 
+    def on_ensure_build(self, packet):
+        if packet.side == self.fsm.side:
+            yield from self.grab_stand()
+
     def on_stand_presence(self, packet):
+        yield from self.grab_stand()
+
+
+    def grab_stand(self):
         if not self.fsm.enabled:
+            return
+        if self.building:
             return
         if self.fsm.stand_count < 4:
             self.fsm.building = True
             yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
-            self.send_packet(packets.StandGrabbed(self.fsm.side))
             if self.fsm.stand_count < 3:
                 yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
                 yield Trigger(self.fsm.ELEVATOR_UP)
                 yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
+                self.send_packet(packets.StandGrabbed(self.fsm.side))
                 yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, self.fsm.ELEVATOR_DOWN)
                 yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID, self.fsm.ELEVATOR_ID], False)
+            else:
+                self.send_packet(packets.StandGrabbed(self.fsm.side))
             self.fsm.stand_count += 1
         self.fsm.building = False
+        yield Timer(300)
         self.send_packet(packets.StandStored(self.fsm.side))
 
 

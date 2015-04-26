@@ -20,12 +20,11 @@ import statemachines.testsmain as testsmain
 
 
 
-WEDGE_SIZE = 0.014
-LEFT_START_X = 0.8 + WEDGE_SIZE + ROBOT_CENTER_X
+LEFT_START_X = 1.0
 LEFT_START_Y = 0.07 + ROBOT_CENTER_Y
 LEFT_START_ANGLE = math.pi / 2.0
 
-STAND_GRAB_OFFSET = 0.0
+STAND_GRAB_OFFSET = 0.04
 STAND_GOAL_OFFSET = -0.25
 
 STAND_PRESENCE_SENSOR_OFFSET = 0.0
@@ -59,11 +58,6 @@ def left_builder_at_point(robot_pose, x, y):
 
 def right_builder_at_point(robot_pose, x, y):
     return builder_at_point(SIDE_RIGHT, robot_pose, x, y)
-
-
-
-
-
 
 
 
@@ -172,16 +166,12 @@ class Main(State):
 
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
-        # yield StaticStrategy()
-        # yield ExecuteGoals()
         yield SafeMoveLineTo(LEFT_START_X, 0.53)
+        yield StaticStrategy()
+        # yield ExecuteGoals()
         yield ExecuteGoalsV2()
-        #yield Tmp()
 
-class Tmp(State):
-    def on_start(self, packet):
-        #yield BuildSpotlight()
-        pass
+
 
 
 class Initialize(State):
@@ -206,13 +196,8 @@ class CalibratePosition(State):
 class WaitForStandStored(Timer):
 
     def __init__(self, side):
-        super().__init__(2000)
+        super().__init__(3000)
         self.side = side
-
-    def on_enter(self):
-        builder = self.fsm.builders[self.side]
-        if not builder.building:
-            yield None
 
 
     def on_stand_stored(self, packet):
@@ -241,9 +226,9 @@ class StaticStrategy(State):
     def on_enter(self):
         try:
             # GRAB_NORTH_STAIRS_STANDS
-            yield SafeMoveLineTo(LEFT_START_X, 0.53)
             yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
             yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
+            self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
             yield LookAtOpposite(0.42, 0.73)
             yield SafeMoveLineTo(0.42, 0.73)
 
@@ -272,6 +257,11 @@ class StaticStrategy(State):
             yield from self.grab_stand(None, SIDE_RIGHT, 1.750, 0.090, True)
             yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.850, 0.090, True)
             yield ResettleAfterSouthMineStands()
+            yield MoveLineTo(1.77, 0.22)
+            kick = yield KickMineClaps()
+            if kick.exit_reason == GOAL_DONE:
+                self.robot.goal_manager.update_goal_status("KICK_MINE_CLAPS", GOAL_DONE)
+
         except OpponentInTheWay:
             pass
         yield None
@@ -306,6 +296,7 @@ class GrabStand(State):
         self.exit_reason = GOAL_FAILED
         try:
             move = yield SafeMoveLineTo(x, y)
+            self.send_packet(packets.EnsureBuild(self.side))
             if self.store_stand:
                 yield WaitForStandStored(self.side)
             else:
@@ -370,7 +361,7 @@ class ResettleAfterSouthMineStands(State):
 class KickMineClaps(State):
 
     def on_enter(self):
-        goal = self.robot.goal_manager.get_current_goal()
+        goal = self.robot.goal_manager.get_goals("KICK_MINE_CLAPS")[0]
         yield RotateTo(math.pi / 2.0)
         yield MoveLineTo(goal.x, 0.10)
         yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)

@@ -894,6 +894,17 @@ class StandbuilderIdle(BasePacket):
     )
 
 
+
+
+class EnsureBuild(BasePacket):
+
+    TYPE = 268
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
+
+
 ################################################################################
 # Packets lookup setup
 
