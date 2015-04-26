@@ -35,7 +35,9 @@ class Goal:
                  "score",
                  "penality",
                  "status", "shared", "navigate", "trial_count","last_try",
-                 "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration","stats"
+                 "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration",
+                 "ratio_decc",
+                 "stats"
                  ]
 
     def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
@@ -81,6 +83,7 @@ class Goal:
         n.is_blacklisted = self.is_blacklisted
         n.uid = self.uid
         n.estimated_duration = self.estimated_duration
+        n.ratio_decc = self.ratio_decc
         return n
 
     @property

@@ -32,6 +32,7 @@ class GrabCup(State):
 
     def on_cup_presence(self, packet):
         if packet.value == 1 and not self.robot.holding_cup:
+            yield Timer(50)
             self.robot.grabbing_in_progress = True
             self.send_packet(packets.Stop())
             yield Trigger(CUP_GRIPPER_ON_CUP)

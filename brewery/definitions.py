@@ -108,6 +108,10 @@ TURRET_LONG_DISTANCE_DETECTION_ID      = 255
 # For security reasons
 UNDEFINED_ACTUATOR_VALUE = None
 
+# Asser settings
+
+ROBOT_DEFAULT_RATIO_DECC = 1.8
+
 
 ########################################################################
 # Enums

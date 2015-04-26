@@ -17,12 +17,13 @@ import statemachines.testscommon as testscommon
 import statemachines.testssecondary as testssecondary
 
 
-
+CUP_GRAB_RATION_DECC=1.0
 
 class GrabCupGoal(goalmanager.Goal):
 
     def __init__(self, identifier, weight, x, y, offset, handler_state, ctor_parameters = None):
         super().__init__(identifier, weight, x, y, offset, DIRECTION_BACKWARDS, handler_state, ctor_parameters)
+        self.ratio_decc = CUP_GRAB_RATION_DECC
 
 
     def is_available(self):

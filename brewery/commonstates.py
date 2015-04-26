@@ -210,6 +210,25 @@ class SpeedControl(statemachine.State):
         yield None
 
 
+class RatioDeccControl(statemachine.State):
+
+    def __init__(self, ratio = None):
+        statemachine.State.__init__(self)
+        self.packet = packets.PositionControlConfig()
+        if ratio is not None:
+            self.packet.ratio_decc = ratio
+        else:
+            self.packet.ratio_decc = ROBOT_DEFAULT_RATIO_DECC
+
+
+    def on_enter(self):
+        self.send_packet(self.packet)
+
+
+    def on_position_control_config(self, packet):
+        yield None
+
+
 
 
 class SetupTurret(statemachine.State):
@@ -891,8 +910,16 @@ class ExecuteGoals(statemachine.State):
                 current_navigation_succeeded = True
                 if goal.navigate :
                     logger.log('Navigating to goal')
+
+                    if goal.ratio_decc:
+                        logger.log("Goal has ratio_decc set to: {}".format(goal.ratio_decc))
+                        yield RatioDeccControl(goal.ratio_decc)
+
                     move = yield Navigate(goal.x, goal.y, goal.direction, goal.offset)
                     logger.log('End of navigation : {}'.format(TRAJECTORY.lookup_by_value[move.exit_reason]))
+
+                    if goal.ratio_decc:
+                        yield RatioDeccControl()
 
                     current_navigation_succeeded = move.exit_reason in [ TRAJECTORY_DESTINATION_REACHED, TRAJECTORY_STOP_REQUESTED ]
                     if current_navigation_succeeded:
