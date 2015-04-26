@@ -54,15 +54,64 @@ class Main(State):
 
         self.robot.holding_cup = False
 
+        G=goalmanager.GoalBuilder
+        GCG=functools.partial(goalmanager.GoalBuilder, ctor=GrabCupGoal)
+        DCG=functools.partial(goalmanager.GoalBuilder, ctor=DepositCupGoal)
+
         self.robot.goal_manager.add(
-            GrabCupGoal("GRAB_STAIRS_CUP", 1, 0.80, 0.91, -ROBOT_CENTER_X, GrabCup),
-            goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 2, 0.725, 1.08, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_LEFT,)),
-            goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 3, 0.725, 1.40, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_RIGHT,)),
-            DepositCupGoal("DEPOSIT_CUP_HOME", 4, 1.0, 0.5, 0, DepositCup, (True,)),
-            GrabCupGoal("GRAB_SOUTH_MINE_CUP", 5, 1.75, 0.25, -ROBOT_CENTER_X, GrabCup),
-            DepositCupGoal("DEPOSIT_OPP_NORTH", 6, 0.67, 2.70, 0, DepositCup, (False,)),
-            GrabCupGoal("GRAB_PLATFORM_CUP", 7, 1.65, 1.50, -ROBOT_CENTER_X, GrabCup),
-            DepositCupGoal("DEPOSIT_OPP_SOUTH", 8, 1.33, 2.70, 0, DepositCup, (False,)),
+            #GrabCupGoal("GRAB_STAIRS_CUP", 1, 0.80, 0.91, -ROBOT_CENTER_X, GrabCup),
+            GCG("GRAB_STAIRS_CUP")
+            .weight(1)
+            .coords(0.80, 0.91)
+            .offset(-ROBOT_CENTER_X)
+            .state(GrabCup)
+            .build(),
+            #goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 2, 0.725, 1.08, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_LEFT,)),
+            G("DEPOSIT_CARPET_LEFT")
+            .weight(2)
+            .coords(0.725, 1.08)
+            .direction(DIRECTION_FORWARD)
+            .state(DepositCarpet, (SIDE_LEFT,))
+            .build(),
+            #goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 3, 0.725, 1.40, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_RIGHT,)),
+            G("DEPOSIT_CARPET_RIGHT")
+            .weight(3)
+            .coords(0.725, 1.40)
+            .direction(DIRECTION_FORWARD)
+            .state(DepositCarpet, (SIDE_RIGHT,))
+            .build(),
+            #DepositCupGoal("DEPOSIT_CUP_HOME", 4, 1.0, 0.5, 0, DepositCup, (True,)),
+            DCG("DEPOSIT_CUP_HOME")
+            .weight(4)
+            .coords(1.0, 0.5)
+            .state(DepositCup, (True,))
+            .build(),
+            #GrabCupGoal("GRAB_SOUTH_MINE_CUP", 5, 1.75, 0.25, -ROBOT_CENTER_X, GrabCup),
+            GCG("GRAB_SOUTH_MINE_CUP")
+            .weight(5)
+            .coords(1.75, 0.25)
+            .offset(-ROBOT_CENTER_X)
+            .state(GrabCup)
+            .build(),
+            #DepositCupGoal("DEPOSIT_OPP_NORTH", 6, 0.67, 2.70, 0, DepositCup, (False,)),
+            DCG("DEPOSIT_OPP_NORTH")
+            .weight(6)
+            .coords(0.67, 2.70)
+            .state(DepositCup, (False,))
+            .build(),
+            #GrabCupGoal("GRAB_PLATFORM_CUP", 7, 1.65, 1.50, -ROBOT_CENTER_X, GrabCup),
+            GCG("GRAB_PLATFORM_CUP")
+            .weight(7)
+            .coords(1.65, 1.50)
+            .offset(-ROBOT_CENTER_X)
+            .state(GrabCup)
+            .build(),
+            #DepositCupGoal("DEPOSIT_OPP_SOUTH", 8, 1.33, 2.70, 0, DepositCup, (False,)),
+            DCG("DEPOSIT_OPP_SOUTH")
+            .weight(8)
+            .coords(1.33, 2.70)
+            .state(DepositCup, (False,))
+            .build(),
         )
 
     def on_controller_status(self, packet):
