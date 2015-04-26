@@ -61,6 +61,7 @@ class Goal:
         self.is_current = False
         self.is_blacklisted = False
         self.uid = self.identifier
+        self.ratio_decc = None
         self.estimated_duration = None
         self.stats=GoalStats(identifier)
 
