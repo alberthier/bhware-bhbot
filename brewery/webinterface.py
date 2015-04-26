@@ -169,7 +169,9 @@ class WebInterface:
                         "yield MoveLineTo(1.7,0.0)"
                     ],
                     [
-                        "yield DefinePosition(0.0, 0.0, 0.0)",
+                        "yield DefinePosition(0.0, 0.0, 0.0)"
+                    ],
+                    [
                         "for i in range(10): yield RotateTo(2*math.pi/3); yield RotateTo(-2*math.pi/3); yield RotateTo(0.0)"
                     ]
 
