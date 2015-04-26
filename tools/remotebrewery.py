@@ -13,13 +13,14 @@ args = parser.parse_args()
 
 if args.push:
     bhware = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    subprocess.call(["rsync",
+    params=["rsync",
                      "--archive",
                      "--verbose",
                      "--ignore-times",
                      "--exclude-from", os.path.join(bhware, ".hgignore"),
                      "brewery",
-                     "root@{}:/root/bhware".format(args.remote)], cwd = bhware)
+                     "root@{}:/root/bhware".format(args.remote)]
+    subprocess.call(" ".join(params), cwd = bhware, shell=True)
 
 if args.run:
     os.execl("/usr/bin/ssh",
