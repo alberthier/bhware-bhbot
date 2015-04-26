@@ -778,7 +778,7 @@ class Internal(BasePacket):
         for key in self.properties:
             if len(dump) != 0:
                 dump += ', '
-            dump += "('" + key + "', '" + getattr(self, key) + "')"
+            dump += "('" + key + "', '" + str(getattr(self, key)) + "')"
         return "(" + dump + ")"
 
 
