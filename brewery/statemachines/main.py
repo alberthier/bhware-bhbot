@@ -45,7 +45,6 @@ def builder_at_point(side, robot_pose, x, y):
     px = 0.150
     py = 0.0725 if side == SIDE_LEFT else -0.0725
 
-    ra = math.atan2(robot_pose.virt.y, robot_pose.virt.x)
     da = math.atan2(y, x)
 
     ra = angle_between(robot_pose.virt.x, robot_pose.virt.y, x, y)
