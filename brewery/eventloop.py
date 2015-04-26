@@ -467,8 +467,8 @@ class Timer(object):
             self.timeout_date = to
             self.eventloop.next_timers.append(self)
         else:
-            if timeout_ms is not None:
-                self.timeout_ms = timeout_ms
+            if to is not None:
+                self.timeout_ms = to
             self.start()
 
 
