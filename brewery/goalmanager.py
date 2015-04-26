@@ -13,7 +13,14 @@ import tools
 
 from definitions import *
 
+import greplin
+import greplin.scales as scales
 
+class GoalStats(object):
+    real_duration = scales.StateTimeStat('real_duration')
+
+    def __init__(self,id):
+        scales.init(self, '/goals/'+id)
 
 class Goal:
     __slots__ = ["identifier",
@@ -28,7 +35,9 @@ class Goal:
                  "score",
                  "penality",
                  "status", "shared", "navigate", "trial_count","last_try",
-                 "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration"
+                 "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration",
+                 "ratio_decc",
+                 "stats"
                  ]
 
     def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
@@ -52,7 +61,11 @@ class Goal:
         self.is_current = False
         self.is_blacklisted = False
         self.uid = self.identifier
+        self.ratio_decc = None
         self.estimated_duration = None
+        self.stats=GoalStats(identifier)
+
+
 
     def clone(self):
         n = Goal(self.identifier, self.weight, self.x, self.y, self.offset, self.direction,
@@ -61,12 +74,17 @@ class Goal:
         n.penality = self.penality
         n.status = self.status
         n.trial_count = self.trial_count
-        n.last_try = datetime.datetime(self.last_try) if self.last_try else None
+        if self.last_try:
+            l=self.last_try
+            n.last_try = datetime.datetime(l.year,l.month,l.day,l.hour,l.minute,l.second,l.microsecond)
+        else:
+            n.last_try = None
         n.goal_manager = self.goal_manager
         n.is_current = self.is_current
         n.is_blacklisted = self.is_blacklisted
         n.uid = self.uid
         n.estimated_duration = self.estimated_duration
+        n.ratio_decc = self.ratio_decc
         return n
 
     @property
@@ -402,6 +420,7 @@ class GoalBuilder:
         self.goal_id = goal_id
         self.ctor = ctor
         self._estimated_time = None
+        self._disabled = False
         self.params = {"identifier":goal_id}
         self.default_values={"offset": 0}
 
@@ -440,6 +459,10 @@ class GoalBuilder:
     def estimated_duration(self, estimated_duration):
         self._estimated_duration = estimated_time
 
+    @tools.newobj
+    def disabled(self):
+        self._disabled = True
+
     def build(self):
         logger.log("Building goal {}".format(self.goal_id))
 
@@ -456,4 +479,9 @@ class GoalBuilder:
         g = self.ctor(**passed_params)
         if self._estimated_time:
             g.estimated_duration = self._estimated_duration
+            logger.log("estimated_duration={}".format(g.estimated_duration))
+
+        if self._disabled:
+            g.status = GOAL_DISABLED
+            logger.log("status={}".format(g.status))
         return g

@@ -13,6 +13,8 @@ import position
 import statemachine
 import tools
 import goaldecider
+import metrics
+import checks
 
 from definitions import *
 
@@ -198,6 +200,25 @@ class SpeedControl(statemachine.State):
             self.packet.vmax_limit = speed
         else:
             self.packet.vmax_limit = ROBOT_VMAX_LIMIT
+
+
+    def on_enter(self):
+        self.send_packet(self.packet)
+
+
+    def on_position_control_config(self, packet):
+        yield None
+
+
+class RatioDeccControl(statemachine.State):
+
+    def __init__(self, ratio = None):
+        statemachine.State.__init__(self)
+        self.packet = packets.PositionControlConfig()
+        if ratio is not None:
+            self.packet.ratio_decc = ratio
+        else:
+            self.packet.ratio_decc = ROBOT_DEFAULT_RATIO_DECC
 
 
     def on_enter(self):
@@ -524,6 +545,7 @@ class SafeMoveCurveTo(MoveCurveTo):
 class MoveLine(AbstractMove):
 
     def __init__(self, points, direction = DIRECTION_AUTO, virtual = True, opponent_handling_config = OPPONENT_HANDLING_STOP):
+        checks.check_type(direction, int)
         super().__init__(opponent_handling_config)
         poses = []
         for pt in points:
@@ -670,6 +692,7 @@ class FollowPath(statemachine.State):
             first_point = self.path[0]
             self.direction = tools.get_direction(self.robot.pose, first_point.virt.x, first_point.virt.y)
         for pose in self.path:
+            assert isinstance(pose, position.Pose)
             if self.direction == DIRECTION_FORWARD:
                 if not self.robot.is_looking_at(pose):
                     move = yield LookAt(pose.virt.x, pose.virt.y, DIRECTION_FORWARD)
@@ -887,8 +910,16 @@ class ExecuteGoals(statemachine.State):
                 current_navigation_succeeded = True
                 if goal.navigate :
                     logger.log('Navigating to goal')
+
+                    if goal.ratio_decc:
+                        logger.log("Goal has ratio_decc set to: {}".format(goal.ratio_decc))
+                        yield RatioDeccControl(goal.ratio_decc)
+
                     move = yield Navigate(goal.x, goal.y, goal.direction, goal.offset)
                     logger.log('End of navigation : {}'.format(TRAJECTORY.lookup_by_value[move.exit_reason]))
+
+                    if goal.ratio_decc:
+                        yield RatioDeccControl()
 
                     current_navigation_succeeded = move.exit_reason in [ TRAJECTORY_DESTINATION_REACHED, TRAJECTORY_STOP_REQUESTED ]
                     if current_navigation_succeeded:
@@ -945,9 +976,12 @@ class ExecuteGoalsV2(statemachine.State):
             if navigation_failures < 10:
                 goal=None
                 logger.log("Choosing the best goal")
-                identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=1, max_depth=3)
-                if identifier:
-                    goal=gm.get_goals(identifier)[0]
+                with metrics.STATS.duration.time():
+                    identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=1, max_depth=3)
+                    if identifier:
+                        goal=gm.get_goals(identifier)[0]
+
+                metrics.write("metrics.json")
             else:
                 logger.log("Escaping to anywhere !!")
                 yield EscapeToAnywhere()
@@ -987,7 +1021,8 @@ class ExecuteGoalsV2(statemachine.State):
                     state.goal = goal
                     state.exit_reason = GOAL_FAILED
 
-                    yield state
+                    with goal.stats.real_duration.acquire():
+                        yield state
 
                     logger.log('State exit reason : {}'.format(GOAL_STATUS.lookup_by_value[state.exit_reason]))
 

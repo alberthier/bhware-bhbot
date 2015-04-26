@@ -73,7 +73,7 @@ class ClientSocketChannel(asyncore.dispatcher_with_send):
         self.close()
         if self.existing_socket is None:
             if self.show_reconnect_error_log:
-                logger.log("{}: *** WARNING *** Connection closed, reconnecting".format(self.origin))
+                logger.log("{}: *** WARNING *** Connection closed, reconnecting to {}:{}".format(self.origin, *self.address))
             self.try_connect()
 
 
@@ -609,7 +609,7 @@ class EventLoop(object):
                 Timer(self, 0, self.process_packets_and_dispatch).start()
 
 
-    def do_send_packet(self, packet, packet_range_start, packet_range_end, channel):
+    def do_send_packet(self, packet: packets.BasePacket, packet_range_start, packet_range_end, channel):
         if packet.TYPE >= packet_range_start and packet.TYPE < packet_range_end:
             if channel is not None and channel.connected:
                 logger.log_packet(packet, "ARM")

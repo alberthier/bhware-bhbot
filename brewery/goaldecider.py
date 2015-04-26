@@ -158,7 +158,7 @@ class Explorer:
         self.logger.log("Finding best goal combination. Max depth: {} Max duration: {}"
                           .format(self.max_depth, self.max_duration))
 
-        self.logger.log("Considered goals are: {}".format((g.identifier for g in world.remaining_goals)))
+        self.logger.log("Considered goals are: {}".format([g.identifier for g in world.remaining_goals]))
 
         self.start_time = datetime.datetime.now()
 

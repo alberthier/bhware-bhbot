@@ -5,9 +5,16 @@ import signal
 import argparse
 import socket
 import sys
+import os
 
+def patch_sys_path():
+    current_dir=os.path.abspath(os.path.dirname(__file__))
+    sys.path.append(current_dir+"/../libs")
+    import glob
+    for p in glob.glob1(current_dir+"/../libs","*.egg"):
+        sys.path.append(current_dir+"/../libs/"+p)
 
-
+patch_sys_path()
 
 loop = None
 
@@ -44,7 +51,7 @@ if __name__ == "__main__":
             print(sys.path)
             import pydevd
             pydevd.settrace(args.pydev_debug[0], port=int(args.pydev_debug[1]), stdoutToServer=True,
-                                                          stderrToServer=True)
+                                                          stderrToServer=True, suspend=False)
 
     definitions.setup_definitions(args.hostname == "main")
 
