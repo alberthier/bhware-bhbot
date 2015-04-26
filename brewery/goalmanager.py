@@ -419,6 +419,7 @@ class GoalBuilder:
         self.goal_id = goal_id
         self.ctor = ctor
         self._estimated_time = None
+        self._disabled = False
         self.params = {"identifier":goal_id}
         self.default_values={"offset": 0}
 
@@ -457,6 +458,10 @@ class GoalBuilder:
     def estimated_duration(self, estimated_duration):
         self._estimated_duration = estimated_time
 
+    @tools.newobj
+    def disabled(self):
+        self._disabled = True
+
     def build(self):
         logger.log("Building goal {}".format(self.goal_id))
 
@@ -473,4 +478,9 @@ class GoalBuilder:
         g = self.ctor(**passed_params)
         if self._estimated_time:
             g.estimated_duration = self._estimated_duration
+            logger.log("estimated_duration={}".format(g.estimated_duration))
+
+        if self._disabled:
+            g.status = GOAL_DISABLED
+            logger.log("status={}".format(g.status))
         return g
