@@ -155,6 +155,29 @@ class WebInterface:
         ]
         result.append(["Misc", actions])
 
+        result.append(
+            [
+                "Calibration",
+                [
+
+                    [
+                        "yield DefinePosition(0.0, 0.0, 0.0)",
+                        "yield MoveLineTo(1.3,0.0)"
+                    ],
+                    [
+                        "yield DefinePosition(0.0, 0.0, 0.0)",
+                        "yield MoveLineTo(1.7,0.0)"
+                    ],
+                    [
+                        "yield DefinePosition(0.0, 0.0, 0.0)",
+                        "for i in range(10): yield RotateTo(2*math.pi/3); yield RotateTo(-2*math.pi/3); yield RotateTo(0.0)"
+                    ]
+
+                ]
+            ],
+
+        )
+
         return json.dumps(result)
 
 
