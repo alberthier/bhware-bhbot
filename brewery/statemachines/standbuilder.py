@@ -199,6 +199,7 @@ class BuildSpotlight(State):
             yield Trigger(self.fsm.LIGHTER_DEPOSIT)
             yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
             yield Timer(200)
+        yield MoveLineRelative(0.05)
         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
         yield Timer(200)
         yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)

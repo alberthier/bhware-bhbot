@@ -143,7 +143,7 @@ class Main(State):
             #goalmanager.Goal("DEPOSIT_SPOTLIGHT_PLATFORM", 8, 1.69, 1.3, 0, DIRECTION_FORWARD, BuildSpotlightPlatform),
             G("DEPOSIT_SPOTLIGHT_PLATFORM")
                 .weight(8)
-                .coords(1.69, 1.3)
+                .coords(1.64, 1.3)
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightPlatform)
                 .build()
@@ -423,7 +423,7 @@ class BuildSpotlightPlatform(State):
 
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_LEFT:
-            yield MoveLineRelative(-0.1)
+            yield MoveLineRelative(-0.15)
             self.fsm.builders[SIDE_LEFT].enabled = True
             self.send_packet(packets.StandbuilderIdle(SIDE_LEFT))
             self.exit_reason = GOAL_DONE
@@ -443,7 +443,7 @@ class BuildSpotlightHome(State):
 
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_RIGHT:
-            yield MoveLineRelative(-0.1)
+            yield MoveLineRelative(-0.15)
             self.fsm.builders[SIDE_RIGHT].enabled = True
             self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
             self.exit_reason = GOAL_DONE
