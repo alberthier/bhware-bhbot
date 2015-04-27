@@ -163,15 +163,16 @@ class Build(State):
             return
         if self.fsm.stand_count < 4:
             self.fsm.building = True
-            yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
             if self.fsm.stand_count < 3:
+                yield Trigger(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
                 yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
                 yield Trigger(self.fsm.ELEVATOR_UP)
-                yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
                 self.send_packet(packets.StandGrabbed(self.fsm.side))
+                yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
                 yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, self.fsm.ELEVATOR_DOWN)
                 yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID, self.fsm.ELEVATOR_ID], False)
             else:
+                yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
                 self.send_packet(packets.StandGrabbed(self.fsm.side))
             self.fsm.stand_count += 1
         self.fsm.building = False
@@ -199,12 +200,13 @@ class BuildSpotlight(State):
             yield Trigger(self.fsm.LIGHTER_DEPOSIT)
             yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
             yield Timer(200)
+        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
         yield MoveLineRelative(0.05)
         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
         yield Timer(200)
         yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
         yield Timer(500)
-        yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT, self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+        yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
         self.fsm.stand_count = 0
         self.send_packet(packets.BuildSpotlight(self.fsm.side))
         yield None

@@ -24,11 +24,6 @@ LEFT_START_X = 1.0
 LEFT_START_Y = 0.07 + ROBOT_CENTER_Y
 LEFT_START_ANGLE = math.pi / 2.0
 
-STAND_GRAB_OFFSET = 0.04
-STAND_GOAL_OFFSET = -0.25
-
-STAND_PRESENCE_SENSOR_OFFSET = 0.0
-
 
 
 
@@ -83,7 +78,7 @@ class Main(State):
                 .weight(2)
                 .coords(0.42, 0.30)
                 .direction(DIRECTION_FORWARD)
-                .state(GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False))
+                .state(GrabStand, (SIDE_LEFT, 0.200, 0.090, 0.04, False, False))
                 .build(),
             G("GRAB_STAIRS_STAND")
                 .weight(2)
@@ -96,21 +91,21 @@ class Main(State):
                 .weight(3)
                 .side(SIDE_LEFT)
                 .coords(1.355, 0.870)
-                .state(GoalGrabStand)
+                .state(GoalGrabStand, (0.04,))
                 .build(),
             #goalmanager.Goal("GRAB_PLATFORM_2_STAND", 4, 1.600, 0.900, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 1.770, 1.100, False, False)),,
             G("GRAB_PLATFORM_2_STAND")
                 .weight(4)
                 .coords(1.600, 0.900)
                 .direction(DIRECTION_FORWARD)
-                .state(GrabStand, (SIDE_LEFT, 1.770, 1.100, False, False))
+                .state(GrabStand, (SIDE_LEFT, 1.770, 1.100, 0.04, False, False))
                 .build(),
             #goalmanager.StandGoal("GRAB_PLATFORM_3_STAND", 5, SIDE_LEFT, 1.400, 1.300, GoalGrabStand),
             SG("GRAB_PLATFORM_3_STAND")
                 .weight(5)
                 .side(SIDE_LEFT)
                 .coords(1.400, 1.300)
-                .state(GoalGrabStand)
+                .state(GoalGrabStand, (0.04,))
                 .build(),
             #goalmanager.Goal("GRAB_SOUTH_MINE_STANDS", 6, 1.45, 0.22, 0, DIRECTION_FORWARD, GrabSouthMineStands),
             G("GRAB_SOUTH_MINE_STANDS")
@@ -226,8 +221,8 @@ class StaticStrategy(State):
     def on_enter(self):
         try:
             # GRAB_NORTH_STAIRS_STANDS
-            yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
-            yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
+            yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
+            yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.04, False)
             self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
             yield LookAtOpposite(0.42, 0.73)
             yield SafeMoveLineTo(0.42, 0.73)
@@ -235,27 +230,27 @@ class StaticStrategy(State):
             # GRAB_NORTH_MINE_STAND
             yield RotateTo(-math.pi / 2.0)
             yield SafeMoveLineTo(0.42, 0.30)
-            yield from self.grab_stand("GRAB_NORTH_MINE_STAND", SIDE_LEFT, 0.200, 0.090, False)
+            yield from self.grab_stand("GRAB_NORTH_MINE_STAND", SIDE_LEFT, 0.200, 0.090, 0.04, False)
             x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
             yield SafeMoveLineTo(x, y)
 
             # GRAB_PLATFORM_1_STAND
             yield LookAt(0.5, 0.62)
             yield SafeMoveLineTo(0.5, 0.62)
-            yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, False)
+            yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, 0.01, False)
 
             # GRAB_PLATFORM_2_STAND
-            yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, False)
+            yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, 0.01, False)
 
             # GRAB_PLATFORM_3_STAND
-            yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, False)
+            yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, 0.04, False)
 
             # GRAB_SOUTH_MINE_STANDS
             x, y = 1.45, 0.22
             yield LookAt(x, y)
             yield SafeMoveLineTo(x, y)
-            yield from self.grab_stand(None, SIDE_RIGHT, 1.750, 0.090, True)
-            yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.850, 0.090, True)
+            yield from self.grab_stand(None, SIDE_RIGHT, 1.750, 0.090, 0.03, True)
+            yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.850, 0.090, 0.04, True)
             yield ResettleAfterSouthMineStands()
             yield MoveLineTo(1.77, 0.22)
             kick = yield KickMineClaps()
@@ -267,8 +262,8 @@ class StaticStrategy(State):
         yield None
 
 
-    def grab_stand(self, goal_name, side, x, y, store_stand):
-        grab = yield GrabStand(side, x, y, store_stand)
+    def grab_stand(self, goal_name, side, x, y, stand_grab_offset, store_stand):
+        grab = yield GrabStand(side, x, y, stand_grab_offset, store_stand)
         if goal_name is not None:
             if grab.exit_reason == GOAL_DONE:
                 self.robot.goal_manager.update_goal_status(goal_name, GOAL_DONE)
@@ -280,11 +275,12 @@ class StaticStrategy(State):
 
 class GrabStand(State):
 
-    def __init__(self, side, x, y, store_stand, raise_on_error = True):
+    def __init__(self, side, x, y, stand_grab_offset, store_stand, raise_on_error = True):
         super().__init__()
         self.side = side
         self.x = x
         self.y = y
+        self.stand_grab_offset = stand_grab_offset
         self.store_stand = store_stand
         self.raise_on_error = raise_on_error
 
@@ -293,7 +289,7 @@ class GrabStand(State):
         x, y, angle = builder_at_point(self.side, self.robot.pose, self.x, self.y)
         ref_pose = Pose(self.robot.pose.x, self.robot.pose.y, angle, True)
         yield RotateTo(angle)
-        x, y = get_offset_position(ref_pose, x, y, STAND_GRAB_OFFSET)
+        x, y = get_offset_position(ref_pose, x, y, self.stand_grab_offset)
         self.exit_reason = GOAL_FAILED
         try:
             move = yield SafeMoveLineTo(x, y)
@@ -313,8 +309,9 @@ class GrabStand(State):
 
 class GoalGrabStand(GrabStand):
 
-    def __init__(self):
-        super().__init__(SIDE_LEFT, 0, 0, False, False)
+    def __init__(self, stand_grab_offset):
+        super().__init__(SIDE_LEFT, 0, 0, stand_grab_offset, False, False)
+
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
@@ -329,9 +326,9 @@ class GrabNorthMineStands(State):
 
     def on_enter(self):
 
-        grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, True)
+        grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
         if grab.exit_reason == GOAL_DONE:
-            yield GrabStand(SIDE_RIGHT, 0.100, 0.850, False)
+            yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.04, False)
 
         self.exit_reason = grab.exit_reason
         yield None
@@ -342,9 +339,9 @@ class GrabNorthMineStands(State):
 class GrabSouthMineStands(State):
 
     def on_enter(self):
-        grab = yield GrabStand(SIDE_RIGHT, 1.75, 0.09, True)
+        grab = yield GrabStand(SIDE_RIGHT, 1.75, 0.09, 0.03, True)
         if grab.exit_reason == GOAL_DONE:
-            grab = yield GrabStand(SIDE_RIGHT, 1.85, 0.09, False)
+            grab = yield GrabStand(SIDE_RIGHT, 1.85, 0.09, 0.04, False)
         self.exit_reason = grab.exit_reason
         yield ResettleAfterSouthMineStands()
 
