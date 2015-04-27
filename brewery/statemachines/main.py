@@ -291,8 +291,9 @@ class GrabStand(State):
 
     def on_enter(self):
         x, y, angle = builder_at_point(self.side, self.robot.pose, self.x, self.y)
+        ref_pose = Pose(self.robot.pose.x, self.robot.pose.y, angle, True)
         yield RotateTo(angle)
-        x, y = get_offset_position(self.robot.pose, x, y, STAND_GRAB_OFFSET)
+        x, y = get_offset_position(ref_pose, x, y, STAND_GRAB_OFFSET)
         self.exit_reason = GOAL_FAILED
         try:
             move = yield SafeMoveLineTo(x, y)
@@ -321,6 +322,9 @@ class GoalGrabStand(GrabStand):
         self.y = goal.y
         yield from super().on_enter()
 
+
+
+
 class GrabNorthMineStands(State):
 
     def on_enter(self):
@@ -331,6 +335,8 @@ class GrabNorthMineStands(State):
 
         self.exit_reason = grab.exit_reason
         yield None
+
+
 
 
 class GrabSouthMineStands(State):
