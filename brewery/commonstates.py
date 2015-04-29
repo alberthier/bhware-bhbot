@@ -942,7 +942,10 @@ class ExecuteGoals(statemachine.State):
                     state.goal = goal
                     state.exit_reason = GOAL_FAILED
 
-                    yield state
+                    try:
+                        yield state
+                    except:
+                        pass
 
                     logger.log('State exit reason : {}'.format(GOAL_STATUS.lookup_by_value[state.exit_reason]))
 
@@ -1022,7 +1025,10 @@ class ExecuteGoalsV2(statemachine.State):
                     state.exit_reason = GOAL_FAILED
 
                     with goal.stats.real_duration.acquire():
-                        yield state
+                        try:
+                            yield state
+                        except:
+                            pass
 
                     logger.log('State exit reason : {}'.format(GOAL_STATUS.lookup_by_value[state.exit_reason]))
 
