@@ -228,6 +228,26 @@ class StaticStrategy(State):
     def on_enter(self):
         try:
             # GRAB_NORTH_STAIRS_STANDS
+            try:
+                yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, 0.01, False)
+            except:
+                self.log("GRAB_PLATFORM_1_STAND aborted")
+
+            # GRAB_PLATFORM_2_STAND
+            try:
+                yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, 0.01, False)
+            except:
+                self.log("GRAB_PLATFORM_2_STAND aborted")
+
+            # GRAB_PLATFORM_3_STAND
+            try:
+                yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, 0.04, False)
+            except:
+                self.log("GRAB_PLATFORM_3_STAND aborted")
+
+            yield RotateTo(-math.pi / 2.0)
+            yield SafeMoveLineTo(self.robot.pose.x, 0.850 - 0.0725)
+
             yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
             yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.04, False)
             self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
@@ -238,31 +258,17 @@ class StaticStrategy(State):
             yield RotateTo(-math.pi / 2.0)
             yield SafeMoveLineTo(0.42, 0.30)
             yield from self.grab_stand("GRAB_NORTH_MINE_STAND", SIDE_LEFT, 0.200, 0.090, 0.04, False)
-            x, y = get_crossing_point(self.robot.pose.virt.x, self.robot.pose.virt.y, self.robot.pose.virt.angle, 0.5, 1.5, math.pi / 2.0)
-            yield SafeMoveLineTo(x, y)
-
-            # GRAB_PLATFORM_1_STAND
-            yield LookAt(0.5, 0.62)
-            yield SafeMoveLineTo(0.5, 0.62)
-            yield from self.grab_stand("GRAB_PLATFORM_1_STAND", SIDE_LEFT, 1.355, 0.870, 0.01, False)
-
-            # GRAB_PLATFORM_2_STAND
-            yield from self.grab_stand("GRAB_PLATFORM_2_STAND", SIDE_LEFT, 1.770, 1.100, 0.01, False)
-
-            # GRAB_PLATFORM_3_STAND
-            yield from self.grab_stand("GRAB_PLATFORM_3_STAND", SIDE_LEFT, 1.400, 1.300, 0.04, False)
 
             # GRAB_SOUTH_MINE_STANDS
-            x, y = 1.45, 0.22
-            yield LookAt(x, y)
-            yield SafeMoveLineTo(x, y)
-            yield from self.grab_stand(None, SIDE_RIGHT, 1.750, 0.090, 0.03, True)
-            yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.850, 0.090, 0.04, True)
-            yield ResettleAfterSouthMineStands()
-            yield MoveLineTo(1.77, 0.22)
-            kick = yield KickMineClaps()
-            if kick.exit_reason == GOAL_DONE:
-                self.robot.goal_manager.update_goal_status("KICK_MINE_CLAPS", GOAL_DONE)
+            navigate = yield Navigate(1.45, 0.22)
+            if navigate.exit_reason == TRAJECTORY_DESTINATION_REACHED:
+                yield from self.grab_stand(None, SIDE_RIGHT, 1.750, 0.090, 0.03, True)
+                yield from self.grab_stand("GRAB_SOUTH_MINE_STANDS", SIDE_RIGHT, 1.850, 0.090, 0.04, True)
+                yield ResettleAfterSouthMineStands()
+                yield MoveLineTo(1.77, 0.22)
+                kick = yield KickMineClaps()
+                if kick.exit_reason == GOAL_DONE:
+                    self.robot.goal_manager.update_goal_status("KICK_MINE_CLAPS", GOAL_DONE)
 
         except OpponentInTheWay:
             pass
