@@ -719,6 +719,17 @@ class InterbotGeneric(BasePacket):
     )
 
 
+
+
+class InterbotUnlockZone(BasePacket):
+
+    TYPE = 204
+
+    DEFINITION = (
+        ('zone', String(255, "", "Zone name")),
+    )
+
+
 # Media Player
 
 

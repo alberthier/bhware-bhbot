@@ -247,6 +247,8 @@ class StaticStrategy(State):
 
             yield RotateTo(-math.pi / 2.0)
             yield SafeMoveLineTo(self.robot.pose.x, 0.850 - 0.0725)
+            yield RotateTo(math.pi)
+            yield WaitForZoneFree("NORTH_MINE", 5000)
 
             yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
             yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.04, False)

@@ -878,6 +878,20 @@ class GetInputStatus(statemachine.State):
 
 
 
+class WaitForZoneFree(statemachine.Timer):
+
+    def __init__(self, zone, timeout):
+        super().__init__(timeout)
+        self.zone = zone
+
+
+    def on_interbot_unlock_zone(self, packet):
+        if packet.zone == self.zone:
+            yield None
+
+
+
+
 ##################################################
 # GOAL MANAGEMENT
 ##################################################
