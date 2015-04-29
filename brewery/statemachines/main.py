@@ -93,7 +93,7 @@ class Main(State):
                 .weight(2)
                 .coords(0.4, 0.77)
                 .direction(DIRECTION_FORWARD)
-                .state(GrabNorthMineStands)
+                .state(GrabStairsStands)
                 .build(),
             #StandGoal("GRAB_PLATFORM_1_STAND", 3, SIDE_LEFT, 1.355, 0.870, GoalGrabStand),
             SG("GRAB_PLATFORM_1_STAND")
@@ -151,9 +151,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightPlatform)
                 .build()
-
-
-        )
+            )
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
@@ -331,7 +329,7 @@ class GoalGrabStand(GrabStand):
 
 
 
-class GrabNorthMineStands(State):
+class GrabStairsStands(State):
 
     def on_enter(self):
 
