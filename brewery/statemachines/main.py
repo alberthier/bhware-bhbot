@@ -57,6 +57,15 @@ def right_builder_at_point(robot_pose, x, y):
 
 
 
+class StandGoal(goalmanager.Goal):
+
+    def __init__(self, identifier, weight, side, x, y, handler_state, ctor_parameters = None):
+        super().__init__(identifier, weight, x, y, STAND_GOAL_OFFSET, DIRECTION_FORWARD, handler_state, ctor_parameters)
+        self.side = side
+
+
+
+
 class Main(State):
 
     def on_enter(self):
@@ -69,8 +78,8 @@ class Main(State):
             SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
         }
 
-        G=goalmanager.GoalBuilder
-        SG=functools.partial(goalmanager.GoalBuilder, ctor=goalmanager.StandGoal)
+        G = goalmanager.GoalBuilder
+        SG = functools.partial(goalmanager.GoalBuilder, ctor = StandGoal)
 
         self.robot.goal_manager.add(
             #goalmanager.Goal("GRAB_NORTH_MINE_STAND", 2, 0.42, 0.30, 0, DIRECTION_FORWARD, GrabStand, (SIDE_LEFT, 0.200, 0.090, False, False)),

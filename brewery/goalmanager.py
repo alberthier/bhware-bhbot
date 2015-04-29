@@ -146,11 +146,6 @@ class Goal:
         pass
 
 
-class StandGoal(Goal):
-
-    def __init__(self, identifier, weight, side, x, y, handler_state, ctor_parameters = None):
-        super().__init__(identifier, weight, x, y, STAND_GOAL_OFFSET, DIRECTION_FORWARD, handler_state, ctor_parameters)
-        self.side = side
 
 
 class GoalManager:
