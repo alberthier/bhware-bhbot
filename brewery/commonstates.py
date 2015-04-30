@@ -860,6 +860,26 @@ class ServoTorqueControl(statemachine.State):
 
 
 
+class ReadServoPosition(statemachine.State):
+
+    def __init__(self, servo_id):
+        self.servo_id = servo_id
+        self.value = -1
+
+
+    def on_enter(self):
+        cmd = makeServoReadCommand((self.servo_id, 0))
+        self.send_packet(packets.ServoControl(*cmd))
+
+
+    def on_servo_control(self, packet):
+        if packet.id == self.servo_id:
+            self.value = packet.value
+            yield None
+
+
+
+
 class GetInputStatus(statemachine.State):
 
     def __init__(self, id):
