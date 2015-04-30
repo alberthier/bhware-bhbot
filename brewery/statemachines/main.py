@@ -25,8 +25,6 @@ LEFT_START_Y = 0.070 + ROBOT_CENTER_Y
 LEFT_START_ANGLE = math.pi / 2.0
 
 
-
-
 def left_builder_at_pose(x, y, angle):
     return get_center_pose_for_point(0.150, 0.0725, x, y, angle)
 
@@ -59,7 +57,15 @@ def right_builder_at_point(robot_pose, x, y):
 
 class Main(State):
 
+    def init_platform_build_position(self):
+        cx, cy, ca = get_center_pose_for_point(0.150, -0.0725, 2.00 - 0.05, 1.20 - 0.05, math.pi / 4.0)
+        self.fsm.build_spotlight_platform_x = cx - 0.045
+        self.fsm.build_spotlight_platform_y = cy - 0.045
+
+
     def on_enter(self):
+        self.init_platform_build_position()
+
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
@@ -131,7 +137,7 @@ class Main(State):
                 .build(),
             G("BUILD_SPOTLIGHT_PLATFORM")
                 .weight(8)
-                .coords(1.64, 1.3)
+                .coords(self.fsm.build_spotlight_platform_x - 0.05, self.fsm.build_spotlight_platform_y - 0.05)
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightPlatform)
                 .build()
@@ -244,14 +250,28 @@ class StaticStrategy(State):
             yield GrabNorthCornerStand()
             self.robot.goal_manager.update_goal_status("GRAB_NORTH_CORNER_STAND", GOAL_DONE)
 
-            navigate = yield Navigate(1.45, 0.22)
-            if navigate.exit_reason == TRAJECTORY_DESTINATION_REACHED:
-                yield GrabSouthCornerStands()
-                self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
-                yield MoveLineTo(1.77, 0.22)
-                kick = yield KickMineClaps()
-                if kick.exit_reason == GOAL_DONE:
-                    self.robot.goal_manager.update_goal_status("KICK_MINE_CLAPS", GOAL_DONE)
+            yield LookAtOpposite(0.60, 0.60)
+            yield SafeMoveLineTo(0.60, 0.60)
+            yield RotateTo(math.pi)
+            yield SafeMoveLineTo(1.00, 0.60)
+            yield BuildSpotlightHome()
+            self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
+            yield SafeMoveLineTo(1.00, 0.60)
+            yield RotateTo(0.0)
+            yield SafeMoveLineTo(1.45, 0.60)
+            yield LookAt(1.45, 0.22)
+            yield SafeMoveLineTo(1.45, 0.22)
+
+            yield GrabSouthCornerStands()
+            self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
+            yield MoveLineTo(1.77, 0.22)
+            kick = yield KickMineClaps()
+            if kick.exit_reason == GOAL_DONE:
+                self.robot.goal_manager.update_goal_status("KICK_MINE_CLAPS", GOAL_DONE)
+            yield LookAt(self.fsm.build_spotlight_platform_x, self.fsm.build_spotlight_platform_y)
+            yield MoveLineTo(self.fsm.build_spotlight_platform_x, self.fsm.build_spotlight_platform_y)
+            yield BuildSpotlightPlatform()
+            self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_PLATFORM", GOAL_DONE)
 
         except OpponentInTheWay:
             pass
@@ -384,6 +404,8 @@ class KickMineClaps(State):
         yield Trigger(self.commands[-1]) # Use last command in any case as the move may have failed
         if move.exit_reason == TRAJECTORY_DESTINATION_REACHED:
             self.exit_reason = GOAL_DONE
+        else:
+            self.exit_reason = GOAL_FAILED
         yield None
 
 
@@ -417,16 +439,16 @@ class KickTheirClap(State):
 class BuildSpotlightPlatform(State):
 
     def on_enter(self):
-        yield RotateTo(0.0)
-        self.fsm.builders[SIDE_LEFT].enabled = False
-        self.send_packet(packets.BuildSpotlight(SIDE_LEFT))
+        yield RotateTo(math.pi / 4.0)
+        self.fsm.builders[SIDE_RIGHT].enabled = False
+        self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
 
 
     def on_build_spotlight(self, packet):
-        if packet.side == SIDE_LEFT:
+        if packet.side == SIDE_RIGHT:
             yield MoveLineRelative(-0.15)
-            self.fsm.builders[SIDE_LEFT].enabled = True
-            self.send_packet(packets.StandbuilderIdle(SIDE_LEFT))
+            self.fsm.builders[SIDE_RIGHT].enabled = True
+            self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
             self.exit_reason = GOAL_DONE
             yield None
 
@@ -438,15 +460,15 @@ class BuildSpotlightHome(State):
     def on_enter(self):
         yield RotateTo(-math.pi / 2)
         yield MoveLineTo(1.0, 0.5)
-        self.fsm.builders[SIDE_RIGHT].enabled = False
-        self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
+        self.fsm.builders[SIDE_LEFT].enabled = False
+        self.send_packet(packets.BuildSpotlight(SIDE_LEFT))
 
 
     def on_build_spotlight(self, packet):
-        if packet.side == SIDE_RIGHT:
+        if packet.side == SIDE_LEFT:
             yield MoveLineRelative(-0.15)
-            self.fsm.builders[SIDE_RIGHT].enabled = True
-            self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
+            self.fsm.builders[SIDE_LEFT].enabled = True
+            self.send_packet(packets.StandbuilderIdle(SIDE_LEFT))
             self.exit_reason = GOAL_DONE
             yield None
 
