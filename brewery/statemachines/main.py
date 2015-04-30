@@ -216,16 +216,19 @@ class StaticStrategy(State):
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_WEST_STAND", GOAL_DONE)
             except:
                 self.log("GRAB_CENTER_WEST_STAND aborted")
+                yield MoveLineRelative(-0.100)
             try:
                 yield GrabCenterEastStand()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_EAST_STAND", GOAL_DONE)
             except:
                 self.log("GRAB_CENTER_EAST_STAND aborted")
+                yield MoveLineRelative(-0.100)
             try:
                 yield GrabCenterSouthStand()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_SOUTH_STAND", GOAL_DONE)
             except:
                 self.log("GRAB_CENTER_SOUTH_STAND aborted")
+                yield MoveLineRelative(-0.100)
 
             yield RotateTo(-math.pi / 2.0)
             yield SafeMoveLineTo(self.robot.pose.x, 0.850 - 0.0725)
