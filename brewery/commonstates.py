@@ -759,7 +759,7 @@ class GotoHome(Navigate):
 
 
 
-class Trigger(statemachine.State):
+class Trigger(statemachine.Timer):
 
     TYPE               = 0
     ID                 = 1
@@ -790,8 +790,12 @@ class Trigger(statemachine.State):
 
         self.status = False
         self.statuses = {}
+        max_timeout = 0
         for cmd in self.commands:
             self.statuses[cmd[self.TYPED_ID]] = False
+            if cmd[self.TYPED_ID][self.TYPE] in [ ACTUATOR_TYPE_SERVO_AX, ACTUATOR_TYPE_SERVO_RX ]:
+                max_timeout = max(max_timeout, cmd[self.SERVO_TIMEOUT])
+        super().__init__(max_timeout + 2000)
 
 
     def on_enter(self):
@@ -838,6 +842,11 @@ class Trigger(statemachine.State):
         if len(self.commands) == 0:
             self.status = not (False in self.statuses)
             yield None
+
+
+    def on_timeout(self):
+        self.log_error("Trigger timed out !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        yield from super().on_timeout()
 
 
 
