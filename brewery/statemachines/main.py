@@ -78,9 +78,8 @@ class Main(State):
             SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
         }
 
-        # TODO: make dynamic
-        self.has_left_bulb = True
-        self.has_right_bulb = True
+        self.robot.has_left_bulb = False
+        self.robot.has_right_bulb = False
 
         G = goalmanager.GoalBuilder
         SG = functools.partial(goalmanager.GoalBuilder, ctor = StandGoal)
