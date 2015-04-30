@@ -18,7 +18,10 @@ from tools import *
 class Main(State):
 
     def on_enter(self):
-        if self.fsm.side == SIDE_LEFT:
+        self.setup()
+
+    def setup(self):
+        if self.fsm.side == SIDE_LEFT and self.robot.team == TEAM_LEFT:
             self.fsm.PLIERS_LEFT_INIT      = LEFT_BUILDER_PLIERS_LEFT_INIT
             self.fsm.PLIERS_LEFT_CLOSE     = LEFT_BUILDER_PLIERS_LEFT_CLOSE
             self.fsm.PLIERS_LEFT_HOLD      = LEFT_BUILDER_PLIERS_LEFT_HOLD
@@ -95,6 +98,7 @@ class Main(State):
 
 
     def on_start(self, packet):
+        self.setup() # Ensure we take the color correctly into account (we may change it after the robot is booted)
         if packet.value == 0:
             self.fsm.stand_count = 0
             self.fsm.building = False
