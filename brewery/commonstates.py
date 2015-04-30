@@ -898,15 +898,20 @@ class GetInputStatus(statemachine.State):
 
 
 
-class WaitForZoneFree(statemachine.Timer):
+class WaitForUnlock(statemachine.Timer):
 
-    def __init__(self, zone, timeout):
+    def __init__(self, name, timeout):
         super().__init__(timeout)
-        self.zone = zone
+        self.name = name
 
 
-    def on_interbot_unlock_zone(self, packet):
-        if packet.zone == self.zone:
+    def on_enter(self):
+        if not self.robot.is_locked(self.name):
+            yield None
+
+
+    def on_interbot_unlock(self, packet):
+        if packet.name == self.name:
             yield None
 
 

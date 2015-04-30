@@ -26,6 +26,7 @@ class Robot(object):
         #TODO: make dynamic
         self.has_left_bulb=True
         self.has_right_bulb=True
+        self.locks = set()
 
 
     def is_looking_at(self, pose):
@@ -68,3 +69,15 @@ class Robot(object):
         return self._team
 
     team = property(get_team, set_team)
+
+
+    def lock(self, name):
+        self.locks.add(name)
+
+
+    def unlock(self, name):
+        self.locks.discard(name)
+
+
+    def is_locked(self, name):
+        return name in self.locks

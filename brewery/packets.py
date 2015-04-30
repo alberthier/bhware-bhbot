@@ -721,12 +721,23 @@ class InterbotGeneric(BasePacket):
 
 
 
-class InterbotUnlockZone(BasePacket):
+class InterbotLock(BasePacket):
 
     TYPE = 204
 
     DEFINITION = (
-        ('zone', String(255, "", "Zone name")),
+        ('zone', String(255, "", "Name")),
+    )
+
+
+
+
+class InterbotUnlock(BasePacket):
+
+    TYPE = 205
+
+    DEFINITION = (
+        ('zone', String(255, "", "Name")),
     )
 
 
