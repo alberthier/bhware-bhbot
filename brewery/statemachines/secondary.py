@@ -59,60 +59,54 @@ class Main(State):
         GCG=functools.partial(goalmanager.GoalBuilder, ctor=GrabCupGoal)
         DCG=functools.partial(goalmanager.GoalBuilder, ctor=DepositCupGoal)
 
+        grab_offset = -(ROBOT_CENTER_X + 0.02)
+
         self.robot.goal_manager.add(
-            #GrabCupGoal("GRAB_STAIRS_CUP", 1, 0.80, 0.91, -ROBOT_CENTER_X, GrabCup),
             GCG("GRAB_STAIRS_CUP")
-            .weight(1)
-            .coords(0.80, 0.91)
-            .offset(-ROBOT_CENTER_X)
-            .state(GrabCup)
-            .build(),
-            #goalmanager.Goal("DEPOSIT_CARPET_LEFT" , 2, 0.725, 1.08, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_LEFT,)),
+                .weight(1)
+                .coords(0.80, 0.91)
+                .offset(grab_offset)
+                .state(GrabCup)
+                .build(),
             G("DEPOSIT_CARPET_LEFT")
-            .weight(2)
-            .coords(0.725, 1.08)
-            .direction(DIRECTION_FORWARD)
-            .state(DepositCarpet, (SIDE_LEFT,))
-            .build(),
-            #goalmanager.Goal("DEPOSIT_CARPET_RIGHT", 3, 0.725, 1.40, 0, DIRECTION_FORWARD, DepositCarpet, (SIDE_RIGHT,)),
+                .weight(2)
+                .coords(0.725, 1.08)
+                .direction(DIRECTION_FORWARD)
+                .state(DepositCarpet, (SIDE_LEFT,))
+                .build(),
             G("DEPOSIT_CARPET_RIGHT")
-            .weight(3)
-            .coords(0.725, 1.40)
-            .direction(DIRECTION_FORWARD)
-            .state(DepositCarpet, (SIDE_RIGHT,))
-            .build(),
-            #DepositCupGoal("DEPOSIT_CUP_HOME", 4, 1.0, 0.5, 0, DepositCup, (True,)),
+                .weight(3)
+                .coords(0.725, 1.40)
+                .direction(DIRECTION_FORWARD)
+                .state(DepositCarpet, (SIDE_RIGHT,))
+                .build(),
             DCG("DEPOSIT_CUP_HOME")
-            .weight(4)
-            .coords(1.0, 0.5)
-            .state(DepositCup, (True,))
-            .build(),
-            #GrabCupGoal("GRAB_SOUTH_MINE_CUP", 5, 1.75, 0.25, -ROBOT_CENTER_X, GrabCup),
+                .weight(4)
+                .coords(1.0, 0.5)
+                .state(DepositCup, (True,))
+                .build(),
             GCG("GRAB_SOUTH_MINE_CUP")
-            .weight(5)
-            .coords(1.75, 0.25)
-            .offset(-ROBOT_CENTER_X)
-            .state(GrabCup)
-            .build(),
-            #DepositCupGoal("DEPOSIT_OPP_NORTH", 6, 0.67, 2.70, 0, DepositCup, (False,)),
+                .weight(5)
+                .coords(1.75, 0.25)
+                .offset(grab_offset)
+                .state(GrabCup)
+                .build(),
             DCG("DEPOSIT_OPP_NORTH")
-            .weight(6)
-            .coords(0.67, 2.70)
-            .state(DepositCup, (False,))
-            .build(),
-            #GrabCupGoal("GRAB_PLATFORM_CUP", 7, 1.65, 1.50, -ROBOT_CENTER_X, GrabCup),
+                .weight(6)
+                .coords(0.67, 2.70)
+                .state(DepositCup, (False,))
+                .build(),
             GCG("GRAB_PLATFORM_CUP")
-            .weight(7)
-            .coords(1.65, 1.50)
-            .offset(-ROBOT_CENTER_X)
-            .state(GrabCup)
-            .build(),
-            #DepositCupGoal("DEPOSIT_OPP_SOUTH", 8, 1.33, 2.70, 0, DepositCup, (False,)),
+                .weight(7)
+                .coords(1.65, 1.50)
+                .offset(grab_offset)
+                .state(GrabCup)
+                .build(),
             DCG("DEPOSIT_OPP_SOUTH")
-            .weight(8)
-            .coords(1.33, 2.70)
-            .state(DepositCup, (False,))
-            .build(),
+                .weight(8)
+                .coords(1.33, 2.70)
+                .state(DepositCup, (False,))
+                .build(),
         )
 
     def on_controller_status(self, packet):
@@ -129,6 +123,7 @@ class Main(State):
             self.yield_at(90000, EndOfMatch())
             logger.log("Starting ...")
             self.send_packet(packets.ServoControl(*CUP_GRIPPER_OPEN))
+            yield StaticStrategy()
             yield ExecuteGoals()
 
 
@@ -151,8 +146,7 @@ class CalibratePosition(State):
         start_x = 1.0
         start_y = 0.54
 
-        apose = position.Pose(0.80, 0.91, None, True)
-        start_angle = math.atan2(apose.y - start_y, apose.x - start_x) + math.pi
+        start_angle = math.atan2(0.91 - start_y, 0.80 - start_x) + math.pi
         start_angle = tools.normalize_angle(start_angle)
 
         if IS_HOST_DEVICE_ARM:
@@ -167,6 +161,39 @@ class CalibratePosition(State):
         else:
             yield DefinePosition(start_x, start_y, start_angle)
         yield None
+
+
+
+
+class StaticStrategy(State):
+
+    def on_enter(self):
+        try:
+            self.send_packet(packets.InterbotLock("NORTH_ZONE"))
+            yield from self.execute_goal("GRAB_STAIRS_CUP")
+            yield from self.execute_goal("DEPOSIT_CARPET_LEFT")
+            yield from self.execute_goal("DEPOSIT_CARPET_RIGHT")
+            yield LookAtOpposite(1.0, 0.55)
+            yield SafeMoveLineTo(1.0, 0.55)
+            self.send_packet(packets.InterbotUnlock("NORTH_ZONE"))
+            yield from self.execute_goal("DEPOSIT_CUP_HOME")
+            yield WaitForUnlock("SOUTH_ZONE", 5000)
+            yield from self.execute_goal("GRAB_SOUTH_MINE_CUP")
+        except OpponentInTheWay:
+            pass
+        yield None
+
+
+    def execute_goal(self, name):
+        goal = self.robot.goal_manager.get_goals(name)[0]
+        x, y = get_offset_position(self.robot.pose, goal.x, goal.y, goal.offset)
+        if goal.direction == DIRECTION_FORWARD:
+            yield LookAt(x, y)
+        else:
+            yield LookAtOpposite(x, y)
+        yield SafeMoveLineTo(x, y)
+        yield goal.get_state()
+        self.robot.goal_manager.update_goal_status(name, GOAL_DONE)
 
 
 
@@ -193,16 +220,15 @@ class DepositCup(State):
 
 
     def on_enter(self):
-        goal = self.robot.goal_manager.get_current_goal()
         if self.home:
             yield RotateTo(math.pi / 2.0)
-            yield MoveLineTo(goal.x, 0.30)
+            yield MoveLineTo(1.0, 0.30)
         yield Timer(500)
         yield Trigger(CUP_GRIPPER_HALF_OPEN)
         yield Timer(500)
         yield Trigger(CUP_GRIPPER_OPEN)
         if self.home:
-            yield MoveLineTo(goal.x, goal.y)
+            yield MoveLineTo(1.0, 0.65)
         else:
             yield MoveLineRelative(0.05)
         self.robot.holding_cup = False

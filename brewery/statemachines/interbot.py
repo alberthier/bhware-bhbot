@@ -69,8 +69,8 @@ class Main(Timer):
 
 
     def on_interbot_lock(self, packet):
-        self.robot.lock(packet.name)
+        self.robot.lock(packet.lock_name)
 
 
     def on_interbot_unlock(self, packet):
-        self.robot.unlock(packet.name)
+        self.robot.unlock(packet.lock_name)

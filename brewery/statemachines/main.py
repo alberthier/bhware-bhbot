@@ -217,6 +217,7 @@ class StaticStrategy(State):
 
     def on_enter(self):
         try:
+            self.send_packet(packets.InterbotLock("SOUTH_ZONE"))
             try:
                 yield GrabCenterWestStand()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_WEST_STAND", GOAL_DONE)
@@ -240,7 +241,10 @@ class StaticStrategy(State):
             yield SafeMoveLineTo(self.robot.pose.x, 0.850 - 0.0725)
             yield RotateTo(math.pi)
 
+            yield WaitForUnlock("NORTH_ZONE", 5000)
+
             yield GrabStairsStands()
+            self.send_packet(packets.InterbotUnlock("SOUTH_ZONE"))
             self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
             yield LookAtOpposite(0.42, 0.73)
             yield SafeMoveLineTo(0.42, 0.73)

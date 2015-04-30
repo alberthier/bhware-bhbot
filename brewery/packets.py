@@ -726,7 +726,7 @@ class InterbotLock(BasePacket):
     TYPE = 204
 
     DEFINITION = (
-        ('zone', String(255, "", "Name")),
+        ('lock_name', String(255, "", "Name")),
     )
 
 
@@ -737,7 +737,7 @@ class InterbotUnlock(BasePacket):
     TYPE = 205
 
     DEFINITION = (
-        ('zone', String(255, "", "Name")),
+        ('lock_name', String(255, "", "Name")),
     )
 
 

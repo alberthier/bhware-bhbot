@@ -909,18 +909,18 @@ class GetInputStatus(statemachine.State):
 
 class WaitForUnlock(statemachine.Timer):
 
-    def __init__(self, name, timeout):
+    def __init__(self, lock_name, timeout):
         super().__init__(timeout)
-        self.name = name
+        self.lock_name = lock_name
 
 
     def on_enter(self):
-        if not self.robot.is_locked(self.name):
+        if not self.robot.is_locked(self.lock_name):
             yield None
 
 
     def on_interbot_unlock(self, packet):
-        if packet.name == self.name:
+        if packet.lock_name == self.lock_name:
             yield None
 
 
