@@ -699,14 +699,25 @@ class FollowPath(statemachine.State):
             else:
                 if not self.robot.is_looking_at_opposite(pose):
                     move = yield LookAtOpposite(pose.virt.x, pose.virt.y, DIRECTION_FORWARD)
-            try:
-                move = SafeMoveLine([pose], self.direction)
-                yield move
-            except OpponentInTheWay:
+            move = self.create_move_line(pose, self.direction)
+            yield move
+            if move.exit_reason != TRAJECTORY_DESTINATION_REACHED:
                 break
         self.robot.destination = None
         self.exit_reason = move.exit_reason
         yield None
+
+
+    def create_move_line(self, pose, direction):
+        return MoveLine([pose], direction)
+
+
+
+
+class SafeFollowPath(FollowPath):
+
+    def create_move_line(self, pose, direction):
+        return SafeMoveLine(pose, direction)
 
 
 
@@ -743,10 +754,23 @@ class Navigate(statemachine.State):
             self.exit_reason = TRAJECTORY_DESTINATION_UNREACHABLE
             yield None
             return
-        move = yield FollowPath(path, self.direction)
+        move = self.create_follow_path(path, self.direction)
+        yield move
         self.direction = move.direction # fetch the real move direction in case of DIRECTION_AUTO for the caller
         self.exit_reason = move.exit_reason
         yield None
+
+
+    def create_follow_path(self, path, direction):
+        return FollowPath(path, direction)
+
+
+
+
+class SafeNavigate(Navigate):
+
+    def create_follow_path(self, path, direction):
+        return SafeFollowPath(path, direction)
 
 
 
