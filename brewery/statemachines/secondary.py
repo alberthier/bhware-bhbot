@@ -192,7 +192,12 @@ class StaticStrategy(State):
         else:
             yield LookAtOpposite(x, y)
         yield SafeMoveLineTo(x, y)
-        yield goal.get_state()
+        goal.doing()
+        state = yield goal.get_state()
+        if state.exit_reason == GOAL_DONE :
+            goal.done()
+        else:
+            goal.available()
         self.robot.goal_manager.update_goal_status(name, GOAL_DONE)
 
 
