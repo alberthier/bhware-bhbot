@@ -534,6 +534,7 @@ class EventLoop(object):
 
     def on_team_read(self, packet):
         logger.set_team(packet.value)
+        self.map.setup_zones(packet.value)
 
 
     def on_start(self, packet):
