@@ -256,10 +256,13 @@ class DepositCarpet(State):
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
         yield RotateTo(math.pi)
+        yield MoveLineTo(0.600, goal.y)
+        yield DefinePosition(0.580 + ROBOT_CENTER_X, None, math.pi)
         yield Trigger(self.dropper_open)
         yield Trigger(self.ejector_throw)
         yield Trigger(self.dropper_close)
         yield Trigger(self.ejector_hold)
+        yield MoveLineTo(goal.x, goal.y)
         self.exit_reason = GOAL_DONE
         yield None
 
