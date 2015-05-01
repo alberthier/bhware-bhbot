@@ -171,8 +171,8 @@ class StaticStrategy(State):
         try:
             self.send_packet(packets.InterbotLock("NORTH_ZONE"))
             yield from self.execute_goal("GRAB_STAIRS_CUP")
+            yield from self.execute_goal("DEPOSIT_CARPET_RIGHT", DIRECTION_BACKWARDS)
             yield from self.execute_goal("DEPOSIT_CARPET_LEFT")
-            yield from self.execute_goal("DEPOSIT_CARPET_RIGHT")
             yield LookAtOpposite(1.0, 0.55)
             yield SafeMoveLineTo(1.0, 0.55)
             self.send_packet(packets.InterbotUnlock("NORTH_ZONE"))
@@ -184,10 +184,11 @@ class StaticStrategy(State):
         yield None
 
 
-    def execute_goal(self, name):
+    def execute_goal(self, name, forced_direction = None):
         goal = self.robot.goal_manager.get_goals(name)[0]
         x, y = get_offset_position(self.robot.pose, goal.x, goal.y, goal.offset)
-        if goal.direction == DIRECTION_FORWARD:
+        direction = forced_direction if forced_direction is not None else goal.direction
+        if direction == DIRECTION_FORWARD:
             yield LookAt(x, y)
         else:
             yield LookAtOpposite(x, y)
