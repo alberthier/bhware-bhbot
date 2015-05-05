@@ -18,6 +18,10 @@ import statemachines.testssecondary as testssecondary
 
 
 CUP_GRAB_RATION_DECC=1.0
+GRAB_OFFSET = ROBOT_CENTER_X + 0.02
+
+
+
 
 class GrabCupGoal(goalmanager.Goal):
 
@@ -59,13 +63,11 @@ class Main(State):
         GCG=functools.partial(goalmanager.GoalBuilder, ctor=GrabCupGoal)
         DCG=functools.partial(goalmanager.GoalBuilder, ctor=DepositCupGoal)
 
-        grab_offset = -(ROBOT_CENTER_X + 0.02)
-
         self.robot.goal_manager.add(
             GCG("GRAB_STAIRS_CUP")
                 .weight(1)
                 .coords(0.80, 0.91)
-                .offset(grab_offset)
+                .offset(GRAB_OFFSET)
                 .state(GrabCup)
                 .build(),
             G("DEPOSIT_CARPET_LEFT")
@@ -85,27 +87,39 @@ class Main(State):
                 .coords(1.0, 0.5)
                 .state(DepositCup, (True,))
                 .build(),
-            GCG("GRAB_SOUTH_MINE_CUP")
+            G("GRAB_SOUTH_MINE_CUP")
                 .weight(5)
-                .coords(1.75, 0.25)
-                .offset(grab_offset)
-                .state(GrabCup)
+                .coords(1.40, 0.50)
+                .direction(DIRECTION_BACKWARDS)
+                .state(GrabSouthCornerCup)
+                .build(),
+            G("GRAB_SOUTH_THEIRS_CUP")
+                .weight(10)
+                .coords(1.40, 2.50)
+                .direction(DIRECTION_BACKWARDS)
+                .state(GrabSouthCornerCup)
                 .build(),
             DCG("DEPOSIT_OPP_NORTH")
-                .weight(6)
+                .weight(8)
                 .coords(0.67, 2.70)
                 .state(DepositCup, (False,))
                 .build(),
             GCG("GRAB_PLATFORM_CUP")
                 .weight(7)
                 .coords(1.65, 1.50)
-                .offset(grab_offset)
+                .offset(GRAB_OFFSET)
                 .state(GrabCup)
                 .build(),
             DCG("DEPOSIT_OPP_SOUTH")
-                .weight(8)
-                .coords(1.33, 2.70)
+                .weight(6)
+                .coords(1.40, 2.80)
                 .state(DepositCup, (False,))
+                .build(),
+            G("KICK_THEIRS_CLAP")
+                .weight(6)
+                .coords(1.86, 2.65)
+                .direction(DIRECTION_FORWARD)
+                .state(KickTheirsClap)
                 .build(),
         )
 
@@ -125,6 +139,7 @@ class Main(State):
             self.send_packet(packets.ServoControl(*CUP_GRIPPER_OPEN))
             yield StaticStrategy()
             yield ExecuteGoals()
+            # yield ExecuteGoalsV2()
 
 
 
@@ -219,6 +234,38 @@ class GrabCup(State):
 
 
 
+class GrabSouthCornerCup(State):
+
+    def on_enter(self):
+        goal = self.robot.goal_manager.get_current_goal()
+        mine = goal.y < 1.5
+        cup_y = 0.250 if mine else 3.0 - 0.250
+
+        # Recalibrate
+        a = math.pi / 2.0 if mine else -math.pi / 2.0
+        yield RotateTo(a)
+        yield SpeedControl(0.2)
+        y = 0.0 if mine else 3.0
+        yield MoveLineTo(goal.x, y)
+        ry = ROBOT_CENTER_X if mine else 3.0 - ROBOT_CENTER_X
+        yield DefinePosition(None, ry, a)
+        yield SpeedControl()
+        yield MoveLineTo(goal.x, cup_y)
+        yield RotateTo(0.0)
+        yield SpeedControl(0.2)
+        yield MoveLineTo(1.0, cup_y)
+        yield DefinePosition(1.222 + ROBOT_CENTER_X, None, 0.0)
+        yield SpeedControl()
+
+        # Grab cup
+        yield SafeMoveLineTo(1.750, cup_y)
+        grab = yield GrabCup()
+        self.exit_reason = grab.exit_reason
+        yield None
+
+
+
+
 class DepositCup(State):
 
     def __init__(self, home):
@@ -247,7 +294,15 @@ class DepositCup(State):
 class DepositCarpet(State):
 
     def __init__(self, side):
-        if side == SIDE_LEFT:
+        self.side = side
+
+
+    def on_enter(self):
+        if self.robot.team == TEAM_LEFT and self.side == SIDE_LEFT or self.robot.team == TEAM_RIGHT and self.side == SIDE_RIGHT:
+            real_side = SIDE_LEFT
+        else:
+            real_side = SIDE_RIGHT
+        if real_side == SIDE_LEFT:
             self.dropper_open  = LEFT_CARPET_DROPPER_OPEN
             self.dropper_close = LEFT_CARPET_DROPPER_CLOSE
             self.ejector_throw = LEFT_CARPET_EJECTOR_THROW
@@ -258,8 +313,6 @@ class DepositCarpet(State):
             self.ejector_throw = RIGHT_CARPET_EJECTOR_THROW
             self.ejector_hold  = RIGHT_CARPET_EJECTOR_HOLD
 
-
-    def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
         yield RotateTo(math.pi)
         yield MoveLineTo(0.600, goal.y)
@@ -271,6 +324,20 @@ class DepositCarpet(State):
         yield MoveLineTo(goal.x, goal.y)
         self.exit_reason = GOAL_DONE
         yield None
+
+
+
+
+class KickTheirsClap(State):
+
+    def on_enter(self):
+        goal = self.robot.goal_manager.get_current_goal()
+        yield RotateTo(-math.pi / 2)
+        yield SafeMoveLineTo(goal.x, 2.330)
+        self.exit_reason = GOAL_DONE
+        yield None
+
+
 
 
 ##################################################

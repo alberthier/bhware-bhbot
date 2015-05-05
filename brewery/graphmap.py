@@ -93,13 +93,20 @@ class Map:
                        (FIELD_X_SIZE, FIELD_Y_SIZE - platfrom_loc)])
 
         if not IS_MAIN_ROBOT:
-            coords = [(1.355 - 0.030 - offset, 0.870 - 0.030 - offset),
-                      (1.355 - 0.030 - offset, 1.300 + 0.030 + offset),
-                      (1.770 + 0.030 + offset, 1.300 + 0.030 + offset),
-                      (1.770 + 0.030 + offset, 0.870 - 0.030 - offset)]
-            if team == TEAM_RIGHT:
-                coords = list(map(lambda c: (c[0], 3.0 - c[1]), coords))
-            self.add_zone(coords)
+            zones = []
+            off = 0.030 + offset
+            zones.append([(1.355 - off, 0.870 - off),
+                          (1.355 - off, 1.300 + off),
+                          (1.400 + off, 1.300 + off),
+                          (1.400 + off, 0.870 - off)])
+            zones.append([(1.770 - off, 1.100 - off),
+                          (1.770 - off, 1.100 + off),
+                          (1.770 + off, 1.100 + off),
+                          (1.770 + off, 1.100 - off)])
+            for coords in zones:
+                if team == TEAM_RIGHT:
+                    coords = list(map(lambda c: (c[0], 3.0 - c[1]), coords))
+                self.add_zone(coords)
 
         self.pathfinder.field_config_done()
 
