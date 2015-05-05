@@ -133,6 +133,11 @@ def compare_world_by_score_and_dist(w1 : WorldState, w2 : WorldState):
 def world_to_key(w : WorldState):
     return w.score * 1000 + w.traveled_distance
 
+def world_to_key_distance_decay(w : WorldState):
+    alteration = max(1 - (( w.traveled_distance / 0.75 ) * 0.15), 0.0)
+
+    return alteration * w.score * 1000 + w.traveled_distance
+
 
 class Explorer:
 
@@ -209,6 +214,8 @@ class Explorer:
 
         allret=[]
 
+        new_worlds.sort(key=world_to_key_distance_decay)
+
         for world in new_worlds :
             ret=self.explore_recursive(world)
             if not ret :
@@ -252,7 +259,7 @@ class Explorer:
         self.logger.log("Choosing best of {} worlds".format(len(worlds) if worlds else 0))
         if worlds :
             if len(worlds) > 1:
-                worlds.sort(key=world_to_key, reverse=True)
+                worlds.sort(key=world_to_key_distance_decay, reverse=True)
             return worlds[0]
 
 
