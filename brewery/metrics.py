@@ -1,7 +1,6 @@
-import greplin
-import greplin.scales
 from greplin import scales
-from greplin.scales.formats import jsonFormat
+
+import logger
 
 STATS = scales.collection('/goaldecider',
     scales.IntStat('errors'),
@@ -14,5 +13,12 @@ STATS = scales.collection('/goaldecider',
 STATS.success += 1
 
 
-def write(filename):
-    scales.dumpStatsTo(filename)
+def write(filename=None):
+    try:
+        if filename is None:
+            filename=logger.filepath.replace(".py",".json")
+        logger.dbg("Writing metrics to {}".format(filename))
+        scales.dumpStatsTo(filename)
+    except Exception as e:
+        logger.dbg("Exception in stats writing")
+        logger.log_exception(e)

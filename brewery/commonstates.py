@@ -981,7 +981,6 @@ class ExecuteGoalsV2(statemachine.State):
                     if identifier:
                         goal=gm.get_goals(identifier)[0]
 
-                metrics.write("metrics.json")
             else:
                 logger.log("Escaping to anywhere !!")
                 yield EscapeToAnywhere()
