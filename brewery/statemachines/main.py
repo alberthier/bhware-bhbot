@@ -113,7 +113,7 @@ class Main(State):
                 .build(),
             G("GRAB_SOUTH_CORNER_STANDS")
                 .weight(6)
-                .coords(1.45, 0.22)
+                .coords(1.45, 0.55)
                 .direction(DIRECTION_FORWARD)
                 .state(GrabSouthCornerStands)
                 .build(),
@@ -260,11 +260,9 @@ class StaticStrategy(State):
             yield SafeMoveLineTo(1.00, 0.60)
             yield BuildSpotlightHome()
             self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
-            yield SafeMoveLineTo(1.00, 0.60)
+            yield SafeMoveLineTo(1.00, 0.55)
             yield RotateTo(0.0)
-            yield SafeMoveLineTo(1.45, 0.60)
-            yield LookAt(1.45, 0.22)
-            yield SafeMoveLineTo(1.45, 0.22)
+            yield SafeMoveLineTo(1.45, 0.55)
 
             yield GrabSouthCornerStands()
             self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
