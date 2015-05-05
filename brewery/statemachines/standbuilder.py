@@ -2,6 +2,7 @@
 
 import collections
 import math
+from contextlib import contextmanager
 
 import packets
 import position
@@ -12,6 +13,7 @@ from statemachine import *
 from definitions import *
 from commonstates import *
 from position import *
+
 from tools import *
 
 
@@ -136,13 +138,20 @@ class IdlePosition(State):
                                   self.fsm.ELEVATOR_ID], False)
         yield None
 
+@contextmanager
+def building_guard(self):
+    self.fsm.building = True
+    yield
+    self.fsm.building = False
 
-
+class NoStandFoundException(Exception):
+    pass
 
 class Build(State):
 
     def on_enter(self):
         self.building = False
+        self.is_holding = False
 
     def on_input_status(self, packet):
         # Dispatch manually because there are 2 bulb detectors and 2 stand presence detectors
@@ -160,28 +169,86 @@ class Build(State):
         yield from self.grab_stand()
 
 
+    def hold_and_check(self):
+        yield Trigger(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
+
+        previous_value_left = None
+        previous_value_right = None
+
+        for i in range(4):
+            value_left = yield ReadServoPosition(self.fsm.PLIERS_LEFT_ID)
+            value_right = yield ReadServoPosition(self.fsm.PLIERS_RIGHT_ID)
+
+            if previous_value_left:
+                if previous_value_left.value == value_left.value \
+                    and previous_value_right == value_right.value:
+                    break
+
+            previous_value_left = value_left
+            previous_value_right = value_right
+
+            yield Timer(50)
+
+        logger.log("Got stable value for servos after {} attempts".format(i+1))
+
+        #check position
+
+        expected_left  = self.fsm.PLIERS_LEFT_HOLD[-2]
+        expected_right = self.fsm.PLIERS_RIGHT_HOLD[-2]
+
+        delta_expected = expected_left - expected_right
+
+        value_left = yield ReadServoPosition(self.fsm.PLIERS_LEFT_ID)
+        value_right = yield ReadServoPosition(self.fsm.PLIERS_RIGHT_ID)
+
+        delta_real = value_left.value - value_right.value
+
+        self.is_holding = False
+
+        logger.log("Left: real: {} expected: {}".format(value_left.value, expected_left))
+        logger.log("Right: real: {} expected: {}".format(value_right.value, expected_right))
+
+        logger.log("Delta real: {} expected: {}".format(delta_real, delta_expected))
+
+        if delta_real < delta_expected - 10 :
+            self.is_holding = True
+
+        logger.log("Holding: {}".format("YES" if self.is_holding else "NO"))
+
+        if not self.is_holding :
+            raise NoStandFoundException()
+
+
     def grab_stand(self):
         if not self.fsm.enabled:
             return
         if self.building:
             return
-        if self.fsm.stand_count < 4:
-            self.fsm.building = True
-            if self.fsm.stand_count < 3:
-                yield Trigger(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
-                yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
-                yield Trigger(self.fsm.ELEVATOR_UP)
+
+        with building_guard(self):
+            try:
+                if self.fsm.stand_count < 4:
+                    if self.fsm.stand_count < 3:
+                        yield from self.hold_and_check()
+
+                        yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
+                        yield Trigger(self.fsm.ELEVATOR_UP)
+                        self.send_packet(packets.StandGrabbed(self.fsm.side))
+                        yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
+                        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, self.fsm.ELEVATOR_DOWN)
+                        yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID, self.fsm.ELEVATOR_ID], False)
+                    else:
+                        yield from self.hold_and_check()
+                    self.fsm.stand_count += 1
+                yield Timer(300)
+                self.send_packet(packets.StandStored(self.fsm.side))
+            except NoStandFoundException as e:
+                logger.error("No stand found, resetting pliers position")
+                yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
                 self.send_packet(packets.StandGrabbed(self.fsm.side))
-                yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
-                yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN, self.fsm.ELEVATOR_DOWN)
-                yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID, self.fsm.ELEVATOR_ID], False)
-            else:
-                yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
-                self.send_packet(packets.StandGrabbed(self.fsm.side))
-            self.fsm.stand_count += 1
-        self.fsm.building = False
-        yield Timer(300)
-        self.send_packet(packets.StandStored(self.fsm.side))
+                self.send_packet(packets.StandStored(self.fsm.side))
+                return
+
 
 
     def on_build_spotlight(self, packet):
