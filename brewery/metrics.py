@@ -3,14 +3,8 @@ from greplin import scales
 import logger
 
 STATS = scales.collection('/goaldecider',
-    scales.IntStat('errors'),
-    scales.IntStat('success'),
     scales.PmfStat('duration')
     )
-
-# In a request handler
-
-STATS.success += 1
 
 
 def write(filename=None):
