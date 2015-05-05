@@ -21,7 +21,13 @@ class Main(State):
         self.setup()
 
     def setup(self):
-        if self.fsm.side == SIDE_LEFT and self.robot.team == TEAM_LEFT:
+        if self.robot.team != TEAM_UNKNOWN:
+            virtual_left = self.fsm.side == SIDE_LEFT and self.robot.team == TEAM_LEFT
+            virtual_left |= self.fsm.side == SIDE_RIGHT and self.robot.team == TEAM_RIGHT
+        else:
+            virtual_left = self.fsm.side
+
+        if virtual_left:
             self.fsm.PLIERS_LEFT_INIT      = LEFT_BUILDER_PLIERS_LEFT_INIT
             self.fsm.PLIERS_LEFT_CLOSE     = LEFT_BUILDER_PLIERS_LEFT_CLOSE
             self.fsm.PLIERS_LEFT_HOLD      = LEFT_BUILDER_PLIERS_LEFT_HOLD
