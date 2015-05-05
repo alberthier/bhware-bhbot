@@ -25,7 +25,7 @@ class CategoriesModel(QStandardItemModel):
         row = 0
         for packet in packets.PACKETS_LIST:
             pixmap = QPixmap(icon_size)
-            pixmap.fill(QColor(packets.COLORS[packet.TYPE]))
+            pixmap.fill(QColor(packets.COLORS[packet.TYPE % 256]))
             item = QStandardItem(QIcon(pixmap), packet.__name__)
             item.setData(packet.TYPE, CategoriesModel.PACKET_TYPE_ROLE)
             self.appendRow([item])
@@ -57,7 +57,7 @@ class LogModel(QStandardItemModel):
         icon_size = QSize(16, 16)
         for type, packet in packets.PACKETS_BY_TYPE.items():
             pixmap = QPixmap(icon_size)
-            pixmap.fill(QColor(packets.COLORS[packet.TYPE]))
+            pixmap.fill(QColor(packets.COLORS[packet.TYPE % 256]))
             self.colors[type] = QIcon(pixmap)
         pixmap = QPixmap(icon_size)
         pixmap.fill(QColor("#a9a9a9"))

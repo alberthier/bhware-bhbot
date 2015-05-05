@@ -288,7 +288,7 @@ class Struct(AbstractItem):
         for name, item in self.content:
             if len(dump) != 0:
                 dump += ', '
-            dump += "('" + name + "', '" + str(item.to_dump(getattr(value, name))) + "')"
+            dump += "('" + name + "'," + str(item.to_dump(getattr(value, name))) + ")"
         return "(" + dump + ")"
 
 
