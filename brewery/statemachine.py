@@ -151,7 +151,7 @@ class StateMachine(object):
                     if previous_exception is not None:
                         exception = previous_exception
                         previous_exception = None
-                        generator.throw(exception)
+                        new_state = generator.throw(exception)
                     else:
                         new_state = generator.send(previous_state)
                 except BaseException as e:

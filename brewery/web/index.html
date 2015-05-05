@@ -152,7 +152,7 @@
         $.ajax("/brewery/sysinfo").success(function (data) {
             $.sysinfoCallbacks.fire(data);
         })
-    }, 1000);
+    }, 30000);
 
     nunjucks.configure("/templates");
 </script>

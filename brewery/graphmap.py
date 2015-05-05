@@ -57,6 +57,8 @@ class Map:
         if packet.remote_device == REMOTE_DEVICE_SIMULATOR:
             self.event_loop.send_packet(packets.SimulatorClearGraphMapZones())
 
+
+    def setup_zones(self, team):
         self.main_opponent_zone = self.add_zone(self.create_circular_coords(0.0, 0.0, 0.130 + ROBOT_GYRATION_RADIUS))
         self.secondary_opponent_zone = self.add_zone(self.create_circular_coords(0.0, 0.0, 0.080 + ROBOT_GYRATION_RADIUS))
         self.teammate_zone = self.add_zone(self.create_segment_coords(0.0, 0.0, 0.0, 0.0, self.get_teammate_radius()))
@@ -91,10 +93,13 @@ class Map:
                        (FIELD_X_SIZE, FIELD_Y_SIZE - platfrom_loc)])
 
         if not IS_MAIN_ROBOT:
-            self.add_zone([(1.355 - 0.030 - offset, 0.870 - 0.030 - offset),
-                           (1.355 - 0.030 - offset, 1.300 + 0.030 + offset),
-                           (1.770 + 0.030 + offset, 1.300 + 0.030 + offset),
-                           (1.770 + 0.030 + offset, 0.870 - 0.030 - offset)])
+            coords = [(1.355 - 0.030 - offset, 0.870 - 0.030 - offset),
+                      (1.355 - 0.030 - offset, 1.300 + 0.030 + offset),
+                      (1.770 + 0.030 + offset, 1.300 + 0.030 + offset),
+                      (1.770 + 0.030 + offset, 0.870 - 0.030 - offset)]
+            if team == TEAM_RIGHT:
+                coords = list(map(lambda c: (c[0], 3.0 - c[1]), coords))
+            self.add_zone(coords)
 
         self.pathfinder.field_config_done()
 

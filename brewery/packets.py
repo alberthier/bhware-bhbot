@@ -719,6 +719,28 @@ class InterbotGeneric(BasePacket):
     )
 
 
+
+
+class InterbotLock(BasePacket):
+
+    TYPE = 204
+
+    DEFINITION = (
+        ('lock_name', String(255, "", "Name")),
+    )
+
+
+
+
+class InterbotUnlock(BasePacket):
+
+    TYPE = 205
+
+    DEFINITION = (
+        ('lock_name', String(255, "", "Name")),
+    )
+
+
 # Media Player
 
 
@@ -778,7 +800,7 @@ class Internal(BasePacket):
         for key in self.properties:
             if len(dump) != 0:
                 dump += ', '
-            dump += "('" + key + "', '" + getattr(self, key) + "')"
+            dump += "('" + key + "', '" + str(getattr(self, key)) + "')"
         return "(" + dump + ")"
 
 
@@ -888,6 +910,17 @@ class BulbGrabbed(BasePacket):
 class StandbuilderIdle(BasePacket):
 
     TYPE = 267
+
+    DEFINITION = (
+        ('side', UEnum8(SIDE, SIDE_LEFT)),
+    )
+
+
+
+
+class EnsureBuild(BasePacket):
+
+    TYPE = 268
 
     DEFINITION = (
         ('side', UEnum8(SIDE, SIDE_LEFT)),

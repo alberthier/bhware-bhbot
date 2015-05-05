@@ -35,4 +35,8 @@ class Main(State):
              yield Timer(500)
              yield Trigger(LIGHTER_ELEVATOR_DOWN)
              yield ServoTorqueControl([LIGHTER_ELEVATOR_ID, LIGHTER_GRIPPER_ID], False)
+             bulb_presence = yield GetInputStatus(MAIN_INPUT_LEFT_BULB_PRESENCE)
+             self.robot.has_left_bulb = bulb_presence == 0
+             bulb_presence = yield GetInputStatus(MAIN_INPUT_RIGHT_BULB_PRESENCE)
+             self.robot.has_right_bulb = bulb_presence == 0
              yield None

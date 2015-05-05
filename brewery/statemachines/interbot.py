@@ -66,3 +66,11 @@ class Main(Timer):
 
     def set_teammate_collision_detection(self, status):
         self.teammate_collision_detection = status
+
+
+    def on_interbot_lock(self, packet):
+        self.robot.lock(packet.lock_name)
+
+
+    def on_interbot_unlock(self, packet):
+        self.robot.unlock(packet.lock_name)

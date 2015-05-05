@@ -699,14 +699,25 @@ class FollowPath(statemachine.State):
             else:
                 if not self.robot.is_looking_at_opposite(pose):
                     move = yield LookAtOpposite(pose.virt.x, pose.virt.y, DIRECTION_FORWARD)
-            try:
-                move = SafeMoveLine([pose], self.direction)
-                yield move
-            except OpponentInTheWay:
+            move = self.create_move_line(pose, self.direction)
+            yield move
+            if move.exit_reason != TRAJECTORY_DESTINATION_REACHED:
                 break
         self.robot.destination = None
         self.exit_reason = move.exit_reason
         yield None
+
+
+    def create_move_line(self, pose, direction):
+        return MoveLine([pose], direction)
+
+
+
+
+class SafeFollowPath(FollowPath):
+
+    def create_move_line(self, pose, direction):
+        return SafeMoveLine(pose, direction)
 
 
 
@@ -743,10 +754,23 @@ class Navigate(statemachine.State):
             self.exit_reason = TRAJECTORY_DESTINATION_UNREACHABLE
             yield None
             return
-        move = yield FollowPath(path, self.direction)
+        move = self.create_follow_path(path, self.direction)
+        yield move
         self.direction = move.direction # fetch the real move direction in case of DIRECTION_AUTO for the caller
         self.exit_reason = move.exit_reason
         yield None
+
+
+    def create_follow_path(self, path, direction):
+        return FollowPath(path, direction)
+
+
+
+
+class SafeNavigate(Navigate):
+
+    def create_follow_path(self, path, direction):
+        return SafeFollowPath(path, direction)
 
 
 
@@ -759,7 +783,7 @@ class GotoHome(Navigate):
 
 
 
-class Trigger(statemachine.State):
+class Trigger(statemachine.Timer):
 
     TYPE               = 0
     ID                 = 1
@@ -790,8 +814,12 @@ class Trigger(statemachine.State):
 
         self.status = False
         self.statuses = {}
+        max_timeout = 0
         for cmd in self.commands:
             self.statuses[cmd[self.TYPED_ID]] = False
+            if cmd[self.TYPED_ID][self.TYPE] in [ ACTUATOR_TYPE_SERVO_AX, ACTUATOR_TYPE_SERVO_RX ]:
+                max_timeout = max(max_timeout, cmd[self.SERVO_TIMEOUT])
+        super().__init__(max_timeout + 2000)
 
 
     def on_enter(self):
@@ -840,6 +868,11 @@ class Trigger(statemachine.State):
             yield None
 
 
+    def on_timeout(self):
+        self.log_error("Trigger timed out !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        yield from super().on_timeout()
+
+
 
 
 class ServoTorqueControl(statemachine.State):
@@ -860,6 +893,26 @@ class ServoTorqueControl(statemachine.State):
 
 
 
+class ReadServoPosition(statemachine.State):
+
+    def __init__(self, servo_id):
+        self.servo_id = servo_id
+        self.value = -1
+
+
+    def on_enter(self):
+        cmd = makeServoReadCommand((self.servo_id, 0))
+        self.send_packet(packets.ServoControl(*cmd))
+
+
+    def on_servo_control(self, packet):
+        if packet.id == self.servo_id:
+            self.value = packet.value
+            yield None
+
+
+
+
 class GetInputStatus(statemachine.State):
 
     def __init__(self, id):
@@ -873,6 +926,25 @@ class GetInputStatus(statemachine.State):
     def on_input_status(self, packet):
         if packet.id == self.id and packet.kind == KIND_READ:
             self.value = packet.value
+            yield None
+
+
+
+
+class WaitForUnlock(statemachine.Timer):
+
+    def __init__(self, lock_name, timeout):
+        super().__init__(timeout)
+        self.lock_name = lock_name
+
+
+    def on_enter(self):
+        if not self.robot.is_locked(self.lock_name):
+            yield None
+
+
+    def on_interbot_unlock(self, packet):
+        if packet.lock_name == self.lock_name:
             yield None
 
 
@@ -942,7 +1014,10 @@ class ExecuteGoals(statemachine.State):
                     state.goal = goal
                     state.exit_reason = GOAL_FAILED
 
-                    yield state
+                    try:
+                        yield state
+                    except:
+                        pass
 
                     logger.log('State exit reason : {}'.format(GOAL_STATUS.lookup_by_value[state.exit_reason]))
 
@@ -1021,7 +1096,10 @@ class ExecuteGoalsV2(statemachine.State):
                     state.exit_reason = GOAL_FAILED
 
                     with goal.stats.real_duration.acquire():
-                        yield state
+                        try:
+                            yield state
+                        except:
+                            pass
 
                     logger.log('State exit reason : {}'.format(GOAL_STATUS.lookup_by_value[state.exit_reason]))
 

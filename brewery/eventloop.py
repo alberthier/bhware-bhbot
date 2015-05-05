@@ -468,8 +468,8 @@ class Timer(object):
             self.timeout_date = to
             self.eventloop.next_timers.append(self)
         else:
-            if timeout_ms is not None:
-                self.timeout_ms = timeout_ms
+            if to is not None:
+                self.timeout_ms = to
             self.start()
 
 
@@ -537,6 +537,7 @@ class EventLoop(object):
 
     def on_team_read(self, packet):
         logger.set_team(packet.value)
+        self.map.setup_zones(packet.value)
 
 
     def on_start(self, packet):
