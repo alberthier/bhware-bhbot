@@ -1,0 +1,6 @@
+{
+  "listen_port": 9000,
+  "document_root": "/home/thier/Documents/bhware-bhbot/brewery/web",
+  "pic_url": "http://localhost:42080/"
+}
+

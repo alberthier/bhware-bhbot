@@ -136,12 +136,12 @@ class Main(State):
                 .state(BuildSpotlightHome)
                 .builder_action(-1,0)
                 .build(),
-            G("KICK_THEIR_CLAP")
-                .weight(9)
-                .coords(1.77, 2.62)
-                .direction(DIRECTION_FORWARD)
-                .state(KickTheirClap)
-                .build(),
+#            G("KICK_THEIR_CLAP")
+#                .weight(9)
+#                .coords(1.77, 2.62)
+#                .direction(DIRECTION_FORWARD)
+#                .state(KickTheirClap)
+#                .build(),
             G("BUILD_SPOTLIGHT_PLATFORM")
                 .weight(8)
                 .coords(self.fsm.build_spotlight_platform_x - 0.05, self.fsm.build_spotlight_platform_y - 0.05)
