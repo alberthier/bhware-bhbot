@@ -23,7 +23,6 @@ import robot
 import statemachine
 import sysinfo
 import webinterface
-import webconfig
 import metrics
 
 from definitions import *
@@ -523,8 +522,6 @@ class EventLoop(object):
         self.sysinfo = sysinfo.SysInfo(self)
         self.metrics_timer = Timer(self, 5000, metrics.write, single_shot=False)
         self.metrics_timer.start()
-
-        webconfig.setup_nginx_config()
 
 
     def on_keep_alive(self, packet: packets.KeepAlive):
