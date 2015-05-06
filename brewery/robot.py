@@ -24,6 +24,11 @@ class Robot(object):
         self.secondary_opponent_direction = None
         self.goal_manager = goalmanager.GoalManager(event_loop)
         self.locks = set()
+        #TODO: make dynamic
+        self.has_left_bulb=True
+        self.has_right_bulb=True
+        self.left_stand_count=0
+        self.right_stand_count=0
 
 
     def is_looking_at(self, pose):

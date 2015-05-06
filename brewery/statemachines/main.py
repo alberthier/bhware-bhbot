@@ -86,36 +86,42 @@ class Main(State):
                 .coords(0.420, 0.300)
                 .direction(DIRECTION_FORWARD)
                 .state(GrabNorthCornerStand)
+                .builder_action(1,0)
                 .build(),
             G("GRAB_STAIRS_STAND")
                 .weight(2)
                 .coords(0.400, 0.770)
                 .direction(DIRECTION_FORWARD)
                 .state(GrabStairsStands)
+                .builder_action(0,2)
                 .build(),
             G("GRAB_CENTER_WEST_STAND")
                 .weight(3)
                 .coords(1.100, 0.870 - 0.0725)
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterWestStand)
+                .builder_action(1,0)
                 .build(),
             G("GRAB_CENTER_EAST_STAND")
                 .weight(4)
                 .coords(1.150, 1.300 - 0.0725)
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterEastStand)
+                .builder_action(1,0)
                 .build(),
             G("GRAB_CENTER_SOUTH_STAND")
                 .weight(5)
                 .coords(1.500, 1.100 - 0.0725)
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterSouthStand)
+                .builder_action(1,0)
                 .build(),
             G("GRAB_SOUTH_CORNER_STANDS")
                 .weight(6)
                 .coords(1.45, 0.55)
                 .direction(DIRECTION_FORWARD)
                 .state(GrabSouthCornerStands)
+                .builder_action(0,2)
                 .build(),
             G("KICK_MINE_CLAPS")
                 .weight(7)
@@ -128,6 +134,7 @@ class Main(State):
                 .coords(1.0, 0.58)
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightHome)
+                .builder_action(-1,0)
                 .build(),
             G("KICK_THEIR_CLAP")
                 .weight(9)
@@ -140,6 +147,7 @@ class Main(State):
                 .coords(self.fsm.build_spotlight_platform_x - 0.05, self.fsm.build_spotlight_platform_y - 0.05)
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightPlatform)
+                .builder_action(0,-1)
                 .build()
             )
 

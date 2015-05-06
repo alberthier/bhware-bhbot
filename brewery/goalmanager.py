@@ -36,6 +36,7 @@ class Goal:
                  "penality",
                  "status", "shared", "navigate", "trial_count","last_try",
                  "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration",
+                 "builder_action",
                  "ratio_decc",
                  "stats"
                  ]
@@ -63,6 +64,7 @@ class Goal:
         self.uid = self.identifier
         self.ratio_decc = None
         self.estimated_duration = None
+        self.builder_action = None
         self.stats=GoalStats(identifier)
 
 
@@ -84,6 +86,7 @@ class Goal:
         n.is_blacklisted = self.is_blacklisted
         n.uid = self.uid
         n.estimated_duration = self.estimated_duration
+        n.builder_action = self.builder_action
         n.ratio_decc = self.ratio_decc
         return n
 
@@ -120,22 +123,19 @@ class Goal:
 
 
     def available(self):
-        self.status = GOAL_AVAILABLE
         self.is_current = False
-        self.goal_manager.update_goal_status(self, self.status)
+        self.goal_manager.update_goal_status(self, GOAL_AVAILABLE)
 
 
     def doing(self):
-        self.status = GOAL_DOING
         self.is_current = True
         self.last_try = datetime.datetime.now()
-        self.goal_manager.update_goal_status(self, self.status)
+        self.goal_manager.update_goal_status(self, GOAL_DOING)
 
 
     def done(self):
-        self.status = GOAL_DONE
         self.is_current = False
-        self.goal_manager.update_goal_status(self, self.status)
+        self.goal_manager.update_goal_status(self, GOAL_DONE)
 
 
     def is_available(self):
@@ -401,11 +401,14 @@ class GoalManager:
             if g.identifier == identifier:
                 old = g.status
                 g.status = status
-                logger.log('updated goal {} status : {} -> {}'.format(identifier, old, status))
+                logger.log('updated goal {} status : {} -> {}'.format(identifier,
+                                                                      GOAL_STATUS.lookup_by_value[old],
+                                                                      GOAL_STATUS.lookup_by_value[status])
+                           )
 
 
     def on_interbot_goal_status(self, packet):
-        logger.log('Got goal status : {} = {}'.format(packet.goal_identifier, packet.goal_status))
+        logger.log('Got goal status : {} = {}'.format(packet.goal_identifier,GOAL_STATUS.lookup_by_value[packet.goal_status]))
         self.internal_goal_update(packet.goal_identifier, packet.goal_status)
 
 import inspect
@@ -418,6 +421,7 @@ class GoalBuilder:
         self._disabled = False
         self.params = {"identifier":goal_id}
         self.default_values={"offset": 0}
+        self._builder_action=None
 
     @tools.newobj
     def identifier(self, identifier):
@@ -443,6 +447,10 @@ class GoalBuilder:
     @tools.newobj
     def side(self, side):
         self.params["side"]=side
+
+    @tools.newobj
+    def builder_action(self, left,right):
+        self._builder_action=left,right
 
     @tools.newobj
     def state(self, handler_state, ctor_parameters=None):
@@ -479,4 +487,7 @@ class GoalBuilder:
         if self._disabled:
             g.status = GOAL_DISABLED
             logger.log("status={}".format(g.status))
+
+        if self._builder_action:
+            g.builder_action = self._builder_action
         return g

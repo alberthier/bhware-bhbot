@@ -16,6 +16,21 @@ from position import *
 
 from tools import *
 
+def increment_stand_count(state):
+    state.fsm.stand_count+=1
+    if state.fsm.side == SIDE_LEFT:
+        state.robot.left_stand_count+=1
+    else:
+        state.robot.right_stand_count+=1
+
+    logger.log("Robot new builder count: {}, {}".format(state.robot.left_stand_count, state.robot.right_stand_count))
+
+def reset_stand_count(state):
+    state.fsm.stand_count=0
+    if state.fsm.side == SIDE_LEFT:
+        state.robot.left_stand_count=0
+    else:
+        state.robot.right_stand_count=0
 
 class Main(State):
 
@@ -102,7 +117,7 @@ class Main(State):
     def on_start(self, packet):
         self.setup() # Ensure we take the color correctly into account (we may change it after the robot is booted)
         if packet.value == 0:
-            self.fsm.stand_count = 0
+            reset_stand_count(self)
             self.fsm.building = False
             self.fsm.enabled = True
 
@@ -213,6 +228,9 @@ class Build(State):
         if delta_real < delta_expected - 10 :
             self.is_holding = True
 
+        if IS_HOST_DEVICE_PC:
+            self.is_holding = True
+
         logger.log("Holding: {}".format("YES" if self.is_holding else "NO"))
 
         if not self.is_holding :
@@ -239,8 +257,8 @@ class Build(State):
                         yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID, self.fsm.ELEVATOR_ID], False)
                     else:
                         yield from self.hold_and_check()
-                    self.fsm.stand_count += 1
                 yield Timer(300)
+                increment_stand_count(self)
                 self.send_packet(packets.StandStored(self.fsm.side))
             except NoStandFoundException as e:
                 logger.error("No stand found, resetting pliers position")
@@ -278,7 +296,7 @@ class BuildSpotlight(State):
         yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
         yield Timer(500)
         yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
-        self.fsm.stand_count = 0
+        reset_stand_count(self)
         self.send_packet(packets.BuildSpotlight(self.fsm.side))
         yield None
 

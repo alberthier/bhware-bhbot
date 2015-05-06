@@ -9,13 +9,16 @@ import robot
 
 from definitions import *
 
-MEAN_SPEED_PER_S=0.3
+MEAN_SPEED_PER_S=0.1
 DEFAULT_GOAL_ESTIMATED_DURATION_S=15
 MAX_STAND_PER_BUILDER=4
 
 class GoalDeciderException(Exception):
-    def __init__(self, goal):
-         super(GoalDeciderException, self).__init__(goal.identifier)
+    def __init__(self, goal, message=None):
+        if not message:
+            super(GoalDeciderException, self).__init__("{}: {}".format(self.__class__.__name__, goal.identifier))
+        else:
+            super(GoalDeciderException, self).__init__("{}: {}: {}".format(self.__class__.__name__, goal.identifier, message))
 
 
 class NoTimeToAttain(GoalDeciderException):
@@ -28,6 +31,11 @@ class NoTimeToExecute(GoalDeciderException):
 
 class GoalImpossibleToExecute(GoalDeciderException):
     pass
+
+class UnneededAction(GoalDeciderException):
+    pass
+
+
 
 
 class WorldState:
@@ -103,23 +111,33 @@ class WorldState:
         self.robot_pose = goal.pose.clone()
 
         if "STAND" in goal.identifier :
-            if self.left_builder_count>= MAX_STAND_PER_BUILDER and self.right_builder_count>= MAX_STAND_PER_BUILDER:
-                raise GoalImpossibleToExecute(goal)
-            if self.left_builder_count>= MAX_STAND_PER_BUILDER:
-                self.right_builder_count+=1
-            elif self.right_builder_count>= MAX_STAND_PER_BUILDER:
-                self.left_builder_count+=1
-            else:
-                if random.randint(0,1) == 0 :
-                    #TODO : check how to affect builder
-                    self.left_builder_count+=1
-                else:
-                    self.right_builder_count+=1
+            if goal.builder_action[0]>0:
+                if self.left_builder_count+goal.builder_action[0]> MAX_STAND_PER_BUILDER:
+                    raise GoalImpossibleToExecute(goal, "No space left in left builder")
+                self.left_builder_count+=goal.builder_action[0]
+            elif goal.builder_action[1]>0:
+                if self.right_builder_count+goal.builder_action[1]> MAX_STAND_PER_BUILDER:
+                    raise GoalImpossibleToExecute(goal, "No space left in right builder")
+                self.right_builder_count+=goal.builder_action[1]
+
+        self.logger.log("After execute goal {}: {}".format(goal.identifier, self.to_str()))
 
     def after_goal(self, goal):
         if "SPOTLIGHT" in goal.identifier :
-            self.left_builder_count = 0
-            self.right_builder_count = 0
+            if goal.builder_action[0]<0:
+                self.left_builder_count = 0
+            else:
+                self.right_builder_count = 0
+
+    def to_str(self):
+        return "Builders: {},{} Bulbs: {}, {} Time: {} Traveled: {}".format(
+            self.left_builder_count,
+            self.right_builder_count,
+            self.has_left_bulb,
+            self.has_right_bulb,
+            self.remaining_time,
+            self.traveled_distance
+        )
 
 
 def compare_world_by_score_and_dist(w1 : WorldState, w2 : WorldState):
@@ -137,6 +155,8 @@ def world_to_key_distance_decay(w : WorldState):
     alteration = max(1 - (( w.traveled_distance / 0.75 ) * 0.15), 0.0)
 
     return alteration * w.score * 1000 + w.traveled_distance
+
+
 
 
 class Explorer:
@@ -170,10 +190,10 @@ class Explorer:
         best = self.explore_recursive(world)
 
         if best:
-            self.logger.log("Found best world")
+            self.logger.log("Found best world: {}".format(best.goal_trace()))
+            self.logger.log(best.to_str())
             self.logger.log("Score: {} Remaining time: {}".format(best.score, best.remaining_time))
             self.logger.log("Remaining goals: {}".format(len(best.remaining_goals)))
-            self.logger.log("Traveled distance: {}".format(best.traveled_distance))
             self.logger.log(best.goal_trace())
             return best.executed_goals
 
@@ -201,9 +221,7 @@ class Explorer:
 
                 new_world.after_goal(goal)
 
-                self.logger.trace("Score: {} Remaining time: {}".format(new_world.score, new_world.remaining_time))
-                self.logger.trace("Remaining goals: {}".format(len(new_world.remaining_goals)))
-                self.logger.trace("Traveled distance: {}".format(new_world.traveled_distance))
+                self.logger.trace("Score: {} Remaining time: {} Remaining goals: {} Traveled distance: {}".format(new_world.score, new_world.remaining_time, len(new_world.remaining_goals), new_world.traveled_distance))
 
                 new_worlds.append(new_world)
             except GoalDeciderException as e:
@@ -214,7 +232,7 @@ class Explorer:
 
         allret=[]
 
-        new_worlds.sort(key=world_to_key_distance_decay)
+        new_worlds.sort(key=world_to_key_distance_decay, reverse=True)
 
         for world in new_worlds :
             ret=self.explore_recursive(world)
@@ -247,6 +265,9 @@ class Explorer:
                         action_score+=3
                         new_world.has_right_bulb=False
 
+                if not new_world.left_builder_count and not new_world.right_builder_count:
+                    raise UnneededAction(last, "No stand to deposit")
+
 
             elif "CLAP" in last.identifier :
                 action_score+=5
@@ -264,12 +285,17 @@ class Explorer:
 
 
 def adapt_world(goals, map_, robot):
+    import logger
     w = WorldState(goals, map_, robot.event_loop.get_remaining_match_time())
     w.remaining_goals = goals
     w.map_ = map_
     w.robot_pose = robot.pose
     w.has_left_bulb = robot.has_left_bulb
     w.has_right_bulb = robot.has_right_bulb
+    w.left_builder_count = robot.left_stand_count
+    w.right_builder_count = robot.right_stand_count
+
+    logger.log("Initial world situation: {}".format(w.to_str()))
 
     return w
 
