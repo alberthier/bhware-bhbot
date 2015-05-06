@@ -25,7 +25,7 @@ class Main(State):
             virtual_left = self.fsm.side == SIDE_LEFT and self.robot.team == TEAM_LEFT
             virtual_left |= self.fsm.side == SIDE_RIGHT and self.robot.team == TEAM_RIGHT
         else:
-            virtual_left = self.fsm.side
+            virtual_left = self.fsm.side == SIDE_LEFT
 
         if virtual_left:
             self.fsm.PLIERS_LEFT_INIT      = LEFT_BUILDER_PLIERS_LEFT_INIT
