@@ -1041,7 +1041,7 @@ class ExecuteGoalsBase(statemachine.State):
                         if gm.score_estimator:
                             increment=gm.score_estimator.after_goal_success(goal, self.robot)
                             if increment:
-                                logger.log("YES !!! our score was increased by {}".format(increment))
+                                logger.log("YES !!! our score was increased by {}, now {}".format(increment, self.robot.score))
                     else :
                         goal.increment_trials()
                         goal.available()

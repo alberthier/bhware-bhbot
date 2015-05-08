@@ -212,7 +212,7 @@ class Explorer:
     def explore_recursive(self, world: WorldState):
         new_worlds=[]
 
-        for goal in world.remaining_goals :
+        for goal in sorted(world.remaining_goals, key=lambda g: g.weight) :
             try:
                 if self.time_expired():
                     self.log("Time has expired")
