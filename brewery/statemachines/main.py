@@ -8,6 +8,7 @@ import position
 import logger
 import goalmanager
 import tools
+import robot
 
 from statemachine import *
 from definitions import *
@@ -54,7 +55,32 @@ def right_builder_at_point(robot_pose, x, y):
     return builder_at_point(SIDE_RIGHT, robot_pose, x, y)
 
 
+class ScoreEstimator:
+    def __init__(self):
+        self.temporary_score = 0
 
+    def before_goal(self, goal, robot):
+        self.temporary_score=0
+
+        if goal.identifier.startswith("KICK"):
+            self.temporary_score=5
+        elif goal.identifier.startswith("BUILD"):
+            if goal.builder_action[0]<0:
+                if robot.left_stand_count:
+                    self.temporary_score=robot.left_stand_count*2
+                    if robot.has_left_bulb:
+                        self.temporary_score+=3
+            else:
+                if robot.right_stand_count:
+                    self.temporary_score=robot.right_stand_count*2
+                    if robot.has_right_bulb:
+                        self.temporary_score+=3
+
+    def after_goal_success(self, goal_id, robot):
+        robot.score+=self.temporary_score
+        retval=self.temporary_score
+        self.temporary_score=0
+        return retval
 
 class Main(State):
 
@@ -67,6 +93,9 @@ class Main(State):
     def on_enter(self):
         self.init_platform_build_position()
 
+        self.robot.has_left_bulb = False
+        self.robot.has_right_bulb = False
+
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
@@ -76,12 +105,14 @@ class Main(State):
             SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
         }
 
-        self.robot.has_left_bulb = False
-        self.robot.has_right_bulb = False
+
+
+        gm=self.robot.goal_manager
+        gm.score_estimator=ScoreEstimator()
 
         G = goalmanager.GoalBuilder
 
-        self.robot.goal_manager.add(
+        gm.add(
             G("GRAB_NORTH_CORNER_STAND")
                 .weight(2)
                 .coords(0.420, 0.300)
@@ -497,5 +528,5 @@ class EndOfMatch(statemachine.State):
     def on_enter(self):
         self.send_packet(packets.Stop())
         yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
-        goalmanager.on_end_of_match(self.robot.goal_manager)
+        goalmanager.on_end_of_match(self.robot.goal_manager, self.robot)
         tools.on_end_of_match()

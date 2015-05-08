@@ -110,7 +110,7 @@ class WorldState:
 
         self.robot_pose = goal.pose.clone()
 
-        if "STAND" in goal.identifier :
+        if "GRAB" in goal.identifier :
             if goal.builder_action[0]>0:
                 if self.left_builder_count+goal.builder_action[0]> MAX_STAND_PER_BUILDER:
                     raise GoalImpossibleToExecute(goal, "No space left in left builder")
@@ -123,11 +123,13 @@ class WorldState:
         self.logger.log("After execute goal {}: {}".format(goal.identifier, self.to_str()))
 
     def after_goal(self, goal):
-        if "SPOTLIGHT" in goal.identifier :
+        if "BUILD" in goal.identifier :
             if goal.builder_action[0]<0:
                 self.left_builder_count = 0
+                self.has_left_bulb=False
             else:
                 self.right_builder_count = 0
+                self.has_right_bulb=False
 
     def to_str(self):
         return "Builders: {},{} Bulbs: {}, {} Time: {} Traveled: {}".format(
@@ -259,23 +261,21 @@ class Explorer:
         action_score = 0
 
         if last:
-            if "SPOTLIGHT" in last.identifier :
-                if new_world.left_builder_count:
+            if "BUILD" in last.identifier :
+                if last.builder_action[0]<0 and new_world.left_builder_count:
                     action_score+=new_world.left_builder_count*2
                     if new_world.has_left_bulb:
                         action_score+=3
-                        new_world.has_left_bulb=False
-                if new_world.right_builder_count:
+                if last.builder_action[1]<0 and new_world.right_builder_count:
                     action_score+=new_world.right_builder_count*2
                     if new_world.has_right_bulb:
                         action_score+=3
-                        new_world.has_right_bulb=False
 
                 if not new_world.left_builder_count and not new_world.right_builder_count:
                     raise UnneededAction(last, "No stand to deposit")
 
 
-            elif "CLAP" in last.identifier :
+            elif "KICK" in last.identifier :
                 action_score+=5
 
         if action_score>0:
@@ -283,8 +283,8 @@ class Explorer:
             new_world.score += action_score
 
     def best(self, worlds):
-        self.logger.log("Choosing best of {} worlds".format(len(worlds) if worlds else 0))
         if worlds :
+            # self.logger.log("Choosing best of {} worlds".format(len(worlds)))
             if len(worlds) > 1:
                 worlds.sort(key=world_comparison_func, reverse=True)
             return worlds[0]

@@ -980,6 +980,9 @@ class ExecuteGoalsBase(statemachine.State):
             if goal:
                 logger.log('Next goal is {}'.format(goal.identifier))
 
+                if gm.score_estimator:
+                    gm.score_estimator.before_goal(goal, self.robot)
+
                 goal.doing()
 
                 current_navigation_succeeded = True
@@ -1035,6 +1038,10 @@ class ExecuteGoalsBase(statemachine.State):
 
                     if state.exit_reason == GOAL_DONE :
                         goal.done()
+                        if gm.score_estimator:
+                            increment=gm.score_estimator.after_goal_success(goal, self.robot)
+                            if increment:
+                                logger.log("YES !!! our score was increased by {}".format(increment))
                     else :
                         goal.increment_trials()
                         goal.available()
@@ -1060,7 +1067,7 @@ class ExecuteGoalsV2(ExecuteGoalsBase):
 
     def get_next_goal_simple(self,gm):
         with metrics.STATS.duration.time():
-            identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=1, max_depth=4)
+            identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=2, max_depth=5)
             if identifier:
                 goal=gm.get_goals(identifier)[0]
                 return goal

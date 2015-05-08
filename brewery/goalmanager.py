@@ -160,6 +160,7 @@ class GoalManager:
         self.goals = []
         self.last_goal = None
         self.goal_ids = set()
+        self.score_estimator = None
 
     @property
     def available_goals(self):
@@ -499,6 +500,7 @@ class GoalBuilder:
             g.builder_action = self._builder_action
         return g
 
-def on_end_of_match(gm: GoalManager):
+def on_end_of_match(gm: GoalManager, robot):
     logger.log("End of match statistics")
     logger.log("Remaining goals: {}".format([g.id for g in gm.remaining_goals]))
+    logger.log("Our score is: {}".format(robot.score))
