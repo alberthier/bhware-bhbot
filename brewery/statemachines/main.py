@@ -7,6 +7,7 @@ import packets
 import position
 import logger
 import goalmanager
+import tools
 
 from statemachine import *
 from definitions import *
@@ -497,3 +498,4 @@ class EndOfMatch(statemachine.State):
         self.send_packet(packets.Stop())
         yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
         goalmanager.on_end_of_match(self.robot.goal_manager)
+        tools.on_end_of_match()
