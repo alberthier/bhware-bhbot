@@ -984,22 +984,28 @@ class ExecuteGoalsBase(statemachine.State):
 
                 current_navigation_succeeded = True
                 if goal.navigate :
-                    logger.log('Navigating to goal')
+                    nav_timer=metrics.Timer("Navigation to {}".format(goal.identifier))
+                    start_pose=self.robot.pose.clone()
 
-                    if goal.ratio_decc:
-                        logger.log("Goal has ratio_decc set to: {}".format(goal.ratio_decc))
-                        yield RatioDeccControl(goal.ratio_decc)
+                    with nav_timer:
+                        logger.log('Navigating to goal')
 
-                    move = yield Navigate(goal.x, goal.y, goal.direction, goal.offset)
-                    logger.log('End of navigation : {}'.format(TRAJECTORY.lookup_by_value[move.exit_reason]))
+                        if goal.ratio_decc:
+                            logger.log("Goal has ratio_decc set to: {}".format(goal.ratio_decc))
+                            yield RatioDeccControl(goal.ratio_decc)
 
-                    if goal.ratio_decc:
-                        yield RatioDeccControl()
+                        move = yield Navigate(goal.x, goal.y, goal.direction, goal.offset)
+                        logger.log('End of navigation : {}'.format(TRAJECTORY.lookup_by_value[move.exit_reason]))
+
+                        if goal.ratio_decc:
+                            yield RatioDeccControl()
 
                     current_navigation_succeeded = move.exit_reason in [ TRAJECTORY_DESTINATION_REACHED, TRAJECTORY_STOP_REQUESTED ]
                     if current_navigation_succeeded:
                         navigation_failures = 0
-                        logger.log('Navigation was successful')
+                        navigation_distance=self.robot.pose-start_pose
+                        navigation_speed=navigation_distance/nav_timer.duration
+                        logger.log('Navigation was successful, Robot speed: {} m/s'.format(navigation_speed))
                     else:
                         navigation_failures += 1
                         logger.log('Cannot navigate to goal -> picking another')
@@ -1011,13 +1017,15 @@ class ExecuteGoalsBase(statemachine.State):
                         yield MoveLineRelative(dist, direction)
                         self.event_loop.map.robot_blocked(goal.direction)
 
+
+
                 if current_navigation_succeeded:
                     gm.whitelist_all()
                     state = goal.get_state()
                     state.goal = goal
                     state.exit_reason = GOAL_FAILED
 
-                    with goal.stats.real_duration.acquire():
+                    with goal.stats.real_duration.acquire(), metrics.simple_timer("Goal {}".format(goal.identifier)):
                         try:
                             yield state
                         except:

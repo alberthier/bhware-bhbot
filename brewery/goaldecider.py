@@ -148,16 +148,22 @@ def compare_world_by_score_and_dist(w1 : WorldState, w2 : WorldState):
     else:
         return cmp(w1.traveled_distance, w2.traveled_distance)
 
-def world_to_key(w : WorldState):
-    return w.score * 1000 + w.traveled_distance
+MAX_DIST=3.0*2.0*3
+
+def world_to_key_distance_score(w : WorldState):
+    return w.score * 1000 + (MAX_DIST - w.traveled_distance)
+
+def world_to_key_distance_score_decay(w : WorldState):
+    alteration = max(1 - (( w.traveled_distance / 0.75 ) * 0.15), 0.0)
+
+    return alteration * w.score * 1000 + (MAX_DIST - w.traveled_distance)
 
 def world_to_key_distance_decay(w : WorldState):
     alteration = max(1 - (( w.traveled_distance / 0.75 ) * 0.15), 0.0)
 
-    return alteration * w.score * 1000 + w.traveled_distance
+    return alteration * w.score * 1000 + (MAX_DIST - w.traveled_distance)
 
-
-
+world_comparison_func = world_to_key_distance_score
 
 class Explorer:
 
@@ -232,7 +238,7 @@ class Explorer:
 
         allret=[]
 
-        new_worlds.sort(key=world_to_key_distance_decay, reverse=True)
+        new_worlds.sort(key=world_comparison_func, reverse=True)
 
         for world in new_worlds :
             ret=self.explore_recursive(world)
@@ -280,7 +286,7 @@ class Explorer:
         self.logger.log("Choosing best of {} worlds".format(len(worlds) if worlds else 0))
         if worlds :
             if len(worlds) > 1:
-                worlds.sort(key=world_to_key_distance_decay, reverse=True)
+                worlds.sort(key=world_comparison_func, reverse=True)
             return worlds[0]
 
 

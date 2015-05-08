@@ -37,7 +37,7 @@ class Goal:
                  "status", "shared", "navigate", "trial_count","last_try",
                  "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration",
                  "builder_action",
-                 "ratio_decc",
+                 "ratio_decc", "cached_pose",
                  "stats"
                  ]
 
@@ -63,6 +63,7 @@ class Goal:
         self.is_blacklisted = False
         self.uid = self.identifier
         self.ratio_decc = None
+        self.cached_pose = None
         self.estimated_duration = None
         self.builder_action = None
         self.stats=GoalStats(identifier)
@@ -92,7 +93,9 @@ class Goal:
 
     @property
     def pose(self):
-        return position.Pose(self.x, self.y)
+        if not self.cached_pose:
+            self.cached_pose = position.Pose(self.x, self.y)
+        return self.cached_pose
 
 
     def increment_trials(self):
@@ -161,6 +164,10 @@ class GoalManager:
     @property
     def available_goals(self):
         return [ g for g in self.goals if g.is_available() ]
+
+    @property
+    def remaining_goals(self):
+        return [ g for g in self.goals if g.status != GOAL_DONE ]
 
     @property
     def doable_goals(self):
@@ -287,7 +294,7 @@ class GoalManager:
         else :
             oldest = datetime.datetime.now()
             goals = [ None ]
-            for g in available_goals:
+            for g in self.available_goals:
                 if g.last_try is not None and g.last_try < oldest:
                     oldest = g.last_try
                     goals[0] = g
@@ -491,3 +498,7 @@ class GoalBuilder:
         if self._builder_action:
             g.builder_action = self._builder_action
         return g
+
+def on_end_of_match(gm: GoalManager):
+    logger.log("End of match statistics")
+    logger.log("Remaining goals: {}".format([g.id for g in gm.remaining_goals]))

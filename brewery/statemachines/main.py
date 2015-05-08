@@ -496,3 +496,4 @@ class EndOfMatch(statemachine.State):
     def on_enter(self):
         self.send_packet(packets.Stop())
         yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
+        goalmanager.on_end_of_match(self.robot.goal_manager)
