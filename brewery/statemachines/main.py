@@ -199,6 +199,7 @@ class Main(State):
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
         yield SafeMoveLineTo(LEFT_START_X, 0.48)
+        self.send_packet(packets.LiftBulb())
         yield StaticStrategy()
         # yield ExecuteGoals()
         yield ExecuteGoalsV2()

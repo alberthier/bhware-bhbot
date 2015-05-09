@@ -30,6 +30,9 @@ class Main(State):
              yield Trigger(LIGHTER_GRIPPER_CLOSE)
              yield Timer(250)
              self.send_packet(packets.BulbGrabbed())
+
+
+    def on_lift_bulb(self, packet):
              yield Trigger(LIGHTER_ELEVATOR_UP)
              yield Trigger(LIGHTER_GRIPPER_OPEN)
              yield Timer(500)
