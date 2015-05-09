@@ -300,9 +300,9 @@ class StaticStrategy(State):
             yield SafeMoveLineTo(1.00, 0.60)
             yield BuildSpotlightHome()
             self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
-            yield SafeMoveLineTo(1.00, 0.55)
+            yield SafeMoveLineTo(1.00, 0.60)
             yield RotateTo(0.0)
-            yield SafeMoveLineTo(1.45, 0.55)
+            yield SafeMoveLineTo(1.45, 0.60)
 
             yield GrabSouthCornerStands()
             self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
@@ -362,7 +362,7 @@ class GrabStairsStands(State):
 
         grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
         if grab.exit_reason == GOAL_DONE:
-            grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.04, False)
+            grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.01, False)
 
         self.exit_reason = grab.exit_reason
         yield None
@@ -373,7 +373,7 @@ class GrabStairsStands(State):
 class GrabNorthCornerStand(GrabStand):
 
     def __init__(self):
-        super().__init__(SIDE_LEFT, 0.200, 0.090, 0.04, False)
+        super().__init__(SIDE_LEFT, 0.200, 0.090, 0.01, False)
 
 
 
@@ -405,9 +405,9 @@ class GrabCenterEastStand(GrabStand):
 class GrabSouthCornerStands(State):
 
     def on_enter(self):
-        grab = yield GrabStand(SIDE_RIGHT, 1.75, 0.09, 0.03, True)
+        grab = yield GrabStand(SIDE_RIGHT, 1.75, 0.09, 0.01, True)
         if grab.exit_reason == GOAL_DONE:
-            grab = yield GrabStand(SIDE_RIGHT, 1.85, 0.09, 0.04, False)
+            grab = yield GrabStand(SIDE_RIGHT, 1.85, 0.09, 0.02, False)
         self.exit_reason = grab.exit_reason
         yield ResettleAfterSouthCornerStands()
 
@@ -420,7 +420,13 @@ class ResettleAfterSouthCornerStands(State):
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_goals("KICK_MINE_CLAPS")[0]
-        yield MoveCurve(0.0, 0.10, [(1.4, goal.y), (1.32, goal.y)])
+        #yield MoveCurve(0.0, 0.10, [(1.4, goal.y), (1.32, goal.y)])
+        rp = self.robot.pose
+        xc, yc = get_crossing_point(rp.x, rp.y, rp.angle, 1.3, 0.25, 0.0)
+        yield LookAtOpposite(xc, yc)
+        yield MoveLineTo(xc, yc)
+        yield RotateTo(0.0)
+        yield MoveLineTo(1.3, 0.25)
         yield DefinePosition(1.222 + ROBOT_CENTER_X, None, 0.0)
         yield None
 
