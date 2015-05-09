@@ -61,10 +61,14 @@ class WebInterface:
 
         if IS_MAIN_ROBOT:
             actions = [
+                "yield Trigger(LEFT_BUILDER_PLIERS_LEFT_INIT, LEFT_BUILDER_PLIERS_RIGHT_INIT)",
                 "yield Trigger(LEFT_BUILDER_PLIERS_LEFT_CLOSE, LEFT_BUILDER_PLIERS_RIGHT_CLOSE)",
+                "yield Trigger(LEFT_BUILDER_PLIERS_LEFT_HOLD, LEFT_BUILDER_PLIERS_RIGHT_HOLD)",
                 "yield Trigger(LEFT_BUILDER_PLIERS_LEFT_OPEN, LEFT_BUILDER_PLIERS_RIGHT_OPEN)",
+                "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_INIT, LEFT_BUILDER_GRIPPER_RIGHT_INIT)",
                 "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_CLOSE, LEFT_BUILDER_GRIPPER_RIGHT_CLOSE)",
                 "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_GUIDE, LEFT_BUILDER_GRIPPER_RIGHT_GUIDE)",
+                "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_LIGHT, LEFT_BUILDER_GRIPPER_RIGHT_LIGHT)",
                 "yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_DEPOSIT, LEFT_BUILDER_GRIPPER_RIGHT_DEPOSIT)",
                 "yield Trigger(LEFT_BUILDER_LIGHTER_CLOSE)",
                 "yield Trigger(LEFT_BUILDER_LIGHTER_OPEN)",
@@ -75,10 +79,14 @@ class WebInterface:
             result.append(["Left Builder", actions])
 
             actions = [
+                "yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_INIT, RIGHT_BUILDER_PLIERS_RIGHT_INIT)",
                 "yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_CLOSE, RIGHT_BUILDER_PLIERS_RIGHT_CLOSE)",
+                "yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_HOLD, RIGHT_BUILDER_PLIERS_RIGHT_HOLD)",
                 "yield Trigger(RIGHT_BUILDER_PLIERS_LEFT_OPEN, RIGHT_BUILDER_PLIERS_RIGHT_OPEN)",
+                "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_INIT, RIGHT_BUILDER_GRIPPER_RIGHT_INIT)",
                 "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_CLOSE, RIGHT_BUILDER_GRIPPER_RIGHT_CLOSE)",
                 "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_GUIDE, RIGHT_BUILDER_GRIPPER_RIGHT_GUIDE)",
+                "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_LIGHT, RIGHT_BUILDER_GRIPPER_RIGHT_LIGHT)",
                 "yield Trigger(RIGHT_BUILDER_GRIPPER_LEFT_DEPOSIT, RIGHT_BUILDER_GRIPPER_RIGHT_DEPOSIT)",
                 "yield Trigger(RIGHT_BUILDER_LIGHTER_CLOSE)",
                 "yield Trigger(RIGHT_BUILDER_LIGHTER_OPEN)",
