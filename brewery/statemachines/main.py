@@ -287,10 +287,9 @@ class StaticStrategy(State):
             yield GrabStairsStands()
             self.send_packet(packets.InterbotUnlock("SOUTH_ZONE"))
             self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
-            yield LookAtOpposite(0.42, 0.73)
-            yield SafeMoveLineTo(0.42, 0.73)
+            yield SafeMoveLineTo(0.68, 0.850 - 0.0725)
 
-            yield RotateTo(-math.pi / 2.0)
+            yield LookAt(0.42, 0.30)
             yield SafeMoveLineTo(0.42, 0.30)
             yield GrabNorthCornerStand()
             self.robot.goal_manager.update_goal_status("GRAB_NORTH_CORNER_STAND", GOAL_DONE)
@@ -303,11 +302,13 @@ class StaticStrategy(State):
             self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
             yield SafeMoveLineTo(1.00, 0.60)
             yield RotateTo(0.0)
-            yield SafeMoveLineTo(1.45, 0.60)
+            yield SafeMoveLineTo(1.47, 0.60)
+            yield RotateTo(math.pi / 2.0)
+            yield SafeMoveLineTo(1.47, 0.25)
 
             yield GrabSouthCornerStands()
             self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
-            yield MoveLineTo(1.77, 0.22)
+            yield MoveLineTo(1.77, 0.25)
             kick = yield KickMineClaps()
             if kick.exit_reason == GOAL_DONE:
                 self.robot.goal_manager.update_goal_status("KICK_MINE_CLAPS", GOAL_DONE)
@@ -407,6 +408,7 @@ class GrabSouthCornerStands(State):
 
     def on_enter(self):
         grab = yield GrabStand(SIDE_RIGHT, 1.75, 0.09, 0.01, True)
+        yield MoveLineRelative(-0.20)
         if grab.exit_reason == GOAL_DONE:
             grab = yield GrabStand(SIDE_RIGHT, 1.85, 0.09, 0.02, False)
         self.exit_reason = grab.exit_reason
