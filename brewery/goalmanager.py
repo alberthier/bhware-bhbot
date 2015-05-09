@@ -502,5 +502,5 @@ class GoalBuilder:
 
 def on_end_of_match(gm: GoalManager, robot):
     logger.log("End of match statistics")
-    logger.log("Remaining goals: {}".format([g.id for g in gm.remaining_goals]))
+    logger.log("Remaining goals: {}".format([g.identifier for g in gm.remaining_goals]))
     logger.log("Our score is: {}".format(robot.score))

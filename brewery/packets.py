@@ -927,6 +927,13 @@ class EnsureBuild(BasePacket):
     )
 
 
+
+
+class LiftBulb(BasePacket):
+
+    TYPE = 269
+
+
 ################################################################################
 # Packets lookup setup
 
