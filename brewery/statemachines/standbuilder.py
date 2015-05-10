@@ -190,47 +190,14 @@ class Build(State):
         yield from self.grab_stand()
 
 
-    def check_holding(self):
-        previous_value_left = None
-        previous_value_right = None
-
-        for i in range(4):
-            value_left = yield ReadServoPosition(self.fsm.PLIERS_LEFT_ID)
-            value_right = yield ReadServoPosition(self.fsm.PLIERS_RIGHT_ID)
-
-            if previous_value_left:
-                if previous_value_left.value == value_left.value \
-                    and previous_value_right == value_right.value:
-                    break
-
-            previous_value_left = value_left
-            previous_value_right = value_right
-
-            yield Timer(50)
-
-        logger.log("Got stable value for servos after {} attempts".format(i+1))
-
-        #check position
-
-        expected_left  = self.fsm.PLIERS_LEFT_HOLD[-2]
-        expected_right = self.fsm.PLIERS_RIGHT_HOLD[-2]
-
-        value_left = yield ReadServoPosition(self.fsm.PLIERS_LEFT_ID)
-        value_right = yield ReadServoPosition(self.fsm.PLIERS_RIGHT_ID)
+    def check_holding(self, position_left, position_right):
+        yield Trigger(position_left, position_right)
 
         self.is_holding = False
 
-        delta_left = expected_left - value_left.value
-        delta_right = value_right.value - expected_right
+        input_status = yield GetInputStatus(self.fsm.INPUT_STAND_PRESENCE)
 
-        logger.log("Left: real: {} expected: {} delta: {}".format(value_left.value, expected_left, delta_left))
-        logger.log("Right: real: {} expected: {} delta: {}".format(value_right.value, expected_right, delta_right))
-
-        # change this value to fine-tune grabbing state
-        grabbed_delta = 10
-
-        if delta_left > grabbed_delta or delta_right > grabbed_delta:
-            self.is_holding = True
+        self.is_holding = input_status.value == 0
 
         if IS_HOST_DEVICE_PC:
             self.is_holding = True
@@ -251,8 +218,7 @@ class Build(State):
             try:
                 if self.fsm.stand_count < 4:
                     if self.fsm.stand_count < 3:
-                        yield Trigger(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
-                        #yield from self.check_holding()
+                        yield from self.check_holding(self.fsm.PLIERS_LEFT_HOLD, self.fsm.PLIERS_RIGHT_HOLD)
                         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
                         yield Trigger(self.fsm.ELEVATOR_UP)
                         self.send_packet(packets.StandGrabbed(self.fsm.side))
@@ -260,8 +226,7 @@ class Build(State):
                         yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
                         yield Trigger(self.fsm.ELEVATOR_DOWN)
                     else:
-                        yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
-                        #yield from self.check_holding()
+                        yield from self.check_holding(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE)
                         self.send_packet(packets.StandGrabbed(self.fsm.side))
                     yield ServoTorqueControl([self.fsm.PLIERS_LEFT_ID, self.fsm.PLIERS_RIGHT_ID, self.fsm.ELEVATOR_ID], False)
                     yield Timer(300)
@@ -291,17 +256,29 @@ class BuildSpotlight(State):
 
     def on_enter(self):
         bulb_presence = yield GetInputStatus(self.fsm.INPUT_BULB_PRESENCE)
+
         if bulb_presence.value == 0:
             yield Trigger(self.fsm.LIGHTER_DEPOSIT)
             yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
             yield Timer(200)
-        yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
-        yield Timer(200)
-        yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
-        yield Timer(500)
-        yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+
+        if self.fsm.stand_count < 4:
+            yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+            yield Timer(500)
+            yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
+            yield Timer(200)
+            yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
+            yield Timer(500)
+        else:
+            yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
+            yield Timer(200)
+            yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
+            yield Timer(500)
+            yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+
         yield MoveLineRelative(0.05)
         yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
+
         reset_stand_count(self)
         self.send_packet(packets.BuildSpotlight(self.fsm.side))
         yield None

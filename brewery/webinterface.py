@@ -38,7 +38,13 @@ class WebInterface:
         else:
             code = "200 OK"
 
-        start_response(code, [('Content-type','text/plain; charset=utf-8')])
+        content_type='text/plain; charset=utf-8'
+
+        if isinstance(response, dict):
+            content_type='application/json; charset=utf-8'
+            response=json.dumps(response)
+
+        start_response(code, [('Content-type',content_type)])
         return [bytes(response, "utf-8")]
 
 
@@ -228,4 +234,4 @@ class WebInterface:
 
 
     def sysinfo(self, environ):
-        return json.dumps(self.event_loop.sysinfo.data)
+        return self.event_loop.sysinfo.data

@@ -148,11 +148,22 @@
         $("#current_pose").text(data.pose.x.toFixed(3) + " " + data.pose.y.toFixed(3) + " " + data.pose.angle.toFixed(3));
     });
 
+    var window_focus;
+
+    $(window).focus(function() {
+        window_focus = true;
+    }).blur(function() {
+        window_focus = false;
+    });
+
+
     setInterval(function () {
-        $.ajax("/brewery/sysinfo").success(function (data) {
-            $.sysinfoCallbacks.fire(data);
-        })
-    }, 30000);
+        if(window_focus) {
+            $.ajax("/brewery/sysinfo").success(function (data) {
+                $.sysinfoCallbacks.fire(data);
+            });
+        }
+    }, 5000);
 
     nunjucks.configure("/templates");
 </script>
