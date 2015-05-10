@@ -3,12 +3,16 @@
 import os
 import math
 import platform
+import inspect
+import sys
 
 
 ########################################################################
 # Constants
 
 # Brewery execution host
+import collections
+
 IS_HOST_DEVICE_ARM                     = platform.machine() == "armv5tel"
 IS_HOST_DEVICE_PC                      = not IS_HOST_DEVICE_ARM
 
@@ -18,6 +22,21 @@ FIELD_X_SIZE                           = 2.0
 
 MAIN_ROBOT_GYRATION_RADIUS = 0.208
 SECONDARY_ROBOT_GYRATION_RADIUS = 0.100535
+
+def get_servos_commands():
+    all_commands=collections.defaultdict(dict)
+    for name, obj in inspect.getmembers(sys.modules[__name__]):
+        if not inspect.isfunction(obj) and not inspect.isclass(obj):
+            try:
+                if len(obj) == 4:
+                    servo_id = obj[0]
+                    servo_value = obj[2]
+                    all_commands[servo_id][servo_value]=name
+            except TypeError: pass
+
+    return all_commands
+
+
 
 def setup_definitions(is_main_robot):
     globals()["IS_MAIN_ROBOT"]         = is_main_robot
@@ -40,6 +59,8 @@ def setup_definitions(is_main_robot):
         globals()["SERVOS_IDS"]            = SECONDARY_SERVO_IDS
 
     globals()["ROBOT_VMAX_LIMIT"]                  = 88.0
+    globals()["ALL_SERVO_COMMANDS"]=get_servos_commands()
+
 
 # Rule specific
 MATCH_DURATION_MS                      = 90000
