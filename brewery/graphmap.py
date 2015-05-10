@@ -59,6 +59,9 @@ class Map:
 
 
     def setup_zones(self, team):
+        if self.main_opponent_zone is not None:
+            logger.log("Map already initialized. Skipping.")
+            return
         self.main_opponent_zone = self.add_zone(self.create_circular_coords(0.0, 0.0, 0.130 + ROBOT_GYRATION_RADIUS))
         self.secondary_opponent_zone = self.add_zone(self.create_circular_coords(0.0, 0.0, 0.080 + ROBOT_GYRATION_RADIUS))
         self.teammate_zone = self.add_zone(self.create_segment_coords(0.0, 0.0, 0.0, 0.0, self.get_teammate_radius()))
