@@ -296,17 +296,18 @@ class StaticStrategy(State):
 
             yield LookAtOpposite(0.60, 0.60)
             yield SafeMoveLineTo(0.60, 0.60)
-            yield RotateTo(math.pi)
-            yield SafeMoveLineTo(1.00, 0.60)
-            yield BuildSpotlightHome()
-            self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
-            yield SafeMoveLineTo(1.00, 0.60)
-            yield RotateTo(0.0)
-            yield SafeMoveLineTo(1.47, 0.60)
-            yield RotateTo(math.pi / 2.0)
-            yield SafeMoveLineTo(1.47, 0.25)
 
-            yield GrabSouthCornerStands()
+            yield LookAt(1.400, 0.730)
+            yield SafeMoveLineTo(1.400, 0.730)
+
+            # yield RotateTo(0.0)
+            # yield SafeMoveLineTo(1.47, 0.60)
+            # yield RotateTo(math.pi / 2.0)
+            # yield SafeMoveLineTo(1.47, 0.25)
+            # yield GrabSouthCornerStands()
+            yield GrabSouthCornerStandsDirect()
+            yield LookAt(1.77, 0.25)
+
             self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
             yield MoveLineTo(1.77, 0.25)
             kick = yield KickMineClaps()
@@ -316,6 +317,12 @@ class StaticStrategy(State):
             yield MoveLineTo(self.fsm.build_spotlight_platform_x, self.fsm.build_spotlight_platform_y)
             yield BuildSpotlightPlatform()
             self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_PLATFORM", GOAL_DONE)
+
+            yield LookAt(1.00, 0.60)
+            yield SafeMoveLineTo(1.00, 0.60)
+            yield BuildSpotlightHome()
+            self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
+            yield SafeMoveLineTo(1.00, 0.60)
 
         except OpponentInTheWay:
             pass
@@ -383,7 +390,7 @@ class GrabNorthCornerStand(GrabStand):
 class GrabCenterWestStand(GrabStand):
 
     def __init__(self):
-        super().__init__(SIDE_LEFT, 1.355, 0.870, 0.01, False)
+        super().__init__(SIDE_RIGHT, 1.355, 0.870, 0.01, False)
 
 
 
@@ -415,6 +422,46 @@ class GrabSouthCornerStands(State):
         yield ResettleAfterSouthCornerStands()
 
         yield None
+
+
+
+
+class GrabSouthCornerStandsDirect(State):
+
+    def on_enter(self):
+        self.stored_stands = 0
+
+        self.x1, self.y1 = 1.400, 0.730
+        self.x2, self.y2 = 1.800, 0.330
+        self.x3, self.y3 = 1.800, 0.220
+        self.cx, self.cy = self.x1, self.y2
+        self.r = self.x2 - self.x1
+
+        yield RotateTo(0)
+        yield SafeMoveLineTo(self.x1, self.y1)
+
+        #yield SafeMoveArc(self.cx, self.cy, self.r, [-math.pi / 2.0], DIRECTION_FORWARD)
+        yield SafeMoveLineTo(self.x2, self.y1)
+        yield RotateTo(-math.pi/2)
+        yield SafeMoveLineTo(self.x2, self.y2)
+
+        yield SafeMoveLineTo(self.x3, self.y3)
+        self.send_packet(packets.EnsureBuild(SIDE_LEFT))
+        self.send_packet(packets.EnsureBuild(SIDE_RIGHT))
+
+
+    def escape(self):
+        yield SafeMoveLineTo(self.x2, self.y2)
+
+        #yield SafeMoveArc(self.cx, self.cy, self.r, [-math.pi / 3.0], DIRECTION_BACKWARDS)
+
+        yield None
+
+
+    def on_stand_stored(self, packet):
+        self.stored_stands += 1
+        if self.stored_stands == 2:
+            yield from self.escape()
 
 
 
