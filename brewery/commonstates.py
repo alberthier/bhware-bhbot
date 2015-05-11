@@ -827,9 +827,11 @@ class Trigger(statemachine.Timer):
             actuator_typed_id = cmd[self.TYPED_ID]
             actuator_type = actuator_typed_id[self.TYPE]
             actuator_id = actuator_typed_id[self.ID]
-            servo_value = cmd[self.SERVO_VALUE]
-            timeout_value = cmd[self.SERVO_TIMEOUT]
+
             if actuator_type in [ ACTUATOR_TYPE_SERVO_AX, ACTUATOR_TYPE_SERVO_RX ]:
+                servo_value = cmd[self.SERVO_VALUE]
+                timeout_value = cmd[self.SERVO_TIMEOUT]
+
                 logger.log("Trigger: set servo {} value: {} (tm: {})".format(
                     SERVOS_IDS.lookup_by_value[actuator_typed_id],
                     ALL_SERVO_COMMANDS[actuator_typed_id].get(servo_value, servo_value),
