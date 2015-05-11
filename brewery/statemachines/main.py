@@ -257,25 +257,29 @@ class WaitForStandGrabbed(WaitForStandStored):
 
 class StaticStrategy(State):
 
+    def first_curve(self):
+        p1 = Pose(*right_builder_at_point(self.robot.pose, 1.355, 0.870))
+        x1, y1 = get_offset_position(self.robot.pose, p1.x, p1.y, 0.03)
+        p2 = Pose(*left_builder_at_point(Pose(x1, y1), 1.400, 1.300))
+        x2, y2 = get_offset_position(p1, p2.x, p2.y, 0.03)
+        yield LookAt(p1.x, p1.y)
+        yield SafeMoveCurve(None, 0.50, [ p1, Pose(x1, y1), p2, Pose(x2, y2) ], DIRECTION_FORWARD)
+
     def on_enter(self):
         try:
             self.send_packet(packets.InterbotLock("SOUTH_ZONE"))
             try:
-                yield GrabCenterWestStand()
+                yield from self.first_curve()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_WEST_STAND", GOAL_DONE)
-            except:
-                self.log("GRAB_CENTER_WEST_STAND aborted")
-                yield MoveLineRelative(-0.100)
-            try:
-                yield GrabCenterEastStand()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_EAST_STAND", GOAL_DONE)
-            except:
-                self.log("GRAB_CENTER_EAST_STAND aborted")
+                WaitForStandGrabbed(SIDE_LEFT)
+            except OpponentInTheWay:
+                self.log("GRAB_CENTER_WEST_STAND aborted")
                 yield MoveLineRelative(-0.100)
             try:
                 yield GrabCenterSouthStand()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_SOUTH_STAND", GOAL_DONE)
-            except:
+            except OpponentInTheWay:
                 self.log("GRAB_CENTER_SOUTH_STAND aborted")
                 yield MoveLineRelative(-0.100)
 
