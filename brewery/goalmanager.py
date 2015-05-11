@@ -38,7 +38,7 @@ class Goal:
                  "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration",
                  "builder_action",
                  "ratio_decc", "cached_pose",
-                 "stats"
+                 "stats", "tags"
                  ]
 
     def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
@@ -67,6 +67,7 @@ class Goal:
         self.estimated_duration = None
         self.builder_action = None
         self.stats=GoalStats(identifier)
+        self.tags=set(self.identifier.upper().split("_"))
 
 
 
@@ -77,11 +78,7 @@ class Goal:
         n.penality = self.penality
         n.status = self.status
         n.trial_count = self.trial_count
-        if self.last_try:
-            l=self.last_try
-            n.last_try = datetime.datetime(l.year,l.month,l.day,l.hour,l.minute,l.second,l.microsecond)
-        else:
-            n.last_try = None
+        n.last_try = self.last_try
         n.goal_manager = self.goal_manager
         n.is_current = self.is_current
         n.is_blacklisted = self.is_blacklisted
@@ -89,6 +86,7 @@ class Goal:
         n.estimated_duration = self.estimated_duration
         n.builder_action = self.builder_action
         n.ratio_decc = self.ratio_decc
+        n.tags = self.tags
         return n
 
     @property

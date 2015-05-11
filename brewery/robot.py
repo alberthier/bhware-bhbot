@@ -3,11 +3,8 @@
 import math
 
 import goalmanager
-import logger
 import position
-import packets
-import tools
-
+import goaldecider
 from definitions import *
 
 
@@ -23,6 +20,7 @@ class Robot(object):
         self.main_opponent_direction = None
         self.secondary_opponent_direction = None
         self.goal_manager = goalmanager.GoalManager(event_loop)
+        self.goal_decider = goaldecider.GoalDecider()
         self.locks = set()
         #TODO: make dynamic
         self.has_left_bulb=False

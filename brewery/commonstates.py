@@ -1,24 +1,18 @@
 # encoding: utf-8
 
 
-import datetime
 import functools
 import math
 import random
 
-import eventloop
 import logger
 import packets
 import position
 import statemachine
 import tools
-import goaldecider
 import metrics
 import checks
-
 from definitions import *
-
-
 
 
 class StateChain(statemachine.State):
@@ -969,6 +963,9 @@ class ExecuteGoalsBase(statemachine.State):
     def get_next_goal_simple(self, gm):
         pass
 
+    def handle_navigation_failure(self):
+        pass
+
     def on_enter(self):
         gm = self.robot.goal_manager
 
@@ -1023,6 +1020,7 @@ class ExecuteGoalsBase(statemachine.State):
                         logger.log('Cannot navigate to goal -> picking another')
                         goal.is_blacklisted = True
                         goal.available()
+                        self.handle_navigation_failure()
                     if move.exit_reason == TRAJECTORY_BLOCKED:
                         direction = DIRECTION_BACKWARDS if move.direction == DIRECTION_FORWARD else DIRECTION_FORWARD
                         dist = ROBOT_GYRATION_RADIUS - ROBOT_CENTER_X + 0.02
@@ -1076,10 +1074,13 @@ class ExecuteGoalsV2(ExecuteGoalsBase):
 
     def get_next_goal_simple(self,gm):
         with metrics.STATS.duration.time():
-            identifier = goaldecider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=2, max_depth=5)
+            identifier = self.robot.goal_decider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=2, max_depth=5)
             if identifier:
                 goal=gm.get_goals(identifier)[0]
                 return goal
+
+    def handle_navigation_failure(self):
+        self.robot.goal_decider.handle_navigation_failure()
 
 
 
