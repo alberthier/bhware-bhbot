@@ -126,6 +126,7 @@
         <li><a href="enginetests.html?pic=pic&speeds=Speeds" target="linktarget">Engines Speeds</a></li>
         <li><a href="enginetests.html?pic=pic&voltages=Voltages" target="linktarget">Engines Voltages</a></li>
         <li><a href="servo_calibration.html" target="linktarget">Servo calibration</a></li>
+        <li><a href="goals.html" target="linktarget">Goals</a></li>
 
     </ul>
 </div>
@@ -161,6 +162,10 @@
         if(window_focus) {
             $.ajax("/brewery/sysinfo").success(function (data) {
                 $.sysinfoCallbacks.fire(data);
+            }).error( function(xhr, text, error) {
+                console.log(xhr);
+                console.log(text);
+                console.log(error);
             });
         }
     }, 5000);

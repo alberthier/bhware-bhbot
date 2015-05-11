@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inputs</title>
+    <style type="text/css">
+        table {
+            font-family: "Monospace";
+        }
+    </style>
+    <script src="js/jquery-1.11.2.js" language="JavaScript"></script>
+    <script language="javascript" src="js/nunjucks.js"></script>
+    <style type="text/css">
+        .servo {
+            display: block;
+            float: left;
+            background-color: #0099cc;
+            margin-right: 2px;
+            margin-top: 2px;
+            padding: 5px;
+        }
+
+        .current {
+            font-weight: bold;
+            color: white;
+        }
+
+        .torqueEnabled {
+            background-color: brown;
+        }
+
+        .torqueDisabled {
+            background-color: darkgreen;
+        }
+
+        #servo_container #commands {
+            float: none;
+            clear: left;
+        }
+
+        .clear {
+            width: 100%;
+            clear: both !important;
+            display: inline-block;
+        }
+
+        .clear:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        * html .clear {
+            height: 1%;
+        }
+
+        .console {
+            font-family: monospace;
+            font-size: 10pt;
+            background-color: black;
+            color: white;
+            margin: 3px;
+            padding: 3px;
+        }
+
+
+    </style>
+</head>
+<body id="main">
+<h1>Goals</h1>
+
+<table>
+    <tbody>
+    <tr>
+        <td>Doing goal</td>
+        <td><div id="doing_goal"></div></td>
+        <td>Remaining time</td>
+        <td><div id="remaining_time"></div></td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Current goals</h2>
+<p>
+    <div id="current_goals"></div>
+</p>
+
+<h2>Done goals</h2>
+<p>
+    <div id="done_goals"></div>
+</p>
+
+<script>
+    $.fn.multiline = function (text) {
+        this.text(text);
+        this.html(this.html().replace(/\n/g, '<br/>'));
+        return this;
+    };
+
+    $.fn.observe = function (eventName, callback) {
+        return this.each(function () {
+            var el = this;
+            $(document).on(eventName, function () {
+                callback.apply(el, arguments);
+            })
+        })
+    };
+
+
+    var nunjucks = parent.nunjucks;
+    var $$ = parent.$;
+
+    var current = null;
+    var currentData = null;
+
+
+    $(document).ready(function () {
+//        $("#commands").hide();
+//        $(".console").hide();
+
+//        $.subscribe("currentServoChange", function () {
+//            $("#torqueEnable").attr("disabled", "disabled");
+//            $("#torqueDisable").attr("disabled", "disabled");
+//
+//            if (currentData["torque"] == true) {
+//                $("#torqueDisable").removeAttr("disabled");
+//            } else {
+//                $("#torqueEnable").removeAttr("disabled");
+//            }
+//
+//            if (currentData["torque"] == null) {
+//                $("#torqueDisable").removeAttr("disabled");
+//                $("#torqueEnable").removeAttr("disabled");
+//            }
+//        });
+
+
+        $$.sysinfoCallbacks.add(function (data) {
+            var current_goals_text = "No current goals";
+            var doing_goal_text = "???";
+            var goal_data=data["goals"];
+            var done_goals_text= "???"
+
+            if(goal_data["current_available_goals"])
+            {
+                current_goals_text = goal_data["current_available_goals"].join(", ");
+            }
+
+            if(goal_data["done_goals"])
+            {
+                done_goals_text = goal_data["done_goals"].join(", ");
+            }
+
+            if(goal_data["doing_goal"])
+            {
+                doing_goal_text = goal_data["doing_goal"];
+            }
+
+            $("#current_goals").text(current_goals_text);
+
+            $("#doing_goal").text(doing_goal_text);
+
+            $("#done_goals").text(done_goals_text);
+
+            $("#remaining_time").text(goal_data["remaining_time"].toFixed(2));
+
+
+//
+//            nunjucks.render('servo_list.html', {
+//                "current": current,
+//                "robot": data,
+//                "str": JSON.stringify
+//            }, function (err, res) {
+//                $("#servos").html(res);
+//                if (err) {
+//                    console.log(err);
+//                }
+//
+//                $(".servo").click(function (elt) {
+//                    current = elt.target.innerText;
+//                    currentData = JSON.parse(elt.target.attributes.servoData.nodeValue);
+
+//                });
+
+//                if (current) {
+//                    if (!$("#servoValue").is(":focus") && !$("#setValue").is(":focus")) {
+//                        $("#servoValue").val(data["servo"][current].value);
+//                        $("#commands").show();
+//                    }
+//                }
+//            });
+        });
+    });
+
+
+
+
+</script>
+
+</body>
+</html>

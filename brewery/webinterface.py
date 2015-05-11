@@ -222,7 +222,7 @@ class WebInterface:
         inputs = MAIN_INPUT if IS_MAIN_ROBOT else SECONDARY_INPUT
         result = inputs.lookup_by_value
 
-        return json.dumps(result)
+        return result
 
 
     def getevaloutput(self, environ):
@@ -234,4 +234,4 @@ class WebInterface:
 
 
     def sysinfo(self, environ):
-        return self.event_loop.sysinfo.data
+        return self.event_loop.sysinfo.get_data()

@@ -328,10 +328,12 @@ class Explorer:
 
 
 class GoalDecider:
-    def __init__(self):
+    def __init__(self, event_loop, goal_manager):
         import logger
         self.last_solution = None
         self.logger = logger
+        self.event_loop = event_loop
+        self.gm = goal_manager
 
     def adapt_world(self, goals, map_, robot):
         w = WorldState(goals, map_, robot.event_loop.get_remaining_match_time())
@@ -401,3 +403,24 @@ class GoalDecider:
             for goal in evaluated_solution.executed_goals:
                 if goal.identifier in available_ids:
                     return goal.identifier
+
+    def get_current_goals(self):
+        if self.last_solution:
+            return [ g.uid for g in self.last_solution.executed_goals ]
+
+    def get_current_available_goals(self):
+        if self.last_solution:
+            return [ g.uid for g in (self.gm.get_goal_by_uid(g.uid) for g in self.last_solution.executed_goals ) if g.is_available() ]
+
+    def get_done_goals(self):
+        return [ g.uid for g in self.gm.goals if g.is_done() ]
+
+    def get_sysinfo(self):
+        curr = self.gm.get_current_goal()
+        return {
+            "current_goals": self.get_current_goals(),
+            "current_available_goals": self.get_current_available_goals(),
+            "done_goals": self.get_done_goals(),
+            "doing_goal": curr.uid if curr else None,
+            "remaining_time": self.event_loop.get_remaining_match_time()
+        }

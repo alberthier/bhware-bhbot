@@ -142,6 +142,9 @@ class Goal:
     def is_available(self):
         return self.status == GOAL_AVAILABLE
 
+    def is_done(self):
+        return self.status == GOAL_DONE
+
 
     def before_evaluation(self):
         pass
@@ -384,6 +387,9 @@ class GoalManager:
             if goal.identifier == goal_id and goal.status == GOAL_DONE :
                 return True
         return False
+
+    def get_goal_by_uid(self, uid):
+        return next((g for g in self.goals if g.uid == uid))
 
 
     def update_goal_status(self, goal, new_status):

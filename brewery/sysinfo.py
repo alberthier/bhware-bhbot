@@ -99,4 +99,11 @@ class SysInfo:
         elif packet.command == SERVO_COMMAND_SETUP_SPEED:
             self.data["servo"][lk]["speed"]=packet.value
 
+    def get_data(self):
+        if self.event_loop.robot.goal_decider:
+            self.data["goals"]=self.event_loop.robot.goal_decider.get_sysinfo()
+
+        return self.data
+
+
 # d=DotNotation()
