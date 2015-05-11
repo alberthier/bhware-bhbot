@@ -199,16 +199,6 @@ class Main(State):
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
 
-        x1, y1 = 1.355, 0.870
-        x2, y2 = 1.400, 1.300
-        xm = (x2 + x1) / 2.0
-        ym = (y2 + y1) / 2.0
-        d = distance(x1, y1, x2, y2) / 2.0
-        a = -math.asin(0.0725 / d) + math.atan2(y2 - y1, x2 - x1)
-
-        xc, yc = get_crossing_point(xm, ym, a, LEFT_START_X, LEFT_START_Y, math.pi / 2.0)
-        self.log("xm = {} ym = {} d = {} a = {} xc = {} yc = {}".format(xm, ym, d, a, xc, yc))
-
         yield SafeMoveLineTo(LEFT_START_X, 0.48)
         self.send_packet(packets.LiftBulb())
         yield StaticStrategy()
