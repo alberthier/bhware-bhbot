@@ -104,12 +104,23 @@ def get_offset_position(robot_pose, x, y, offset):
 
 @functools.lru_cache()
 def get_crossing_point(x1, y1, angle1, x2, y2, angle2):
-    a1 = math.tan(angle1)
-    b1 = y1 - a1 * x1
-    a2 = math.tan(angle2)
-    b2 = y2 - a2 * x2
-    xc = (b2 - b1) / (a1 - a2)
-    yc = a1 * xc + b1
+    if quasi_equal(abs(angle1), math.pi / 2.0):
+        a2 = math.tan(angle2)
+        b2 = y2 - a2 * x2
+        xc = x1
+        yc = a2 * xc + b2
+    elif quasi_equal(abs(angle2), math.pi / 2.0):
+        a1 = math.tan(angle1)
+        b1 = y1 - a1 * x1
+        xc = x2
+        yc = a1 * xc + b1
+    else:
+        a1 = math.tan(angle1)
+        b1 = y1 - a1 * x1
+        a2 = math.tan(angle2)
+        b2 = y2 - a2 * x2
+        xc = (b2 - b1) / (a1 - a2)
+        yc = a1 * xc + b1
     return xc, yc
 
 # from http://kracekumar.com/post/100897281440/fluent-interface-in-python
