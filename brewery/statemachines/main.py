@@ -440,12 +440,7 @@ class GrabSouthCornerStandsDirect(State):
 
         yield RotateTo(0)
         yield SafeMoveLineTo(self.x1, self.y1)
-
-        #yield SafeMoveArc(self.cx, self.cy, self.r, [-math.pi / 2.0], DIRECTION_FORWARD)
-        yield SafeMoveLineTo(self.x2, self.y1)
-        yield RotateTo(-math.pi/2)
-        yield SafeMoveLineTo(self.x2, self.y2)
-
+        yield SafeMoveArc(self.cx, self.cy, self.r, [ 0.0 ], DIRECTION_FORWARD)
         yield SafeMoveLineTo(self.x3, self.y3)
         self.send_packet(packets.EnsureBuild(SIDE_LEFT))
         self.send_packet(packets.EnsureBuild(SIDE_RIGHT))
@@ -453,9 +448,7 @@ class GrabSouthCornerStandsDirect(State):
 
     def escape(self):
         yield SafeMoveLineTo(self.x2, self.y2)
-
-        #yield SafeMoveArc(self.cx, self.cy, self.r, [-math.pi / 3.0], DIRECTION_BACKWARDS)
-
+        yield SafeMoveArc(self.cx, self.cy, self.r, [ math.pi / 6.0 ], DIRECTION_BACKWARDS)
         yield None
 
 
