@@ -764,6 +764,17 @@ class Say(BasePacket):
     )
 
 
+
+
+class Text(BasePacket):
+
+    TYPE = 252
+
+    DEFINITION = (
+        ('text', String(254, "", "Text to say")),
+    )
+
+
 # Internal
 
 
