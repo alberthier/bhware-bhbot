@@ -149,7 +149,7 @@ class Initialize(State):
     def on_enter(self):
         yield Trigger(LEFT_CARPET_DROPPER_CLOSE, RIGHT_CARPET_DROPPER_CLOSE,
                       LEFT_CARPET_EJECTOR_HOLD, RIGHT_CARPET_EJECTOR_HOLD,
-                      CUP_GRIPPER_CLOSE)
+                      CUP_GRIPPER_CLOSE, CLAPMAN_CLOSE)
         yield None
 
 
@@ -333,7 +333,9 @@ class KickTheirsClap(State):
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
         yield RotateTo(-math.pi / 2)
+        yield Trigger(CLAPMAN_OPEN)
         yield SafeMoveLineTo(goal.x, 2.330)
+        yield Trigger(CLAPMAN_CLOSE)
         self.exit_reason = GOAL_DONE
         yield None
 
