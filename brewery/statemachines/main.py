@@ -204,7 +204,13 @@ class Main(State):
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
 
-        yield SafeMoveLineTo(LEFT_START_X, 0.48)
+        first_move = False
+        while not first_move:
+            try:
+                yield SafeMoveLineTo(LEFT_START_X, 0.48)
+                first_move = True
+            except OpponentInTheWay:
+                yield Timer(100)
         self.send_packet(packets.LiftBulb())
         yield StaticStrategy()
         # yield ExecuteGoals()
