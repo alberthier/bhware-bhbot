@@ -110,7 +110,7 @@ class WorldState:
 
         self.robot_pose = goal.pose.clone()
 
-        if "GRAB" in goal.identifier :
+        if "GRAB" in goal.tags and "STAND" in goal.tags :
             if goal.builder_action[0]>0:
                 if self.left_builder_count+goal.builder_action[0]> MAX_STAND_PER_BUILDER:
                     raise GoalImpossibleToExecute(goal, "No space left in left builder")
@@ -123,7 +123,7 @@ class WorldState:
         self.logger.log("After execute goal {}: {}".format(goal.identifier, self.to_str()))
 
     def after_goal(self, goal):
-        if "BUILD" in goal.identifier :
+        if "BUILD" in goal.tags :
             if goal.builder_action[0]<0:
                 self.left_builder_count = 0
                 self.has_left_bulb=False
@@ -173,7 +173,7 @@ class Explorer:
         import logger
         self.max_result=100
         self.max_duration=5
-        self.start_time=None
+        self.start_time = datetime.datetime.now()
         self.logger=logger
         self.evaluated_count=0
 
@@ -193,8 +193,6 @@ class Explorer:
 
         self.logger.log("Considered goals are: {}".format([g.identifier for g in world.remaining_goals]))
 
-        self.start_time = datetime.datetime.now()
-
         best = self.explore_recursive(world)
 
         if best:
@@ -203,7 +201,7 @@ class Explorer:
             self.logger.log("Score: {} Remaining time: {}".format(best.score, best.remaining_time))
             self.logger.log("Remaining goals: {}".format(len(best.remaining_goals)))
             self.logger.log(best.goal_trace())
-            return best.executed_goals
+            return best.executed_goals, best
 
     def set_world(self, w):
         self.world = w
@@ -261,21 +259,26 @@ class Explorer:
         action_score = 0
 
         if last:
-            if "BUILD" in last.identifier :
+            if "BUILD" in last.tags :
                 if last.builder_action[0]<0 and new_world.left_builder_count:
-                    action_score+=new_world.left_builder_count*2
                     if new_world.has_left_bulb:
+                        action_score+=new_world.left_builder_count*2
                         action_score+=3
+                    else:
+                        action_score+=1
+
                 if last.builder_action[1]<0 and new_world.right_builder_count:
-                    action_score+=new_world.right_builder_count*2
                     if new_world.has_right_bulb:
+                        action_score+=new_world.right_builder_count*2
                         action_score+=3
+                    else:
+                        action_score+=1
 
                 if not new_world.left_builder_count and not new_world.right_builder_count:
                     raise UnneededAction(last, "No stand to deposit")
 
 
-            elif "KICK" in last.identifier :
+            elif "KICK" in last.tags :
                 action_score+=5
 
         if action_score>0:
@@ -289,41 +292,135 @@ class Explorer:
                 worlds.sort(key=world_comparison_func, reverse=True)
             return worlds[0]
 
+    def evaluate(self, base_world: WorldState, last_solution: WorldState):
 
-def adapt_world(goals, map_, robot):
-    import logger
-    w = WorldState(goals, map_, robot.event_loop.get_remaining_match_time())
-    w.remaining_goals = goals
-    w.map_ = map_
-    w.robot_pose = robot.pose
-    w.has_left_bulb = robot.has_left_bulb
-    w.has_right_bulb = robot.has_right_bulb
-    w.left_builder_count = robot.left_stand_count
-    w.right_builder_count = robot.right_stand_count
+        world = base_world.clone()
 
-    logger.log("Initial world situation: {}".format(w.to_str()))
+        for goal in last_solution.executed_goals:
+            try:
+                if self.time_expired():
+                    self.log("Time has expired")
+                    break
 
-    return w
+                if not goal.is_available():
+                    continue
+
+                self.evaluated_count+=1
+
+                new_world = world.clone()
+                new_world.depth+=1
+
+                new_world.execute_goal(goal)
+
+                self.score_world(new_world)
+
+                new_world.after_goal(goal)
+
+                self.logger.trace("Score: {} Remaining time: {} Remaining goals: {} Traveled distance: {}".format(new_world.score, new_world.remaining_time, len(new_world.remaining_goals), new_world.traveled_distance))
+
+                world = new_world
+            except GoalDeciderException as e:
+                self.log(str(e))
+
+        return world
 
 
-def get_best_goal(goals, map_, robot, max_duration: float, max_depth: int):
-    import logger
-    w = adapt_world(goals, map_, robot)
 
-    ex = Explorer()
 
-    ex.set_max_result(10)
-    ex.set_max_duration(max_duration)
-    ex.set_max_depth(max_depth)
-    ex.set_world(w)
+class GoalDecider:
+    def __init__(self, event_loop, goal_manager):
+        import logger
+        self.last_solution = None
+        self.logger = logger
+        self.event_loop = event_loop
+        self.gm = goal_manager
 
-    goals = ex.explore(w)
+    def adapt_world(self, goals, map_, robot):
+        w = WorldState(goals, map_, robot.event_loop.get_remaining_match_time())
+        w.remaining_goals = goals
+        w.map_ = map_
+        w.robot_pose = robot.pose
+        w.has_left_bulb = robot.has_left_bulb
+        w.has_right_bulb = robot.has_right_bulb
+        w.left_builder_count = robot.left_stand_count
+        w.right_builder_count = robot.right_stand_count
 
-    logger.log("Evaluated count : {}".format(ex.evaluated_count))
-    if goals:
-        identifier=goals[0].identifier
-        logger.log("Best goal is: {}".format(identifier))
-        return identifier
-    else:
-        logger.log("Best goal was not found")
+        self.logger.log("Initial world situation: {}".format(w.to_str()))
 
+        return w
+
+    def init_context(self, goals, map_, robot, max_duration: float, max_depth: int):
+        w = self.adapt_world(goals, map_, robot)
+
+        ex = Explorer()
+
+        ex.set_max_result(10)
+        ex.set_max_duration(max_duration)
+        ex.set_max_depth(max_depth)
+        ex.set_world(w)
+
+        return ex, w
+
+    def explore_for_best_goal(self, goals, map_, robot, max_duration: float, max_depth: int):
+        ex, base_world = self.init_context(goals, map_, robot, max_duration, max_depth)
+
+        goals, best_world = ex.explore(base_world)
+
+        self.logger.log("Evaluated count : {}".format(ex.evaluated_count))
+        if goals:
+            identifier=goals[0].identifier
+            self.logger.log("Best goal is: {}".format(identifier))
+            return identifier, best_world
+        else:
+            self.logger.log("Best goal was not found")
+            return None, None
+
+    def get_best_goal(self, goals, map_, robot, max_duration: float, max_depth: int):
+        best = None
+        if self.last_solution:
+            self.logger.log("Trying to validate latest solution: {}".format(self.last_solution.goal_trace()))
+            best = self.validate_latest_solution(goals, map_, robot, max_duration, max_depth)
+
+        if not best:
+            self.logger.log("Doing full exploration")
+            best, self.last_solution = self.explore_for_best_goal(goals, map_, robot, max_duration, max_depth)
+
+        return best
+
+    def handle_navigation_failure(self):
+        self.logger.log("Navigation failed, invalidating latest solution")
+        self.last_solution = None
+
+    def validate_latest_solution(self, goals, map_, robot, max_duration, max_depth):
+        ex, base_world = self.init_context(goals, map_, robot, max_duration, max_depth)
+
+        evaluated_solution = ex.evaluate(base_world, self.last_solution)
+
+        self.logger.log("Previous solution score: {} Re-evaluated to: {}".format(self.last_solution.score, evaluated_solution.score))
+
+        if evaluated_solution.score == self.last_solution.score :
+            available_ids = set(g.identifier for g in goals)
+            for goal in evaluated_solution.executed_goals:
+                if goal.identifier in available_ids:
+                    return goal.identifier
+
+    def get_current_goals(self):
+        if self.last_solution:
+            return [ g.uid for g in self.last_solution.executed_goals ]
+
+    def get_current_available_goals(self):
+        if self.last_solution:
+            return [ g.uid for g in (self.gm.get_goal_by_uid(g.uid) for g in self.last_solution.executed_goals ) if g.is_available() ]
+
+    def get_done_goals(self):
+        return [ g.uid for g in self.gm.goals if g.is_done() ]
+
+    def get_sysinfo(self):
+        curr = self.gm.get_current_goal()
+        return {
+            "current_goals": self.get_current_goals(),
+            "current_available_goals": self.get_current_available_goals(),
+            "done_goals": self.get_done_goals(),
+            "doing_goal": curr.uid if curr else None,
+            "remaining_time": self.event_loop.get_remaining_match_time()
+        }

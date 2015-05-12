@@ -62,19 +62,24 @@ class ScoreEstimator:
     def before_goal(self, goal, robot):
         self.temporary_score=0
 
-        if goal.identifier.startswith("KICK"):
+        if "KICK" in goal.tags:
             self.temporary_score=5
-        elif goal.identifier.startswith("BUILD"):
+        elif "BUILD" in goal.tags:
+            #TODO: only one construction per zone counts !!!
             if goal.builder_action[0]<0:
                 if robot.left_stand_count:
-                    self.temporary_score=robot.left_stand_count*2
                     if robot.has_left_bulb:
+                        self.temporary_score=robot.left_stand_count*2
                         self.temporary_score+=3
+                    else:
+                        self.temporary_score+=1
             else:
                 if robot.right_stand_count:
-                    self.temporary_score=robot.right_stand_count*2
                     if robot.has_right_bulb:
+                        self.temporary_score=robot.right_stand_count*2
                         self.temporary_score+=3
+                    else:
+                        self.temporary_score+=1
 
     def after_goal_success(self, goal_id, robot):
         robot.score+=self.temporary_score

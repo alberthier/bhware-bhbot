@@ -40,6 +40,10 @@ def angle_between(x1, y1, x2, y2):
 
 @functools.lru_cache()
 def normalize_angle(a):
+    """
+    :param a: angle
+    :return: normalized angle between -math.pi and math.pi
+    """
     na = a % (2.0 * math.pi)
     if na > math.pi:
         na -= 2.0 * math.pi
@@ -51,21 +55,12 @@ def sym_x(coord_x):
 def sym_y(coord_y):
     return 3.0 - coord_y
 
-
 def sym_angle(angle):
     return -angle
 
 @functools.lru_cache()
-def angle_minus_pi_to_pi(a):
-    if a > math.pi :
-        return a - 2 * math.pi
-    if a <= -math.pi :
-        return a + 2 * math.pi
-    return a
-
-@functools.lru_cache()
 def compare_angles(a1, a2, epsilon):
-    return abs(angle_minus_pi_to_pi((angle_minus_pi_to_pi(a1) - angle_minus_pi_to_pi(a2)))) < epsilon
+    return abs(normalize_angle((angle_minus_pi_to_pi(a1) - normalize_angle(a2)))) < epsilon
 
 @functools.lru_cache()
 def get_center_pose_for_point(robot_point_x, robot_point_y, dest_x, dest_y, dest_angle):
