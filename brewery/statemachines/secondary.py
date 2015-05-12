@@ -106,9 +106,15 @@ class Main(State):
                 .build(),
             GCG("GRAB_PLATFORM_CUP")
                 .weight(7)
-                .coords(1.65, 1.50)
+                .coords(1.65, 1.28)
                 .offset(GRAB_OFFSET)
-                .state(GrabCup)
+                .state(GrabPlatformCup)
+                .build(),
+            GCG("GRAB_PLATFORM_CUP")
+                .weight(7)
+                .coords(1.65, 1.72)
+                .offset(GRAB_OFFSET)
+                .state(GrabPlatformCup)
                 .build(),
             DCG("DEPOSIT_OPP_SOUTH")
                 .weight(6)
@@ -263,6 +269,21 @@ class GrabSouthCornerCup(State):
         self.exit_reason = grab.exit_reason
         yield None
 
+
+
+
+class GrabPlatformCup(State):
+
+    def on_enter(self):
+        xc = 1.650
+        if self.robot.pose.virt.y < 1.500:
+            yc = 1.500 - GRAB_OFFSET
+        else:
+            yc = 1.500 + GRAB_OFFSET
+        yield LookAtOpposite(xc, yc)
+        yield SafeMoveLineTo(xc, yc)
+        grab = yield GrabCup()
+        self.exit_reason = grab.exit_reason
 
 
 

@@ -97,15 +97,11 @@ class Map:
 
         if not IS_MAIN_ROBOT:
             zones = []
-            off = 0.030 + offset
-            zones.append([(1.355 - off, 0.870 - off),
-                          (1.355 - off, 1.300 + off),
-                          (1.400 + off, 1.300 + off),
-                          (1.400 + off, 0.870 - off)])
-            zones.append([(1.770 - off, 1.100 - off),
-                          (1.770 - off, 1.100 + off),
-                          (1.770 + off, 1.100 + off),
-                          (1.770 + off, 1.100 - off)])
+            off = 0.10 + offset
+            zones.append([(1.650 - off, 1.500 - off),
+                          (1.650 - off, 1.500 + off),
+                          (1.650 + off, 1.500 + off),
+                          (1.650 + off, 1.500 - off)])
             for coords in zones:
                 if team == TEAM_RIGHT:
                     coords = list(map(lambda c: (c[0], 3.0 - c[1]), coords))
