@@ -225,16 +225,14 @@ class StaticStrategy(State):
 
 
 
-class GrabCup(State):
+class GrabCup(Timer):
 
-    def on_enter(self):
-        if self.robot.holding_cup or not self.robot.grabbing_in_progress:
-            self.exit_reason = GOAL_DONE
-            yield None
+    def __init__(self):
+        super().__init__(300)
+        self.exit_reason = GOAL_DONE
 
 
     def on_cup_grabbed(self, packet):
-        self.exit_reason = GOAL_DONE
         yield None
 
 
