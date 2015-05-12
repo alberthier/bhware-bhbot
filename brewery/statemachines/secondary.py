@@ -351,9 +351,13 @@ class KickTheirsClap(State):
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
-        yield RotateTo(-math.pi / 2)
         yield Trigger(CLAPMAN_OPEN)
+        if self.robot.team == TEAM_LEFT:
+            yield RotateTo(math.pi / 2)
+        else:
+            yield RotateTo(-math.pi / 2)
         yield SafeMoveLineTo(goal.x, 2.330)
+        yield RotateTo(math.pi)
         yield Trigger(CLAPMAN_CLOSE)
         self.exit_reason = GOAL_DONE
         yield None

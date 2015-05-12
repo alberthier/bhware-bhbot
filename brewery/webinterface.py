@@ -147,6 +147,12 @@ class WebInterface:
             ]
             result.append(["Cup gripper", actions])
 
+            actions = [
+                "yield Trigger(CLAPMAN_CLOSE)",
+                "yield Trigger(CLAPMAN_OPEN)"
+            ]
+            result.append(["Clapman", actions])
+
         actions = [
             "yield GotoHome()",
             "yield MoveLineRelative(0.2)",
