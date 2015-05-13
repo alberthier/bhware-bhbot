@@ -93,40 +93,40 @@ class Main(State):
                 .direction(DIRECTION_BACKWARDS)
                 .state(GrabSouthCornerCup)
                 .build(),
-            G("GRAB_SOUTH_THEIRS_CUP")
-                .weight(10)
-                .coords(1.40, 2.50)
-                .direction(DIRECTION_BACKWARDS)
-                .state(GrabSouthCornerCup)
-                .build(),
+            # G("GRAB_SOUTH_THEIRS_CUP")
+            #     .weight(10)
+            #     .coords(1.40, 2.50)
+            #     .direction(DIRECTION_BACKWARDS)
+            #     .state(GrabSouthCornerCup)
+            #     .build(),
             DCG("DEPOSIT_OPP_NORTH")
                 .weight(8)
-                .coords(0.67, 2.70)
+                .coords(0.50, 2.65)
                 .state(DepositCup, (False,))
                 .build(),
-            GCG("GRAB_PLATFORM_CUP")
-                .weight(7)
-                .coords(1.65, 1.28)
-                .offset(GRAB_OFFSET)
-                .state(GrabPlatformCup)
-                .build(),
-            GCG("GRAB_PLATFORM_CUP")
-                .weight(7)
-                .coords(1.65, 1.72)
-                .offset(GRAB_OFFSET)
-                .state(GrabPlatformCup)
-                .build(),
-            DCG("DEPOSIT_OPP_SOUTH")
-                .weight(6)
-                .coords(1.40, 2.80)
-                .state(DepositCup, (False,))
-                .build(),
-            G("KICK_THEIRS_CLAP")
-                .weight(6)
-                .coords(1.86, 2.65)
-                .direction(DIRECTION_FORWARD)
-                .state(KickTheirsClap)
-                .build(),
+            # GCG("GRAB_PLATFORM_CUP")
+            #     .weight(7)
+            #     .coords(1.65, 1.28)
+            #     .offset(GRAB_OFFSET)
+            #     .state(GrabPlatformCup)
+            #     .build(),
+            # GCG("GRAB_PLATFORM_CUP")
+            #     .weight(7)
+            #     .coords(1.65, 1.72)
+            #     .offset(GRAB_OFFSET)
+            #     .state(GrabPlatformCup)
+            #     .build(),
+            # DCG("DEPOSIT_OPP_SOUTH")
+            #     .weight(6)
+            #     .coords(1.45, 2.65)
+            #     .state(DepositCup, (False,))
+            #     .build(),
+            # G("KICK_THEIRS_CLAP")
+            #     .weight(6)
+            #     .coords(1.86, 2.65)
+            #     .direction(DIRECTION_FORWARD)
+            #     .state(KickTheirsClap)
+            #     .build(),
         )
 
     def on_controller_status(self, packet):
