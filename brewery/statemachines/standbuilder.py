@@ -32,6 +32,8 @@ def reset_stand_count(state):
     else:
         state.robot.right_stand_count=0
 
+    logger.log("Robot new builder count: {}, {}".format(state.robot.left_stand_count, state.robot.right_stand_count))
+
 class Main(State):
 
     def on_enter(self):
