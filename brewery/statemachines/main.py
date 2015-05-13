@@ -354,9 +354,6 @@ class StaticStrategy(State):
             yield GrabNorthCornerStand()
             self.robot.goal_manager.update_goal_status("GRAB_NORTH_CORNER_STAND", GOAL_DONE)
 
-            yield LookAtOpposite(0.60, 0.60)
-            yield SafeMoveLineTo(0.60, 0.60)
-
             yield LookAt(1.400, 0.730)
             yield SafeMoveLineTo(1.400, 0.730)
 
@@ -393,7 +390,7 @@ class StaticStrategy(State):
 
 class GrabStand(State):
 
-    def __init__(self, side, x, y, stand_grab_offset, store_stand, raise_on_error = True):
+    def __init__(self, side, x, y, stand_grab_offset, store_stand, raise_on_error = True, skip_rotate = False):
         super().__init__()
         self.side = side
         self.x = x
@@ -401,12 +398,14 @@ class GrabStand(State):
         self.stand_grab_offset = stand_grab_offset
         self.store_stand = store_stand
         self.raise_on_error = raise_on_error
+        self.skip_rotate = skip_rotate
 
 
     def on_enter(self):
         x, y, angle = builder_at_point(self.side, self.robot.pose, self.x, self.y)
         ref_pose = Pose(self.robot.pose.x, self.robot.pose.y, angle, True)
-        yield RotateTo(angle)
+        if not self.skip_rotate:
+            yield RotateTo(angle)
         x, y = get_offset_position(ref_pose, x, y, self.stand_grab_offset)
         self.exit_reason = GOAL_FAILED
         try:
@@ -431,7 +430,7 @@ class GrabStairsStands(State):
 
         grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
         if grab.exit_reason == GOAL_DONE:
-            grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.01, False)
+            grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.01, False, True)
 
         self.exit_reason = grab.exit_reason
 
@@ -442,10 +441,14 @@ class GrabStairsStands(State):
 
 
 
-class GrabNorthCornerStand(GrabStand):
+class GrabNorthCornerStand(State):
 
-    def __init__(self):
-        super().__init__(SIDE_LEFT, 0.200, 0.090, 0.01, False)
+    def on_enter(self):
+        grab = yield GrabStand(SIDE_LEFT, 0.200, 0.090, 0.01, False)
+        self.exit_reason = grab.exit_reason
+        yield LookAtOpposite(0.60, 0.60)
+        yield SafeMoveLineTo(0.60, 0.60)
+        yield None
 
 
 
