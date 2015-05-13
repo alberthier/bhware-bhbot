@@ -69,17 +69,15 @@ class ScoreEstimator:
             if goal.builder_action[0]<0:
                 if robot.left_stand_count:
                     if robot.has_left_bulb:
-                        self.temporary_score=robot.left_stand_count*2
-                        self.temporary_score+=3
+                        self.temporary_score=robot.left_stand_count*3
                     else:
-                        self.temporary_score+=1
+                        self.temporary_score=robot.left_stand_count*2
             else:
                 if robot.right_stand_count:
                     if robot.has_right_bulb:
-                        self.temporary_score=robot.right_stand_count*2
-                        self.temporary_score+=3
+                        self.temporary_score=robot.left_stand_count*3
                     else:
-                        self.temporary_score+=1
+                        self.temporary_score=robot.left_stand_count*2
 
     def after_goal_success(self, goal_id, robot):
         robot.score+=self.temporary_score
@@ -212,9 +210,11 @@ class Main(State):
             except OpponentInTheWay:
                 yield Timer(100)
         self.send_packet(packets.LiftBulb())
-        yield StaticStrategy()
+        # yield StaticStrategy()
         # yield ExecuteGoals()
-        yield ExecuteGoalsV2()
+        while True:
+            yield ExecuteGoalsV2()
+            yield Timer(1000)
 
 
 

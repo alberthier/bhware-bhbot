@@ -5,6 +5,7 @@ import random
 import position
 # import logger
 import robot
+import goalmanager
 
 
 from definitions import *
@@ -36,13 +37,18 @@ class UnneededAction(GoalDeciderException):
     pass
 
 
+def goals_to_str(goals):
+    return "->".join((g.uid for g in goals)) if goals else None
 
+def goals_to_list(goals):
+    return [g.uid for g in goals] if goals else None
 
 class WorldState:
     def __init__(self, goals, map_, remaining_time):
         """
 
-        :type goals: list(goalmanager.Goal)
+        :type goals: list(brewery.goalmanager.Goal)
+        :type remaining_time: float
         """
         import logger
         self.score = 0
@@ -50,6 +56,7 @@ class WorldState:
         self.left_builder_count = 0
         self.remaining_goals = goals
         self.executed_goals = []
+        ":type executed_goals: list(brewery.goalmanager.Goal)"
         self.depth = 0
         self.remaining_time = remaining_time
         self.map_ = map_
@@ -58,6 +65,7 @@ class WorldState:
         self.traveled_distance = 0
         self.has_right_bulb = False
         self.has_left_bulb = False
+        self._remaining_deposit_goals = None
 
     def clone(self):
         """
@@ -75,26 +83,41 @@ class WorldState:
         new_inst.traveled_distance = self.traveled_distance
         new_inst.has_left_bulb = self.has_left_bulb
         new_inst.has_right_bulb = self.has_right_bulb
+        new_inst._remaining_deposit_goals = self._remaining_deposit_goals
         return new_inst
 
 
+    @property
+    def remaining_deposit_goals(self):
+        if self._remaining_deposit_goals is None:
+            self._remaining_deposit_goals = len([ g for g in self.remaining_goals if "BUILD" in g.tags ])
+        return self._remaining_deposit_goals
 
+    def decrement_deposit_goals(self):
+        if self._remaining_deposit_goals:
+            self._remaining_deposit_goals-=1
 
     @property
     def last_goal(self) -> goalmanager.Goal:
         return self.executed_goals[-1] if self.executed_goals else None
 
 
-
-
     def goal_trace(self):
-        return "->".join((g.identifier for g in self.executed_goals))
+        return goals_to_str(self.executed_goals)
+
 
     def execute_goal(self, goal: goalmanager.Goal):
         self.executed_goals.append(goal)
         self.remaining_goals=[g for g in self.remaining_goals if g.identifier != goal.identifier]
 
         self.logger.trace("Executing goal : {}".format(self.goal_trace()))
+
+        if goal.tags.issuperset({"BUILD", "SPOTLIGHT"}):
+            self.decrement_deposit_goals()
+
+        if goal.tags.issuperset({"GRAB", "STAND"}):
+            if self.remaining_deposit_goals <=0:
+                raise UnneededAction(goal, "Abort: Impossible to deposit these stand(s)")
 
         distance = goal.pose - self.robot_pose
         elapsed_time = distance / MEAN_SPEED_PER_S
@@ -110,7 +133,7 @@ class WorldState:
 
         self.robot_pose = goal.pose.clone()
 
-        if "GRAB" in goal.tags and "STAND" in goal.tags :
+        if goal.tags.issuperset({"GRAB", "STAND"}):
             if goal.builder_action[0]>0:
                 if self.left_builder_count+goal.builder_action[0]> MAX_STAND_PER_BUILDER:
                     raise GoalImpossibleToExecute(goal, "No space left in left builder")
@@ -262,17 +285,15 @@ class Explorer:
             if "BUILD" in last.tags :
                 if last.builder_action[0]<0 and new_world.left_builder_count:
                     if new_world.has_left_bulb:
-                        action_score+=new_world.left_builder_count*2
-                        action_score+=3
+                        action_score+=new_world.left_builder_count*3
                     else:
-                        action_score+=1
+                        action_score+=new_world.left_builder_count*2
 
                 if last.builder_action[1]<0 and new_world.right_builder_count:
                     if new_world.has_right_bulb:
-                        action_score+=new_world.right_builder_count*2
-                        action_score+=3
+                        action_score+=new_world.right_builder_count*3
                     else:
-                        action_score+=1
+                        action_score+=new_world.right_builder_count*2
 
                 if not new_world.left_builder_count and not new_world.right_builder_count:
                     raise UnneededAction(last, "No stand to deposit")
@@ -331,6 +352,7 @@ class GoalDecider:
     def __init__(self, event_loop, goal_manager):
         import logger
         self.last_solution = None
+        ":type self.last_solution: None or WorldState"
         self.logger = logger
         self.event_loop = event_loop
         self.gm = goal_manager
@@ -392,6 +414,11 @@ class GoalDecider:
         self.last_solution = None
 
     def validate_latest_solution(self, goals, map_, robot, max_duration, max_depth):
+        available_goals = self.current_available_goals
+
+        if not available_goals:
+            return
+
         ex, base_world = self.init_context(goals, map_, robot, max_duration, max_depth)
 
         evaluated_solution = ex.evaluate(base_world, self.last_solution)
@@ -408,19 +435,21 @@ class GoalDecider:
         if self.last_solution:
             return [ g.uid for g in self.last_solution.executed_goals ]
 
-    def get_current_available_goals(self):
+    @property
+    def current_available_goals(self):
         if self.last_solution:
-            return [ g.uid for g in (self.gm.get_goal_by_uid(g.uid) for g in self.last_solution.executed_goals ) if g.is_available() ]
+            return (g for g in (self.gm.get_goal_by_uid(g.uid) for g in self.last_solution.executed_goals ) if g.is_available() )
 
-    def get_done_goals(self):
-        return [ g.uid for g in self.gm.goals if g.is_done() ]
+    @property
+    def done_goals(self):
+        return (g for g in self.gm.goals if g.is_done())
 
     def get_sysinfo(self):
         curr = self.gm.get_current_goal()
         return {
             "current_goals": self.get_current_goals(),
-            "current_available_goals": self.get_current_available_goals(),
-            "done_goals": self.get_done_goals(),
+            "current_available_goals": goals_to_list(self.current_available_goals),
+            "done_goals": goals_to_list(self.done_goals),
             "doing_goal": curr.uid if curr else None,
             "remaining_time": self.event_loop.get_remaining_match_time()
         }
