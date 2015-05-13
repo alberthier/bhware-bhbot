@@ -301,7 +301,7 @@ class StaticStrategy(State):
                 yield from self.first_stands_with_line()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_WEST_STAND", GOAL_DONE)
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_EAST_STAND", GOAL_DONE)
-                WaitForStandGrabbed(SIDE_LEFT)
+                WaitForStandStored(SIDE_LEFT)
             except OpponentInTheWay:
                 self.log("GRAB_CENTER_WEST_STAND aborted")
                 yield MoveLineRelative(-0.100)
