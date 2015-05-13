@@ -271,7 +271,7 @@ SECONDARY_INPUT = Enum("Inputs",
     SECONDARY_INPUT_START        = 16,
     SECONDARY_INPUT_TEAM         = 3,
     SECONDARY_INPUT_ROBOT_INIT   = 7,
-    SECONDARY_INPUT_CUP_PRESENCE = 12,
+    SECONDARY_INPUT_CUP_PRESENCE = 2,
 )
 
 def makeServoMoveCommand(servo, value, timeout=None):

@@ -547,6 +547,8 @@ class ResettleAfterSouthCornerStands(State):
 class KickMineClaps(State):
 
     def on_enter(self):
+        self.last_servo_command = None
+
         goal = self.robot.goal_manager.get_goals("KICK_MINE_CLAPS")[0]
         yield RotateTo(math.pi / 2.0)
         yield MoveLineTo(goal.x, 0.10)
@@ -555,6 +557,9 @@ class KickMineClaps(State):
             self.commands = [RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE]
         else:
             self.commands = [LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE, LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE]
+
+        finish_command = self.commands[-1]
+
         self.commands.reverse()
         yield Trigger(self.commands.pop())
         move = MoveLine([(goal.x, 0.22), (goal.x, 0.60), (goal.x, 0.88)])
@@ -564,12 +569,15 @@ class KickMineClaps(State):
         if move.exit_reason == TRAJECTORY_DESTINATION_REACHED:
             self.exit_reason = GOAL_DONE
         else:
+            if self.last_servo_command != finish_command:
+                yield Trigger(finish_command)
             self.exit_reason = GOAL_FAILED
         yield None
 
 
     def on_waypoint_reached(self, packet):
-        self.send_packet(packets.ServoControl(*self.commands.pop()))
+        self.last_servo_command = self.commands.pop()
+        self.send_packet(packets.ServoControl(*self.last_servo_command))
 
 
 
