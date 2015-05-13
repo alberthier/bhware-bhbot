@@ -122,6 +122,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabNorthCornerStand)
                 .builder_action(1,0)
+                .estimated_duration(5)
                 .build(),
             G("GRAB_STAIRS_STAND")
                 .weight(2)
@@ -129,6 +130,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabStairsStands)
                 .builder_action(0,2)
+                .estimated_duration(10)
                 .build(),
             G("GRAB_CENTER_WEST_STAND")
                 .weight(3)
@@ -136,6 +138,8 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterWestStand)
                 .builder_action(1,0)
+                .estimated_duration(5)
+                .disabled()
                 .build(),
             G("GRAB_CENTER_EAST_STAND")
                 .weight(4)
@@ -143,6 +147,8 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterEastStand)
                 .builder_action(1,0)
+                .estimated_duration(5)
+                .disabled()
                 .build(),
             G("GRAB_CENTER_SOUTH_STAND")
                 .weight(5)
@@ -150,19 +156,22 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterSouthStand)
                 .builder_action(1,0)
+                .disabled()
                 .build(),
             G("GRAB_SOUTH_CORNER_STANDS")
                 .weight(6)
-                .coords(1.45, 0.55)
+                .coords(1.400, 0.730)
                 .direction(DIRECTION_FORWARD)
-                .state(GrabSouthCornerStands)
-                .builder_action(0,2)
+                .state(GrabSouthCornerStandsDirect)
+                .builder_action(1,1)
+                .estimated_duration(10)
                 .build(),
             G("KICK_MINE_CLAPS")
                 .weight(7)
                 .coords(1.77, 0.22)
                 .direction(DIRECTION_FORWARD)
                 .state(KickMineClaps)
+                .not_before(["GRAB_SOUTH_CORNER_STANDS"])
                 .build(),
             G("BUILD_SPOTLIGHT_HOME")
                 .weight(10)
@@ -170,6 +179,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightHome)
                 .builder_action(-1,0)
+                .estimated_duration(15)
                 .build(),
 #            G("KICK_THEIR_CLAP")
 #                .weight(9)
@@ -183,6 +193,23 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightPlatform)
                 .builder_action(0,-1)
+                .estimated_duration(15)
+                .build(),
+            G("BUILD_SPOTLIGHT_PLATFORM_ALTERNATE_LEFT")
+                .weight(15)
+                .coords(1.73, 1.96)
+                .direction(DIRECTION_FORWARD)
+                .state(BuildSpotlightGeneric, (-math.pi/4, SIDE_LEFT))
+                .builder_action(-1,0)
+                .estimated_duration(15)
+                .build(),
+            G("BUILD_SPOTLIGHT_PLATFORM_ALTERNATE_RIGHT")
+                .weight(15)
+                .coords(1.74, 1.96)
+                .direction(DIRECTION_FORWARD)
+                .state(BuildSpotlightGeneric, (-math.pi/4, SIDE_RIGHT))
+                .builder_action(0,-1)
+                .estimated_duration(15)
                 .build()
             )
 
@@ -321,7 +348,6 @@ class StaticStrategy(State):
             yield GrabStairsStands()
             self.send_packet(packets.InterbotUnlock("SOUTH_ZONE"))
             self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
-            yield SafeMoveLineTo(0.68, 0.850 - 0.0725)
 
             yield LookAt(0.42, 0.30)
             yield SafeMoveLineTo(0.42, 0.30)
@@ -408,6 +434,9 @@ class GrabStairsStands(State):
             grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.01, False)
 
         self.exit_reason = grab.exit_reason
+
+        yield SafeMoveLineTo(0.68, 0.850 - 0.0725)
+
         yield None
 
 
@@ -477,6 +506,8 @@ class GrabSouthCornerStandsDirect(State):
         yield SafeMoveLineTo(self.x3, self.y3)
         self.send_packet(packets.EnsureBuild(SIDE_LEFT))
         self.send_packet(packets.EnsureBuild(SIDE_RIGHT))
+
+        self.exit_reason = GOAL_DONE
 
 
     def escape(self):
@@ -559,6 +590,25 @@ class KickTheirClap(State):
         yield None
 
 
+class BuildSpotlightGeneric(State):
+
+    def __init__(self, angle, side):
+        self.side = side
+        self.angle = angle
+
+    def on_enter(self):
+        yield RotateTo(self.angle)
+        self.fsm.builders[self.side].enabled = False
+        self.send_packet(packets.BuildSpotlight(self.side))
+
+
+    def on_build_spotlight(self, packet):
+        if packet.side == self.side:
+            yield MoveLineRelative(-0.15)
+            self.fsm.builders[self.side].enabled = True
+            self.send_packet(packets.StandbuilderIdle(self.side))
+            self.exit_reason = GOAL_DONE
+            yield None
 
 
 class BuildSpotlightPlatform(State):
