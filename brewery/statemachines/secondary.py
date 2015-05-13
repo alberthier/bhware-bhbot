@@ -171,12 +171,17 @@ class CalibratePosition(State):
         start_angle = tools.normalize_angle(start_angle)
 
         if IS_HOST_DEVICE_ARM:
-            wedge_size = 0.055
-            setup_x = 0.8 + wedge_size + ROBOT_CENTER_X
-            setup_y = 0.07 + 0.30 + ROBOT_CENTER_X
-            yield DefinePosition(setup_x, setup_y, math.pi / 2.0)
-            yield MoveLineTo(setup_x, start_y)
-            yield RotateTo(0.0)
+            setup_x = 0.8 - 0.022 - ROBOT_CENTER_X
+            turn_x = 0.63
+            yield DefinePosition(setup_x, 1.0, math.pi)
+            yield MoveLineTo(turn_x, 1.0)
+            yield RotateTo(math.pi / 2.0)
+            yield SpeedControl(0.2)
+            yield MoveLineTo(turn_x, 0.0)
+            yield SpeedControl()
+            yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)
+            yield MoveLineTo(turn_x, start_y)
+            yield RotateTo(0)
             yield MoveLineTo(start_x, start_y)
             yield RotateTo(start_angle)
         else:
