@@ -41,6 +41,11 @@ class Main(State):
              self.robot.has_left_bulb = bulb_presence == 0
              bulb_presence = yield GetInputStatus(MAIN_INPUT_RIGHT_BULB_PRESENCE)
              self.robot.has_right_bulb = bulb_presence == 0
+
+             if IS_HOST_DEVICE_PC:
+                 self.robot.has_left_bulb = True
+                 self.robot.has_right_bulb = True
+
              yield None
 
 
