@@ -279,6 +279,8 @@ class StaticStrategy(State):
 
     def first_stands_with_line(self):
         adjust = math.radians(-2)
+        if self.robot.team == TEAM_RIGHT:
+            adjust = -adjust
 
         p1 = Pose(*left_builder_at_point(self.robot.pose, 1.400, 1.300))
         p2 = Pose(*get_offset_position(self.robot.pose, p1.x, p1.y, 0.05))

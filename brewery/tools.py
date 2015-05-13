@@ -90,11 +90,11 @@ def get_offset_position(robot_pose, x, y, offset):
     """
     Returns the (x, y) position offseted by 'offset' mm with robot_pose as start reference
     """
-    a = angle_between(robot_pose.x, robot_pose.y, x, y)
-    dist = distance(robot_pose.x, robot_pose.y, x, y)
+    a = angle_between(robot_pose.virt.x, robot_pose.virt.y, x, y)
+    dist = distance(robot_pose.virt.x, robot_pose.virt.y, x, y)
     dist += offset
-    x = robot_pose.x + math.cos(a) * dist
-    y = robot_pose.y + math.sin(a) * dist
+    x = robot_pose.virt.x + math.cos(a) * dist
+    y = robot_pose.virt.y + math.sin(a) * dist
     return x, y
 
 @functools.lru_cache()
