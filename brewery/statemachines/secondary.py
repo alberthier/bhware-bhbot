@@ -18,7 +18,7 @@ import statemachines.testssecondary as testssecondary
 
 
 CUP_GRAB_RATION_DECC=1.0
-GRAB_OFFSET = -(ROBOT_CENTER_X + 0.05)
+GRAB_OFFSET = -(ROBOT_CENTER_X + 0.06)
 
 
 
@@ -263,7 +263,7 @@ class GrabSouthCornerCup(State):
         yield RotateTo(0)
         yield SpeedControl(0.2)
         yield MoveLineTo(1.0, cup_y)
-        yield DefinePosition(1.222 + ROBOT_CENTER_X, None, math.pi)
+        yield DefinePosition(1.222 + ROBOT_CENTER_X, None, 0.0)
         yield SpeedControl()
 
         yield MoveLineTo(1.4, cup_y)
