@@ -38,7 +38,7 @@ class Goal:
                  "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration",
                  "builder_action",
                  "ratio_decc", "cached_pose",
-                 "stats", "tags"
+                 "stats", "tags", "_not_before"
                  ]
 
     def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
@@ -68,6 +68,7 @@ class Goal:
         self.builder_action = None
         self.stats=GoalStats(identifier)
         self.tags=set(self.identifier.upper().split("_"))
+        self._not_before = None
 
 
 
@@ -87,7 +88,24 @@ class Goal:
         n.builder_action = self.builder_action
         n.ratio_decc = self.ratio_decc
         n.tags = self.tags
+        n._not_before = self._not_before
         return n
+
+
+    def not_before(self, states_ids):
+        if states_ids:
+            if isinstance(states_ids, set):
+                self._not_before = states_ids
+            elif hasattr(states_ids, "__iter__"):
+                self._not_before = set(states_ids)
+            else:
+                self._not_before = { states_ids }
+
+    def can_follow(self, current_states):
+        if self._not_before is None:
+            return True
+        return any((state in self._not_before for state in current_states))
+
 
     @property
     def pose(self):
@@ -174,6 +192,10 @@ class GoalManager:
     @property
     def doable_goals(self):
         return [ g for g in self.goals if g.is_available() and not g.is_blacklisted ]
+
+    @property
+    def done_goals(self):
+        return [ g for g in self.goals if g.is_done() ]
 
     def add(self, *args):
         for goal in args :
@@ -393,18 +415,28 @@ class GoalManager:
 
 
     def update_goal_status(self, goal, new_status):
+
+        goal_to_update = None
+
         if not isinstance(goal, Goal):
             for g in self.goals:
                 if g.identifier == goal:
-                    goal = g
+                    goal_to_update = g
                     break
-        logger.log("Goal {} : {}".format(GOAL_STATUS.lookup_by_value[new_status], goal.identifier))
+        else:
+            goal_to_update = goal
 
-        self.internal_goal_update(goal.identifier, new_status)
+        if not goal_to_update:
+            logger.error("Did not find goal {} to update".format(goal))
+            return
 
-        if goal.shared :
-            logger.log('A shared goal status changed, notifying my buddy : {} -> {}'.format(goal.identifier, goal.status))
-            packet = packets.InterbotGoalStatus(goal_identifier = goal.identifier, goal_status = goal.status)
+        logger.log("Goal {} : {}".format(GOAL_STATUS.lookup_by_value[new_status], goal_to_update.identifier))
+
+        self.internal_goal_update(goal_to_update.identifier, new_status)
+
+        if goal_to_update.shared :
+            logger.log('A shared goal status changed, notifying my buddy : {} -> {}'.format(goal_to_update.identifier, goal_to_update.status))
+            packet = packets.InterbotGoalStatus(goal_identifier = goal_to_update.identifier, goal_status = goal_to_update.status)
             self.event_loop.send_packet(packet)
 
 
@@ -429,11 +461,12 @@ class GoalBuilder:
     def __init__(self, goal_id, ctor=Goal):
         self.goal_id = goal_id
         self.ctor = ctor
-        self._estimated_time = None
         self._disabled = False
         self.params = {"identifier":goal_id}
         self.default_values={"offset": 0}
         self._builder_action=None
+        self._estimated_duration = None
+        self._not_before = None
 
     @tools.newobj
     def identifier(self, identifier):
@@ -472,11 +505,15 @@ class GoalBuilder:
 
     @tools.newobj
     def estimated_duration(self, estimated_duration):
-        self._estimated_duration = estimated_time
+        self._estimated_duration = estimated_duration
 
     @tools.newobj
     def disabled(self):
         self._disabled = True
+
+    @tools.newobj
+    def not_before(self, states):
+        self._not_before = states
 
     def build(self):
         logger.log("Building goal {}".format(self.goal_id))
@@ -492,7 +529,7 @@ class GoalBuilder:
 
         logger.log("Calling {} with {}".format(self.ctor, passed_params))
         g = self.ctor(**passed_params)
-        if self._estimated_time:
+        if self._estimated_duration:
             g.estimated_duration = self._estimated_duration
             logger.log("estimated_duration={}".format(g.estimated_duration))
 
@@ -502,6 +539,10 @@ class GoalBuilder:
 
         if self._builder_action:
             g.builder_action = self._builder_action
+
+        if self._not_before:
+            g.not_before(self._not_before)
+
         return g
 
 def on_end_of_match(gm: GoalManager, robot):

@@ -1074,7 +1074,7 @@ class ExecuteGoalsV2(ExecuteGoalsBase):
 
     def get_next_goal_simple(self,gm):
         with metrics.STATS.duration.time():
-            identifier = self.robot.goal_decider.get_best_goal(gm.doable_goals, map_=graphmap, robot=self.robot, max_duration=2, max_depth=5)
+            identifier = self.robot.goal_decider.get_best_goal(gm.doable_goals, gm.done_goals, map_=graphmap, robot=self.robot, max_duration=2, max_depth=10)
             if identifier:
                 goal=gm.get_goals(identifier)[0]
                 return goal

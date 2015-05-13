@@ -11,7 +11,7 @@ import goalmanager
 from definitions import *
 
 MEAN_SPEED_PER_S=0.1
-DEFAULT_GOAL_ESTIMATED_DURATION_S=15
+DEFAULT_GOAL_ESTIMATED_DURATION_S=10
 MAX_STAND_PER_BUILDER=4
 
 class GoalDeciderException(Exception):
@@ -112,6 +112,9 @@ class WorldState:
 
         self.logger.trace("Executing goal : {}".format(self.goal_trace()))
 
+        if not goal.can_follow([g.identifier for g in self.executed_goals]):
+            raise GoalImpossibleToExecute(goal, "precondition was not met: {}".format(goal._not_before))
+
         if goal.tags.issuperset({"BUILD", "SPOTLIGHT"}):
             self.decrement_deposit_goals()
 
@@ -124,12 +127,14 @@ class WorldState:
         self.traveled_distance+=distance
 
         if self.remaining_time - elapsed_time <= 0.0 :
-            raise NoTimeToAttain(goal)
+            raise NoTimeToAttain(goal, "remaining: {} elapsed: {}".format(self.remaining_time, elapsed_time))
 
         self.remaining_time-=elapsed_time
 
-        if self.remaining_time - (goal.estimated_duration or DEFAULT_GOAL_ESTIMATED_DURATION_S) <= 0.0 :
-            raise NoTimeToExecute(goal)
+        estimated_duration = goal.estimated_duration or DEFAULT_GOAL_ESTIMATED_DURATION_S
+
+        if self.remaining_time - estimated_duration <= 0.0 :
+            raise NoTimeToExecute(goal, "remaining: {} estimated: {}".format(self.remaining_time, estimated_duration))
 
         self.robot_pose = goal.pose.clone()
 
@@ -155,7 +160,7 @@ class WorldState:
                 self.has_right_bulb=False
 
     def to_str(self):
-        return "Builders: {},{} Bulbs: {}, {} Time: {} Traveled: {}".format(
+        return "Builders: {},{} Bulbs: {},{} Time: {} Traveled: {}".format(
             self.left_builder_count,
             self.right_builder_count,
             self.has_left_bulb,
@@ -275,7 +280,7 @@ class Explorer:
         return (datetime.datetime.now() - self.start_time).total_seconds() >= self.max_duration
 
     def log(self, param):
-        print(param)
+        self.logger.log(param)
 
     def score_world(self, new_world: WorldState):
         last = new_world.last_goal
@@ -357,9 +362,10 @@ class GoalDecider:
         self.event_loop = event_loop
         self.gm = goal_manager
 
-    def adapt_world(self, goals, map_, robot):
-        w = WorldState(goals, map_, robot.event_loop.get_remaining_match_time())
-        w.remaining_goals = goals
+    def adapt_world(self, available_goals, done_goals, map_, robot):
+        w = WorldState(available_goals, map_, robot.event_loop.get_remaining_match_time())
+        w.remaining_goals = available_goals
+        w.executed_goals = done_goals
         w.map_ = map_
         w.robot_pose = robot.pose
         w.has_left_bulb = robot.has_left_bulb
@@ -371,8 +377,8 @@ class GoalDecider:
 
         return w
 
-    def init_context(self, goals, map_, robot, max_duration: float, max_depth: int):
-        w = self.adapt_world(goals, map_, robot)
+    def init_context(self, available_goals, done_goals, map_, robot, max_duration: float, max_depth: int):
+        w = self.adapt_world(available_goals, done_goals, map_, robot)
 
         ex = Explorer()
 
@@ -383,29 +389,35 @@ class GoalDecider:
 
         return ex, w
 
-    def explore_for_best_goal(self, goals, map_, robot, max_duration: float, max_depth: int):
-        ex, base_world = self.init_context(goals, map_, robot, max_duration, max_depth)
+    def explore_for_best_goal(self, available_goals, done_goals, map_, robot, max_duration: float, max_depth: int):
+        ex, base_world = self.init_context(available_goals, done_goals, map_, robot, max_duration, max_depth)
 
         goals, best_world = ex.explore(base_world)
 
         self.logger.log("Evaluated count : {}".format(ex.evaluated_count))
+
+        future_goals = None
+
         if goals:
-            identifier=goals[0].identifier
+            future_goals=[g for g in goals if g.is_available()]
+
+        if future_goals:
+            identifier=future_goals[0].identifier
             self.logger.log("Best goal is: {}".format(identifier))
             return identifier, best_world
         else:
             self.logger.log("Best goal was not found")
             return None, None
 
-    def get_best_goal(self, goals, map_, robot, max_duration: float, max_depth: int):
+    def get_best_goal(self, available_goals, done_goals, map_, robot, max_duration: float, max_depth: int):
         best = None
-        if self.last_solution:
-            self.logger.log("Trying to validate latest solution: {}".format(self.last_solution.goal_trace()))
-            best = self.validate_latest_solution(goals, map_, robot, max_duration, max_depth)
+        # if self.last_solution:
+        #     self.logger.log("Trying to validate latest solution: {}".format(self.last_solution.goal_trace()))
+        #     best = self.validate_latest_solution(available_goals, done_goals, map_, robot, max_duration, max_depth)
 
         if not best:
             self.logger.log("Doing full exploration")
-            best, self.last_solution = self.explore_for_best_goal(goals, map_, robot, max_duration, max_depth)
+            best, self.last_solution = self.explore_for_best_goal(available_goals, done_goals, map_, robot, max_duration, max_depth)
 
         return best
 
@@ -413,13 +425,11 @@ class GoalDecider:
         self.logger.log("Navigation failed, invalidating latest solution")
         self.last_solution = None
 
-    def validate_latest_solution(self, goals, map_, robot, max_duration, max_depth):
-        available_goals = self.current_available_goals
-
+    def validate_latest_solution(self, available_goals, done_goals, map_, robot, max_duration, max_depth):
         if not available_goals:
             return
 
-        ex, base_world = self.init_context(goals, map_, robot, max_duration, max_depth)
+        ex, base_world = self.init_context(available_goals, done_goals, map_, robot, max_duration, max_depth)
 
         evaluated_solution = ex.evaluate(base_world, self.last_solution)
 
