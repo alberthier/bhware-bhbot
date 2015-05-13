@@ -210,7 +210,7 @@ class Main(State):
             except OpponentInTheWay:
                 yield Timer(100)
         self.send_packet(packets.LiftBulb())
-        # yield StaticStrategy()
+        yield StaticStrategy()
         # yield ExecuteGoals()
         while True:
             yield ExecuteGoalsV2()
