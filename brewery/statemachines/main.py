@@ -75,9 +75,9 @@ class ScoreEstimator:
             else:
                 if robot.right_stand_count:
                     if robot.has_right_bulb:
-                        self.temporary_score=robot.left_stand_count*3
+                        self.temporary_score=robot.right_stand_count*3
                     else:
-                        self.temporary_score=robot.left_stand_count*2
+                        self.temporary_score=robot.right_stand_count*2
 
     def after_goal_success(self, goal_id, robot):
         robot.score+=self.temporary_score
