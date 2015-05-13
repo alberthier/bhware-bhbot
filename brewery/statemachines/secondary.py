@@ -255,11 +255,14 @@ class GrabSouthCornerCup(State):
         yield DefinePosition(None, ry, a)
         yield SpeedControl()
         yield MoveLineTo(goal.x, cup_y)
-        yield RotateTo(math.pi)
+        yield RotateTo(0)
         yield SpeedControl(0.2)
         yield MoveLineTo(1.0, cup_y)
         yield DefinePosition(1.222 + ROBOT_CENTER_X, None, math.pi)
         yield SpeedControl()
+
+        yield MoveLineTo(1.4, cup_y)
+        yield RotateTo(math.pi)
 
         # Grab cup
         yield SafeMoveLineTo(1.750 + GRAB_OFFSET, cup_y)
@@ -295,6 +298,8 @@ class DepositCup(State):
         if self.home:
             yield RotateTo(math.pi / 2.0)
             yield MoveLineTo(1.0, 0.30)
+        else:
+            yield RotateTo(-math.pi / 2.0)
         yield Timer(500)
         yield Trigger(CUP_GRIPPER_HALF_OPEN)
         yield Timer(500)
