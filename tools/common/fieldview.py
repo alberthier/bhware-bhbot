@@ -63,7 +63,8 @@ class FieldView(QGraphicsView):
         QGraphicsView.__init__(self, parent)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
+        if not sys.platform == "darwin":
+            self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
         self.setSceneRect(-200.0, -250.0, 3404, 2450)
         self.setCursor(Qt.BlankCursor)
 
