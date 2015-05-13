@@ -20,7 +20,22 @@ if args.push:
                      "--exclude-from", os.path.join(bhware, ".hgignore"),
                      "brewery",
                      "root@{}:/root/bhware".format(args.remote)]
-    subprocess.call(" ".join(params), cwd = bhware, shell=True)
+    ret = subprocess.call(" ".join(params), cwd = bhware, shell=True)
+
+    if ret == 0:
+        print("rsync OK")
+    else:
+        print("rsync FAILED ({})".format(ret))
+
+    subprocess.call(["/usr/bin/ssh",
+             "-t",
+             "root@{}".format(args.remote),
+             "sync"])
+
+    if ret == 0:
+        print("sync OK")
+    else:
+        print("sync FAILED ({})".format(ret))
 
 if args.run:
     os.execl("/usr/bin/ssh",
