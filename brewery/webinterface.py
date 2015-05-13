@@ -27,16 +27,20 @@ class WebInterface:
 
     def __call__(self, environ, start_response):
         response = None
+        code = None
         path = environ["PATH_INFO"]
         handler = path[1:]
         if hasattr(self, handler):
-            response = getattr(self, handler)(environ)
+            try:
+                response = getattr(self, handler)(environ)
+                code = "200 OK"
+            except Exception as e:
+                response = "Internal error:\n{}".format(traceback.format_exc())
+                code = "500 Internal error"
 
         if response is None:
             code = "404 Not Found"
             response = ""
-        else:
-            code = "200 OK"
 
         content_type='text/plain; charset=utf-8'
 
