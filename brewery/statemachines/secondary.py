@@ -18,7 +18,7 @@ import statemachines.testssecondary as testssecondary
 
 
 CUP_GRAB_RATION_DECC=1.0
-GRAB_OFFSET = -(ROBOT_CENTER_X + 0.06)
+GRAB_OFFSET = -(ROBOT_CENTER_X + 0.05)
 
 
 
@@ -55,7 +55,7 @@ class Main(State):
         self.fsm.interbot_fsm = StateMachine(self.event_loop, "interbot")
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
         StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
-        StateMachine(self.event_loop, "cupgrabber")
+        self.fsm.cup_grabber = StateMachine(self.event_loop, "cupgrabber")
 
         self.robot.holding_cup = False
 
@@ -66,7 +66,7 @@ class Main(State):
         self.robot.goal_manager.add(
             GCG("GRAB_STAIRS_CUP")
                 .weight(1)
-                .coords(0.80, 0.91)
+                .coords(0.830, 0.910)
                 .offset(GRAB_OFFSET)
                 .state(GrabCup)
                 .build(),
@@ -165,7 +165,7 @@ class CalibratePosition(State):
 
     def on_enter(self):
         start_x = 1.0
-        start_y = 0.54
+        start_y = 0.51
 
         start_angle = math.atan2(0.91 - start_y, 0.80 - start_x) + math.pi
         start_angle = tools.normalize_angle(start_angle)
@@ -233,7 +233,7 @@ class StaticStrategy(State):
 class GrabCup(Timer):
 
     def __init__(self):
-        super().__init__(300)
+        super().__init__(500)
         self.exit_reason = GOAL_DONE
 
 
@@ -290,6 +290,7 @@ class GrabPlatformCup(State):
         yield SafeMoveLineTo(xc, yc)
         grab = yield GrabCup()
         self.exit_reason = grab.exit_reason
+        yield None
 
 
 
@@ -313,6 +314,10 @@ class DepositCup(State):
             yield MoveLineTo(1.0, 0.65)
         else:
             yield MoveLineRelative(0.05)
+        self.fsm.cup_grabber.enabled = False
+        yield Trigger(CUP_GRIPPER_SEEKING)
+        yield Timer(500)
+        self.fsm.cup_grabber.enabled = True
         self.robot.holding_cup = False
         self.exit_reason = GOAL_DONE
         yield None

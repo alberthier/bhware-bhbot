@@ -147,6 +147,7 @@ class WebInterface:
                 "yield Trigger(CUP_GRIPPER_CLOSE)",
                 "yield Trigger(CUP_GRIPPER_ON_CUP)",
                 "yield Trigger(CUP_GRIPPER_HALF_OPEN)",
+                "yield Trigger(CUP_GRIPPER_SEEKING)",
                 "yield Trigger(CUP_GRIPPER_OPEN)"
             ]
             result.append(["Cup gripper", actions])
