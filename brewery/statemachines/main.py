@@ -587,6 +587,7 @@ class KickMineClaps(State):
             yield SafeMoveLineRelative(0.2)
             yield LookAtOpposite(goal.x, 0.26)
             yield SafeMoveLineTo(goal.x, 0.26)
+            yield RotateTo(math.pi / 2.0)
             # Skip first point and associated command
             command = self.commands[0]
             self.commands = self.commands[1:]
