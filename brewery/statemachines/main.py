@@ -89,8 +89,8 @@ class Main(State):
 
     def init_platform_build_position(self):
         cx, cy, ca = get_center_pose_for_point(0.150, -0.0725, 2.00 - 0.05, 1.20 - 0.05, math.pi / 4.0)
-        self.fsm.build_spotlight_platform_x = cx - 0.045
-        self.fsm.build_spotlight_platform_y = cy - 0.045
+        self.fsm.build_spotlight_platform_x = cx - 0.1
+        self.fsm.build_spotlight_platform_y = cy - 0.1
 
 
     def on_enter(self):
@@ -189,7 +189,7 @@ class Main(State):
 #                .build(),
             G("BUILD_SPOTLIGHT_PLATFORM")
                 .weight(8)
-                .coords(self.fsm.build_spotlight_platform_x - 0.05, self.fsm.build_spotlight_platform_y - 0.05)
+                .coords(self.fsm.build_spotlight_platform_x, self.fsm.build_spotlight_platform_y)
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightPlatform)
                 .builder_action(0,-1)
@@ -450,7 +450,7 @@ class GrabStairsStands(State):
 
         grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
         if grab.exit_reason == GOAL_DONE:
-            grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.01, False, True)
+            grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.04, False, True)
 
         self.exit_reason = grab.exit_reason
 
@@ -464,8 +464,9 @@ class GrabStairsStands(State):
 class GrabNorthCornerStand(State):
 
     def on_enter(self):
-        grab = yield GrabStand(SIDE_LEFT, 0.200, 0.090, 0.01, True)
+        grab = yield GrabStand(SIDE_LEFT, 0.200, 0.090, 0.01, False)
         self.exit_reason = grab.exit_reason
+        yield MoveLineRelative(-0.10)
         yield LookAtOpposite(0.60, 0.60)
         yield SafeMoveLineTo(0.60, 0.60)
         yield None
@@ -519,7 +520,7 @@ class GrabSouthCornerStandsDirect(State):
 
         self.x1, self.y1 = 1.400, 0.730
         self.x2, self.y2 = 1.800, 0.330
-        self.x3, self.y3 = 1.800, 0.220
+        self.x3, self.y3 = 1.800, 0.200
         self.cx, self.cy = self.x1, self.y2
         self.r = self.x2 - self.x1
 
@@ -579,7 +580,7 @@ class KickMineClaps(State):
         else:
             self.commands = [LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE, LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE]
         points = [(goal.x, 0.22), (goal.x, 0.60), (goal.x, 0.88)]
-        if self.robot.pose.virt.x < (ROBOT_CENTER_X + 0.05):
+        if self.robot.pose.virt.y < (ROBOT_CENTER_X + 0.05):
             # We are not blocked by stands or cups, we can resettle.
             yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)
         else:
@@ -662,6 +663,8 @@ class BuildSpotlightPlatform(State):
 
     def on_enter(self):
         yield RotateTo(math.pi / 4.0)
+        yield MoveLineTo(1.778, 1.08)
+        yield Timer(3000000000000)
         self.fsm.builders[SIDE_RIGHT].enabled = False
         self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
 
