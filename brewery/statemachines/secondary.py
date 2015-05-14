@@ -123,7 +123,7 @@ class Main(State):
                 .build(),
             G("KICK_THEIRS_CLAP")
                 .weight(7)
-                .coords(2.0 - 0.0825 - 0.070, 2.65)
+                .coords(2.0 - 0.0825 - 0.070, 2.60)
                 .direction(DIRECTION_FORWARD)
                 .state(KickTheirsClap)
                 .build(),
