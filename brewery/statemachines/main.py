@@ -340,7 +340,8 @@ class StaticStrategy(State):
                 yield MoveLineRelative(-0.100)
 
             yield RotateTo(-math.pi / 2.0)
-            yield SafeMoveLineTo(self.robot.pose.x, 0.850 - 0.0725)
+            x, y, a = right_builder_at_pose(0.200, 0.850, math.pi)
+            yield SafeMoveLineTo(self.robot.pose.x, y)
             yield RotateTo(math.pi)
 
             yield WaitForUnlock("NORTH_ZONE", 5000)
@@ -403,10 +404,9 @@ class GrabStand(State):
 
     def on_enter(self):
         x, y, angle = builder_at_point(self.side, self.robot.pose, self.x, self.y)
-        ref_pose = Pose(self.robot.pose.x, self.robot.pose.y, angle, True)
         if not self.skip_rotate:
             yield RotateTo(angle)
-        x, y = get_offset_position(ref_pose, x, y, self.stand_grab_offset)
+        x, y = get_offset_position(self.robot.pose, x, y, self.stand_grab_offset)
         self.exit_reason = GOAL_FAILED
         try:
             move = yield SafeMoveLineTo(x, y)
