@@ -69,6 +69,8 @@ class Map:
 
         # Add Field obstacles
         offset = ROBOT_GYRATION_RADIUS * math.cos(math.pi / 4.0) + 0.01
+        if not IS_MAIN_ROBOT:
+            offset += 0.03
 
         popcorn_loc = 0.300 - 0.035 - offset
         self.add_zone([(0.0, popcorn_loc),
