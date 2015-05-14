@@ -72,13 +72,13 @@ class Main(State):
                 .build(),
             G("DEPOSIT_CARPET_LEFT")
                 .weight(2)
-                .coords(0.725, 1.08)
+                .coords(0.740, 1.08)
                 .direction(DIRECTION_FORWARD)
                 .state(DepositCarpet, (SIDE_LEFT,))
                 .build(),
             G("DEPOSIT_CARPET_RIGHT")
                 .weight(3)
-                .coords(0.725, 1.40)
+                .coords(0.740, 1.40)
                 .direction(DIRECTION_FORWARD)
                 .state(DepositCarpet, (SIDE_RIGHT,))
                 .build(),
@@ -101,32 +101,32 @@ class Main(State):
             #     .build(),
             DCG("DEPOSIT_OPP_NORTH")
                 .weight(8)
-                .coords(0.50, 2.65)
+                .coords(0.55, 2.70)
                 .state(DepositCup, (False,))
                 .build(),
-            # GCG("GRAB_PLATFORM_CUP")
-            #     .weight(7)
-            #     .coords(1.65, 1.28)
-            #     .offset(GRAB_OFFSET)
-            #     .state(GrabPlatformCup)
-            #     .build(),
-            # GCG("GRAB_PLATFORM_CUP")
-            #     .weight(7)
-            #     .coords(1.65, 1.72)
-            #     .offset(GRAB_OFFSET)
-            #     .state(GrabPlatformCup)
-            #     .build(),
-            # DCG("DEPOSIT_OPP_SOUTH")
-            #     .weight(6)
-            #     .coords(1.45, 2.65)
-            #     .state(DepositCup, (False,))
-            #     .build(),
-            # G("KICK_THEIRS_CLAP")
-            #     .weight(6)
-            #     .coords(1.86, 2.65)
-            #     .direction(DIRECTION_FORWARD)
-            #     .state(KickTheirsClap)
-            #     .build(),
+            GCG("GRAB_PLATFORM_CUP")
+                .weight(7)
+                .coords(1.65, 1.28)
+                .offset(GRAB_OFFSET)
+                .state(GrabPlatformCup)
+                .build(),
+            GCG("GRAB_PLATFORM_CUP")
+                .weight(7)
+                .coords(1.65, 1.72)
+                .offset(GRAB_OFFSET)
+                .state(GrabPlatformCup)
+                .build(),
+            DCG("DEPOSIT_OPP_SOUTH")
+                .weight(6)
+                .coords(1.45, 2.70)
+                .state(DepositCup, (False,))
+                .build(),
+            G("KICK_THEIRS_CLAP")
+                .weight(7)
+                .coords(2.0 - 0.0825 - 0.070, 2.65)
+                .direction(DIRECTION_FORWARD)
+                .state(KickTheirsClap)
+                .build(),
         )
 
     def on_controller_status(self, packet):
@@ -371,7 +371,7 @@ class KickTheirsClap(State):
             yield RotateTo(math.pi / 2)
         else:
             yield RotateTo(-math.pi / 2)
-        yield SafeMoveLineTo(goal.x, 2.330)
+        yield SafeMoveLineTo(goal.x, 2.400)
         yield RotateTo(math.pi)
         yield Trigger(CLAPMAN_CLOSE)
         self.exit_reason = GOAL_DONE
