@@ -2,6 +2,7 @@
 
 import math
 import inspect
+import traceback
 import types
 import struct
 import sys
@@ -9,6 +10,7 @@ import sys
 import position
 from binarizer import *
 from definitions import *
+
 
 
 
@@ -981,3 +983,20 @@ def create_packet(buffer):
     if packet_class is None:
         raise PacketNotFoundException(packet_type)
     return packet_class()
+
+
+class PacketGuard:
+    def __init__(self):
+        self.servos={}
+
+    def on_packet_send(self, packet):
+        if isinstance(packet, ServoControl):
+            status = self.servos.setdefault(packet.id, None)
+            if status :
+                raise Exception("Already waiting reply for servo {}, previous traceback: {}".format(packet.id, self.servos[packet.id]))
+            self.servos[packet.id]="".join(traceback.format_stack())
+
+    def on_packet_receive(self, packet):
+        if isinstance(packet, ServoControl):
+            self.servos[packet.id]=None
+

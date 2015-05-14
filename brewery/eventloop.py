@@ -498,6 +498,8 @@ class Timer(object):
 class EventLoop(object):
 
     def __init__(self, state_machine_name, webserver_port, interbot_enabled = True):
+        self.on_packet_receive = None
+        self.on_packet_send = None
         self.pic_control_channel = None
         self.pic_log_channel = None
         self.turret_channel = None
@@ -522,6 +524,10 @@ class EventLoop(object):
         self.sysinfo = sysinfo.SysInfo(self)
         self.metrics_timer = Timer(self, 5000, metrics.write, single_shot=False)
         self.metrics_timer.start()
+
+        packet_guard = packets.PacketGuard()
+        self.on_packet_receive = packet_guard.on_packet_receive
+        self.on_packet_send = packet_guard.on_packet_send
 
 
     def on_keep_alive(self, packet: packets.KeepAlive):
@@ -568,6 +574,8 @@ class EventLoop(object):
     def process_packets_and_dispatch(self):
         while self.packet_queue:
             packet, sender = self.packet_queue.pop()
+            if self.on_packet_receive:
+                self.on_packet_receive(packet)
             packet.dispatch(self.robot)
             packet.dispatch(self.map)
             packet.dispatch(self.sysinfo)
@@ -592,6 +600,10 @@ class EventLoop(object):
             packet: packet to send
             sender: the fsm which sent the packet
         """
+
+        if self.on_packet_send:
+            self.on_packet_send(packet)
+
         if self.do_send_packet(packet, packets.TURRET_RANGE_START, packets.TURRET_RANGE_END, self.turret_channel):
             return
         elif self.do_send_packet(packet, packets.PIC32_RANGE_START, packets.PIC32_RANGE_END, self.pic_control_channel):
