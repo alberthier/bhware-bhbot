@@ -664,7 +664,6 @@ class BuildSpotlightPlatform(State):
     def on_enter(self):
         yield RotateTo(math.pi / 4.0)
         yield MoveLineTo(1.778, 1.08)
-        yield Timer(3000000000000)
         self.fsm.builders[SIDE_RIGHT].enabled = False
         self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
 
