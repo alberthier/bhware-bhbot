@@ -572,28 +572,12 @@ class KickMineClaps(State):
 
         goal = self.robot.goal_manager.get_goals("KICK_MINE_CLAPS")[0]
         yield RotateTo(math.pi / 2.0)
-        yield MoveLineTo(goal.x, 0.10)
-        yield Timer(300) # wait for a keep alive
 
         if self.robot.team == TEAM_LEFT:
             self.commands = [RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE]
         else:
             self.commands = [LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE, LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE]
-        points = [(goal.x, 0.22), (goal.x, 0.60), (goal.x, 0.88)]
-        if self.robot.pose.virt.y < (ROBOT_CENTER_X + 0.05):
-            # We are not blocked by stands or cups, we can resettle.
-            yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)
-        else:
-            # Backout from here and restart kicking
-            yield SafeMoveLineRelative(0.2)
-            yield LookAtOpposite(goal.x, 0.26)
-            yield SafeMoveLineTo(goal.x, 0.26)
-            yield RotateTo(math.pi / 2.0)
-            # Skip first point and associated command
-            command = self.commands[0]
-            self.commands = self.commands[1:]
-            points = points[1:]
-            yield Trigger(command)
+        points = [(goal.x, 0.28), (goal.x, 0.60), (goal.x, 0.88)]
 
         finish_command = self.commands[-1]
 
