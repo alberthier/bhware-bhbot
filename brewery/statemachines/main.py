@@ -268,7 +268,7 @@ class CalibratePosition(State):
 class WaitForStandStored(Timer):
 
     def __init__(self, side):
-        super().__init__(3000)
+        super().__init__(2000)
         self.side = side
 
 

@@ -224,7 +224,9 @@ class Build(State):
                         yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
                         yield Trigger(self.fsm.ELEVATOR_UP)
                         self.send_packet(packets.StandGrabbed(self.fsm.side))
-                        yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
+                        torqueDisableLeft  = makeServoTorqueControl((self.fsm.PLIERS_LEFT_ID, 0), False)
+                        torqueDisableRight = makeServoTorqueControl((self.fsm.PLIERS_RIGHT_ID, 0), False)
+                        yield Trigger(torqueDisableLeft, torqueDisableRight, self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
                         yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
                         yield Trigger(self.fsm.ELEVATOR_DOWN)
                     else:
