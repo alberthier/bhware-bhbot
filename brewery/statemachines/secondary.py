@@ -357,6 +357,10 @@ class DepositCarpet(State):
         yield Trigger(self.ejector_throw)
         yield Trigger(self.dropper_close)
         yield Trigger(self.ejector_hold)
+        yield Trigger(self.dropper_open)
+        yield Trigger(self.ejector_hold)
+        yield Trigger(self.dropper_open)
+        yield Trigger(self.ejector_hold)
         yield MoveLineTo(goal.x, goal.y)
         self.exit_reason = GOAL_DONE
         yield None
