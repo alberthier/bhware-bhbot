@@ -69,13 +69,13 @@ class ScoreEstimator:
             if goal.builder_action[0]<0:
                 if robot.left_stand_count:
                     if robot.has_left_bulb:
-                        self.temporary_score=robot.left_stand_count*3
+                        self.temporary_score=robot.left_stand_count*5
                     else:
                         self.temporary_score=robot.left_stand_count*2
             else:
                 if robot.right_stand_count:
                     if robot.has_right_bulb:
-                        self.temporary_score=robot.right_stand_count*3
+                        self.temporary_score=robot.right_stand_count*5
                     else:
                         self.temporary_score=robot.right_stand_count*2
 

@@ -290,13 +290,13 @@ class Explorer:
             if "BUILD" in last.tags :
                 if last.builder_action[0]<0 and new_world.left_builder_count:
                     if new_world.has_left_bulb:
-                        action_score+=new_world.left_builder_count*3
+                        action_score+=new_world.left_builder_count*5
                     else:
                         action_score+=new_world.left_builder_count*2
 
                 if last.builder_action[1]<0 and new_world.right_builder_count:
                     if new_world.has_right_bulb:
-                        action_score+=new_world.right_builder_count*3
+                        action_score+=new_world.right_builder_count*5
                     else:
                         action_score+=new_world.right_builder_count*2
 
