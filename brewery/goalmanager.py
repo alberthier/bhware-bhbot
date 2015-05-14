@@ -265,7 +265,7 @@ class GoalManager:
                     goal.navigation_cost = self.event_loop.map.evaluate(self.event_loop.robot.pose, pose)
                 else:
                     goal.navigation_cost = tools.distance(self.event_loop.robot.pose.x, self.event_loop.robot.pose.y, pose.x, pose.y)
-                if best_goal is None or best_goal.navigation_cost > goal.navigation_cost:
+                if goal.navigation_cost and (best_goal is None or best_goal.navigation_cost > goal.navigation_cost):
                     best_goal = goal
             return best_goal
 
