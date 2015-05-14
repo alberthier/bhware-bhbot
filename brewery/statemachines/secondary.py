@@ -205,6 +205,8 @@ class StaticStrategy(State):
             yield from self.execute_goal("DEPOSIT_CUP_HOME")
             yield WaitForUnlock("SOUTH_ZONE", 5000)
             yield from self.execute_goal("GRAB_SOUTH_MINE_CUP")
+            yield MoveLineTo(1.40, 0.2)
+            yield Timer(20000)
         except OpponentInTheWay:
             pass
         yield None
