@@ -328,7 +328,7 @@ class StaticStrategy(State):
                 yield from self.first_stands_with_line()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_WEST_STAND", GOAL_DONE)
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_EAST_STAND", GOAL_DONE)
-                WaitForStandStored(SIDE_LEFT)
+                yield WaitForStandStored(SIDE_LEFT)
             except OpponentInTheWay:
                 self.log("GRAB_CENTER_WEST_STAND aborted")
                 yield MoveLineRelative(-0.100)
@@ -444,7 +444,7 @@ class GrabStairsStands(State):
 class GrabNorthCornerStand(State):
 
     def on_enter(self):
-        grab = yield GrabStand(SIDE_LEFT, 0.200, 0.090, 0.01, False)
+        grab = yield GrabStand(SIDE_LEFT, 0.200, 0.090, 0.01, True)
         self.exit_reason = grab.exit_reason
         yield LookAtOpposite(0.60, 0.60)
         yield SafeMoveLineTo(0.60, 0.60)
