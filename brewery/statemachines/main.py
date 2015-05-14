@@ -647,9 +647,14 @@ class BuildSpotlightPlatform(State):
 
     def on_enter(self):
         yield RotateTo(math.pi / 4.0)
-        yield MoveLineTo(1.778, 1.08)
         self.fsm.builders[SIDE_RIGHT].enabled = False
         self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
+        if self.robot.team == TEAM_LEFT:
+            yield Trigger(RIGHT_BUILDER_ELEVATOR_PLATFORM)
+        else:
+            yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM)
+        yield Timer(100)
+        yield MoveLineTo(1.778, 1.08)
 
 
     def on_build_spotlight(self, packet):
