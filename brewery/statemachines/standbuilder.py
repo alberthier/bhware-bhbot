@@ -265,13 +265,6 @@ class BuildSpotlight(State):
         self.platform_mode = platform_mode
 
     def on_enter(self):
-        bulb_presence = yield GetInputStatus(self.fsm.INPUT_BULB_PRESENCE)
-
-        if bulb_presence.value == 0:
-            yield Trigger(self.fsm.LIGHTER_DEPOSIT)
-            yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
-            yield Timer(200)
-            
         if self.fsm.stand_count < 4:
             yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
             yield Timer(500)
@@ -282,21 +275,46 @@ class BuildSpotlight(State):
             yield Timer(200)
             yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
 
-        if bulb_presence.value == 0:
-            yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
-            yield Timer(500) # wait for light to fall
-
         if self.platform_mode:
             yield Trigger(self.fsm.ELEVATOR_PLATFORM)
             yield Timer(100)
-        else:
-            yield MoveLineRelative(0.05)
 
-        yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
+        yield Trigger(self.fsm.PLIERS_LEFT_CLOSE, self.fsm.PLIERS_RIGHT_CLOSE,
+                      self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
 
-        reset_stand_count(self)
-        self.send_packet(packets.BuildSpotlight(self.fsm.side))
-        yield None
+        self.send_packet(packets.BuildSpotlight(self.fsm.side, False))
+
+
+    def on_build_spotlight(self, packet):
+        if packet.side == self.fsm.side:
+            if packet.finished:
+                bulb_presence = yield GetInputStatus(self.fsm.INPUT_BULB_PRESENCE)
+                stand_presence_status = yield GetInputStatus(self.fsm.INPUT_STAND_PRESENCE)
+
+                if bulb_presence.value == 0 :
+                    logger.log("Bulb is present -> building")
+
+                    if stand_presence_status.value == 0:
+                        logger.log("A stand is present -> building")
+                        yield Trigger(self.fsm.GRIPPER_LEFT_CLOSE, self.fsm.GRIPPER_RIGHT_CLOSE)
+                        yield Trigger(self.fsm.LIGHTER_DEPOSIT)
+                        yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
+                        yield Timer(1000)
+                        yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
+                        waiting_time = 500 + 500* (4-self.fsm.stand_count)
+                        yield Timer(waiting_time) # wait for light to fall
+                    else:
+                        logger.log("A stand is not present -> fuck it, don't put the light")
+                else:
+                    logger.log("Bulb is not present")
+
+                yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
+                yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
+
+                reset_stand_count(self)
+                self.send_packet(packets.BuildSpotlight(self.fsm.side))
+                yield None
+
 
 
 

@@ -642,16 +642,19 @@ class BuildSpotlightGeneric(State):
     def on_enter(self):
         yield RotateTo(self.angle)
         self.fsm.builders[self.side].enabled = False
-        self.send_packet(packets.BuildSpotlight(self.side))
+        self.send_packet(packets.BuildSpotlight(self.side, platform_mode=False, finished=False))
 
 
     def on_build_spotlight(self, packet):
         if packet.side == self.side:
-            yield MoveLineRelative(-0.15)
-            self.fsm.builders[self.side].enabled = True
-            self.send_packet(packets.StandbuilderIdle(self.side))
-            self.exit_reason = GOAL_DONE
-            yield None
+            if not packet.finished:
+                self.send_packet(packets.BuildSpotlight(self.side, platform_mode=False, finished=True))
+            else:
+                yield MoveLineRelative(-0.15)
+                self.fsm.builders[self.side].enabled = True
+                self.send_packet(packets.StandbuilderIdle(self.side))
+                self.exit_reason = GOAL_DONE
+                yield None
 
 
 class BuildSpotlightPlatform(State):
@@ -659,17 +662,20 @@ class BuildSpotlightPlatform(State):
     def on_enter(self):
         yield RotateTo(math.pi / 4.0)
         self.fsm.builders[SIDE_RIGHT].enabled = False
-        self.send_packet(packets.BuildSpotlight(SIDE_RIGHT,True))
+        self.send_packet(packets.BuildSpotlight(SIDE_RIGHT, platform_mode=True, finished=False))
 
 
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_RIGHT:
-            yield MoveLineTo(1.778, 1.08)
-            yield MoveLineRelative(-0.15)
-            self.fsm.builders[SIDE_RIGHT].enabled = True
-            self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
-            self.exit_reason = GOAL_DONE
-            yield None
+            if not packet.finished:
+                yield MoveLineTo(1.778, 1.08)
+                self.send_packet(packets.BuildSpotlight(SIDE_RIGHT, platform_mode=True, finished=True))
+            else:
+                yield MoveLineRelative(-0.15)
+                self.fsm.builders[SIDE_RIGHT].enabled = True
+                self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
+                self.exit_reason = GOAL_DONE
+                yield None
 
 
 
@@ -680,16 +686,19 @@ class BuildSpotlightHome(State):
         yield RotateTo(-math.pi / 2)
         yield MoveLineTo(1.0, 0.5)
         self.fsm.builders[SIDE_LEFT].enabled = False
-        self.send_packet(packets.BuildSpotlight(SIDE_LEFT))
+        self.send_packet(packets.BuildSpotlight(SIDE_LEFT, platform_mode=False, finished=False))
 
 
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_LEFT:
-            yield MoveLineRelative(-0.15)
-            self.fsm.builders[SIDE_LEFT].enabled = True
-            self.send_packet(packets.StandbuilderIdle(SIDE_LEFT))
-            self.exit_reason = GOAL_DONE
-            yield None
+            if not packet.finished:
+                self.send_packet(packets.BuildSpotlight(SIDE_LEFT, platform_mode=False, finished=True))
+            else:
+                yield MoveLineRelative(-0.15)
+                self.fsm.builders[SIDE_LEFT].enabled = True
+                self.send_packet(packets.StandbuilderIdle(SIDE_LEFT))
+                self.exit_reason = GOAL_DONE
+                yield None
 
 
 
