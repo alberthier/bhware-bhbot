@@ -586,6 +586,9 @@ class KickMineClaps(State):
 
         self.commands.reverse()
         yield Trigger(self.commands.pop())
+
+        yield SpeedControl(0.3)
+
         move = MoveLine(points)
         move.on_waypoint_reached = self.on_waypoint_reached
         yield move
@@ -596,6 +599,9 @@ class KickMineClaps(State):
             if self.last_servo_command != finish_command:
                 yield Trigger(finish_command)
             self.exit_reason = GOAL_FAILED
+
+        yield SpeedControl()
+
         yield None
 
 
