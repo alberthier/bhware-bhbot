@@ -168,7 +168,7 @@ class Main(State):
                 .build(),
             G("KICK_MINE_CLAPS")
                 .weight(7)
-                .coords(1.77, 0.22)
+                .coords(1.76, 0.25)
                 .direction(DIRECTION_FORWARD)
                 .state(KickMineClaps)
                 .not_before(["GRAB_SOUTH_CORNER_STANDS"])
@@ -385,9 +385,9 @@ class StaticStrategy(State):
             # yield GrabSouthCornerStands()
             yield GrabSouthCornerStandsDirect()
             self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
-            yield LookAtOpposite(1.77, 0.25)
+            yield LookAtOpposite(1.76, 0.25)
 
-            yield MoveLineTo(1.77, 0.25)
+            yield MoveLineTo(1.76, 0.25)
             kick = yield KickMineClaps()
             if kick.exit_reason == GOAL_DONE:
                 self.robot.goal_manager.update_goal_status("KICK_MINE_CLAPS", GOAL_DONE)
@@ -520,7 +520,7 @@ class GrabSouthCornerStandsDirect(State):
 
         self.x1, self.y1 = 1.400, 0.730
         self.x2, self.y2 = 1.800, 0.330
-        self.x3, self.y3 = 1.800, 0.200
+        self.x3, self.y3 = 1.800, 0.170
         self.cx, self.cy = self.x1, self.y2
         self.r = self.x2 - self.x1
 
