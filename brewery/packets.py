@@ -899,7 +899,8 @@ class BuildSpotlight(BasePacket):
 
     DEFINITION = (
         ('side', UEnum8(SIDE, SIDE_LEFT)),
-        ('platform_mode', Bool(False))
+        ('platform_mode', Bool(False)),
+        ('finished', Bool(False))
     )
 
 

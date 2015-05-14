@@ -369,8 +369,10 @@ class StaticStrategy(State):
 
             yield WaitForUnlock("NORTH_ZONE", 5000)
 
-            yield GrabStairsStands()
             self.send_packet(packets.InterbotUnlock("SOUTH_ZONE"))
+
+            yield GrabStairsStands()
+
             self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
 
             yield LookAt(0.42, 0.30)
