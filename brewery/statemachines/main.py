@@ -89,8 +89,8 @@ class Main(State):
 
     def init_platform_build_position(self):
         cx, cy, ca = get_center_pose_for_point(0.150, -0.0725, 2.00 - 0.05, 1.20 - 0.05, math.pi / 4.0)
-        self.fsm.build_spotlight_platform_x = cx - 0.065
-        self.fsm.build_spotlight_platform_y = cy - 0.065
+        self.fsm.build_spotlight_platform_x = cx - 0.1
+        self.fsm.build_spotlight_platform_y = cy - 0.1
 
 
     def on_enter(self):
