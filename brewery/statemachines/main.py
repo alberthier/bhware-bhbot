@@ -321,6 +321,26 @@ class StaticStrategy(State):
         yield SafeMoveLineTo(xr, yr)
 
 
+    def first_stands_with_two_lines(self):
+        adjust = math.radians(-2)
+        if self.robot.team == TEAM_RIGHT:
+            adjust = -adjust
+
+        p1 = Pose(*left_builder_at_point(self.robot.pose, 1.400, 1.300))
+        p2 = Pose(*get_offset_position(self.robot.pose, p1.x, p1.y, 0.05))
+        r = distance(self.robot.pose.x, self.robot.pose.y, p2.x, p2.y)
+        a1 = math.atan2(p2.y - self.robot.pose.y, p2.x - self.robot.pose.x)
+
+        xr2 = self.robot.pose.x + r * math.cos(a1 + adjust)
+        yr2 = self.robot.pose.y + r * math.sin(a1 + adjust)
+        xr1, yr1 = get_offset_position(self.robot.pose, xr2, yr2, -0.3)
+
+        yield LookAt(xr1, yr1)
+        yield SafeMoveLineTo(xr1, yr1)
+        yield WaitForStandStored(SIDE_RIGHT)
+        yield SafeMoveLineTo(xr2, yr2)
+
+
     def on_enter(self):
         try:
             self.send_packet(packets.InterbotLock("SOUTH_ZONE"))
