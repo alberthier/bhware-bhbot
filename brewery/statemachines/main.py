@@ -89,8 +89,8 @@ class Main(State):
 
     def init_platform_build_position(self):
         cx, cy, ca = get_center_pose_for_point(0.150, -0.0725, 2.00 - 0.05, 1.20 - 0.05, math.pi / 4.0)
-        self.fsm.build_spotlight_platform_x = cx - 0.1
-        self.fsm.build_spotlight_platform_y = cy - 0.1
+        self.fsm.build_spotlight_platform_x = cx - 0.065
+        self.fsm.build_spotlight_platform_y = cy - 0.065
 
 
     def on_enter(self):
@@ -267,8 +267,8 @@ class CalibratePosition(State):
 
 class WaitForStandStored(Timer):
 
-    def __init__(self, side):
-        super().__init__(2000)
+    def __init__(self, side, timeout_ms=4000):
+        super().__init__(timeout_ms)
         self.side = side
 
 
@@ -285,6 +285,9 @@ class WaitForStandStored(Timer):
 
 
 class WaitForStandGrabbed(WaitForStandStored):
+
+    def __init__(self, side, timeout_ms=2000):
+        super().__init__(side, timeout_ms)
 
     def on_stand_grabbed(self, packet):
         if packet.side == self.side:
@@ -648,17 +651,12 @@ class BuildSpotlightPlatform(State):
     def on_enter(self):
         yield RotateTo(math.pi / 4.0)
         self.fsm.builders[SIDE_RIGHT].enabled = False
-        self.send_packet(packets.BuildSpotlight(SIDE_RIGHT))
-        if self.robot.team == TEAM_LEFT:
-            yield Trigger(RIGHT_BUILDER_ELEVATOR_PLATFORM)
-        else:
-            yield Trigger(LEFT_BUILDER_ELEVATOR_PLATFORM)
-        yield Timer(100)
-        yield MoveLineTo(1.778, 1.08)
+        self.send_packet(packets.BuildSpotlight(SIDE_RIGHT,True))
 
 
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_RIGHT:
+            yield MoveLineTo(1.778, 1.08)
             yield MoveLineRelative(-0.15)
             self.fsm.builders[SIDE_RIGHT].enabled = True
             self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))

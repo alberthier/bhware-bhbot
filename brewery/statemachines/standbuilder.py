@@ -216,6 +216,8 @@ class Build(State):
         if self.building:
             return
 
+        logger.log("StandBuilder[{}] starting construction".format(self.fsm.side))
+
         with building_guard(self):
             try:
                 if self.fsm.stand_count < 4:
@@ -247,7 +249,7 @@ class Build(State):
 
     def on_build_spotlight(self, packet):
         if packet.side == self.fsm.side:
-            yield BuildSpotlight()
+            yield BuildSpotlight(packet.platform_mode)
 
 
     def on_standbuilder_idle(self, packet):
@@ -259,6 +261,9 @@ class Build(State):
 
 class BuildSpotlight(State):
 
+    def __init__(self, platform_mode):
+        self.platform_mode = platform_mode
+
     def on_enter(self):
         bulb_presence = yield GetInputStatus(self.fsm.INPUT_BULB_PRESENCE)
 
@@ -266,22 +271,27 @@ class BuildSpotlight(State):
             yield Trigger(self.fsm.LIGHTER_DEPOSIT)
             yield ServoTorqueControl([self.fsm.LIGHTER_ID], False)
             yield Timer(200)
-
+            
         if self.fsm.stand_count < 4:
             yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
             yield Timer(500)
             yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
             yield Timer(200)
-            yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
-            yield Timer(500)
         else:
             yield Trigger(self.fsm.GRIPPER_LEFT_GUIDE, self.fsm.GRIPPER_RIGHT_GUIDE)
             yield Timer(200)
-            yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
-            yield Timer(500)
             yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
 
-        yield MoveLineRelative(0.05)
+        if bulb_presence.value == 0:
+            yield Trigger(self.fsm.GRIPPER_LEFT_LIGHT, self.fsm.GRIPPER_RIGHT_LIGHT)
+            yield Timer(500) # wait for light to fall
+
+        if self.platform_mode:
+            yield Trigger(self.fsm.ELEVATOR_PLATFORM)
+            yield Timer(100)
+        else:
+            yield MoveLineRelative(0.05)
+
         yield Trigger(self.fsm.GRIPPER_LEFT_DEPOSIT, self.fsm.GRIPPER_RIGHT_DEPOSIT)
 
         reset_stand_count(self)
