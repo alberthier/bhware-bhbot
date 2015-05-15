@@ -312,7 +312,7 @@ class BuildSpotlight(State):
                 yield Trigger(self.fsm.PLIERS_LEFT_OPEN, self.fsm.PLIERS_RIGHT_OPEN)
 
                 reset_stand_count(self)
-                self.send_packet(packets.BuildSpotlight(self.fsm.side))
+                self.send_packet(packets.BuildSpotlight(self.fsm.side, finished = True))
                 yield None
 
 
