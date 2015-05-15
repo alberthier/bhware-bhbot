@@ -83,14 +83,26 @@ class Map:
                        (0.580 + offset, FIELD_Y_SIZE - steps_loc),
                        (0.0, FIELD_Y_SIZE - steps_loc)])
         start_loc = 0.8 - 0.022 - offset
-        self.add_zone([(start_loc, 0.0),
-                       (start_loc, 0.4 + offset),
-                       (FIELD_X_SIZE - start_loc, 0.4 + offset),
-                       (FIELD_X_SIZE - start_loc, 0.0)])
-        self.add_zone([(start_loc, FIELD_Y_SIZE),
-                       (start_loc, FIELD_Y_SIZE - 0.4 - offset),
-                       (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset),
-                       (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
+        if team == TEAM_LEFT:
+            self.add_zone([(start_loc, 0.0),
+                           (start_loc, 0.4 + offset),
+                           (FIELD_X_SIZE - start_loc, 0.4 + offset),
+                           (FIELD_X_SIZE - start_loc, 0.0)])
+        else:
+            self.add_zone([(start_loc, 0.0),
+                           (start_loc, 0.4 + offset + 0.25),
+                           (FIELD_X_SIZE - start_loc, 0.4 + offset + 0.25),
+                           (FIELD_X_SIZE - start_loc, 0.0)])
+        if team == TEAM_LEFT:
+            self.add_zone([(start_loc, FIELD_Y_SIZE),
+                           (start_loc, FIELD_Y_SIZE - 0.4 - offset - 0.25),
+                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset - 0.25),
+                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
+        else:
+            self.add_zone([(start_loc, FIELD_Y_SIZE),
+                           (start_loc, FIELD_Y_SIZE - 0.4 - offset),
+                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset),
+                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
         platfrom_loc = 1.2 - offset
         self.add_zone([(FIELD_X_SIZE, platfrom_loc),
                        (FIELD_X_SIZE - 0.1 - offset, platfrom_loc),
