@@ -96,12 +96,11 @@ class Main(State):
                 .direction(DIRECTION_BACKWARDS)
                 .state(GrabSouthCornerCup)
                 .build(),
-            # G("GRAB_SOUTH_THEIRS_CUP")
-            #     .weight(10)
-            #     .coords(1.40, 2.50)
-            #     .direction(DIRECTION_BACKWARDS)
-            #     .state(GrabSouthCornerCup)
-            #     .build(),
+            GCG("GRAB_SOUTH_THEIRS_CUP")
+                .weight(10)
+                .coords(1.40, 2.50)
+                .state(GrabSouthCornerCup)
+                .build(),
             DCG("DEPOSIT_OPP_NORTH")
                 .weight(8)
                 .coords(0.55, 2.70)
@@ -304,6 +303,9 @@ class GrabSouthCornerCup(State):
 
 
     def grab_simple(self):
+        goal = self.robot.goal_manager.get_current_goal()
+        mine = goal.y < 1.5
+        cup_y = 0.250 if mine else 3.0 - 0.250
         yield LookAtOpposite(1.750 + GRAB_OFFSET, cup_y)
         yield SafeMoveLineTo(1.750 + GRAB_OFFSET, cup_y)
         grab = yield GrabCup()
@@ -353,6 +355,7 @@ class DepositCup(State):
         self.robot.holding_cup = False
         if True or cup_presence.value == 0: # If True to force this behavior. Sensor isn't reliable. Maybe we should add a timer before reading the value
             self.robot.handled_cup_zones.append(goal.identifier)
+            self.log(self.robot.handled_cup_zones)
             self.exit_reason = GOAL_DONE
         else:
             self.log("We had  no cup :(")
