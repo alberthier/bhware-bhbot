@@ -213,9 +213,10 @@ class StaticStrategy(State):
             self.send_packet(packets.InterbotUnlock("NORTH_ZONE"))
             yield from self.execute_goal("DEPOSIT_CUP_HOME")
             yield WaitForUnlock("SOUTH_ZONE", 5000)
+            yield SafeMoveLineTo(1.0, 0.55)
             yield from self.execute_goal("GRAB_SOUTH_MINE_CUP")
             yield MoveLineTo(1.40, 0.2)
-            yield Timer(20000)
+            yield WaitForUnlock("CROSS_FIELD", 20000)
         except OpponentInTheWay:
             pass
         yield None
@@ -337,10 +338,7 @@ class DepositCup(State):
         yield Timer(500)
         yield Trigger(CUP_GRIPPER_OPEN)
         cup_presence = yield GetInputStatus(SECONDARY_INPUT_CUP_PRESENCE)
-        if goal.identifier == "DEPOSIT_CUP_HOME":
-            yield MoveLineTo(1.0, 0.65)
-        else:
-            yield MoveLineRelative(0.05)
+        yield MoveLineRelative(0.05)
         self.fsm.cup_grabber.enabled = False
         yield Trigger(CUP_GRIPPER_SEEKING)
         yield Timer(500)
