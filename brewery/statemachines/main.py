@@ -229,6 +229,12 @@ class Main(State):
     def on_bulb_grabbed(self, packet):
         logger.log("Starting ...")
 
+        if self.robot.team == TEAM_LEFT:
+
+            build_spotlight_platform = self.robot.goal_manager.get_goals("BUILD_SPOTLIGHT_PLATFORM")[0]
+            self.fsm.build_spotlight_platform_y += 0.03
+            build_spotlight_platform.y = self.fsm.build_spotlight_platform_y
+
         first_move = False
         while not first_move:
             try:
