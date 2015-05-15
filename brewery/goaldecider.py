@@ -5,6 +5,7 @@ import random
 import position
 # import logger
 import robot
+import tools
 import goalmanager
 
 
@@ -122,7 +123,7 @@ class WorldState:
             if self.remaining_deposit_goals <=0:
                 raise UnneededAction(goal, "Abort: Impossible to deposit these stand(s)")
 
-        distance = goal.pose - self.robot_pose
+        distance = tools.distance(goal.pose.virt.x, goal.pose.virt.y, self.robot_pose.virt.x, self.robot_pose.virt.y)
         elapsed_time = distance / MEAN_SPEED_PER_S
         self.traveled_distance+=distance
 
