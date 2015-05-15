@@ -105,7 +105,11 @@ class Goal:
     def can_follow(self, current_states):
         if self._not_before is None:
             return True
-        return any((state in self._not_before for state in current_states))
+        if not "ALL" in self._not_before:
+            return any((state in current_states for state in self._not_before))
+        else:
+            not_before_filtered = self._not_before - {"ALL"}
+            return all((state in current_states for state in not_before_filtered))
 
 
     @property
