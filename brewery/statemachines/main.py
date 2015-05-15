@@ -259,7 +259,7 @@ class Initialize(State):
 class CalibratePosition(State):
 
     def on_enter(self):
-        yield DefinePosition(1.0, 0.07 + ROBOT_CENTER_Y, math.pi / 2.0)
+        yield DefinePosition(1.0, 0.07 + ROBOT_CENTER_X, math.pi / 2.0)
         yield None
 
 
@@ -347,6 +347,7 @@ class StaticStrategy(State):
     def on_enter(self):
         try:
             self.send_packet(packets.InterbotLock("SOUTH_ZONE"))
+            self.send_packet(packets.InterbotLock("CROSS_FIELD"))
             try:
                 yield from self.first_stands_with_line()
                 self.robot.goal_manager.update_goal_status("GRAB_CENTER_WEST_STAND", GOAL_DONE)
@@ -369,8 +370,6 @@ class StaticStrategy(State):
 
             yield WaitForUnlock("NORTH_ZONE", 5000)
 
-            self.send_packet(packets.InterbotUnlock("SOUTH_ZONE"))
-
             yield GrabStairsStands()
 
             self.robot.goal_manager.update_goal_status("GRAB_STAIRS_STAND", GOAL_DONE)
@@ -382,12 +381,6 @@ class StaticStrategy(State):
 
             yield LookAt(1.400, 0.730)
             yield SafeMoveLineTo(1.400, 0.730)
-
-            # yield RotateTo(0.0)
-            # yield SafeMoveLineTo(1.47, 0.60)
-            # yield RotateTo(math.pi / 2.0)
-            # yield SafeMoveLineTo(1.47, 0.25)
-            # yield GrabSouthCornerStands()
             yield GrabSouthCornerStandsDirect()
             self.robot.goal_manager.update_goal_status("GRAB_SOUTH_CORNER_STANDS", GOAL_DONE)
             yield LookAtOpposite(1.76, 0.25)
@@ -416,7 +409,7 @@ class StaticStrategy(State):
 
 class GrabStand(State):
 
-    def __init__(self, side, x, y, stand_grab_offset, store_stand, raise_on_error = True, skip_rotate = False):
+    def __init__(self, side, x, y, stand_grab_offset, store_stand, raise_on_error = True, skip_rotate = False, unlock_zone = None):
         super().__init__()
         self.side = side
         self.x = x
@@ -425,6 +418,7 @@ class GrabStand(State):
         self.store_stand = store_stand
         self.raise_on_error = raise_on_error
         self.skip_rotate = skip_rotate
+        self.unlock_zone = unlock_zone
 
 
     def on_enter(self):
@@ -435,6 +429,12 @@ class GrabStand(State):
         self.exit_reason = GOAL_FAILED
         try:
             move = yield SafeMoveLineTo(x, y)
+            goal = self.robot.goal_manager.get_current_goal()
+            if self.unlock_zone is not None:
+                self.log("Unlocking " + self.unlock_zone)
+                self.send_packet(packets.InterbotUnlock(self.unlock_zone))
+            else:
+                self.log("Nothing to unlock")
             self.send_packet(packets.EnsureBuild(self.side))
             if self.store_stand:
                 yield WaitForStandStored(self.side)
@@ -452,8 +452,7 @@ class GrabStand(State):
 class GrabStairsStands(State):
 
     def on_enter(self):
-
-        grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True)
+        grab = yield GrabStand(SIDE_RIGHT, 0.200, 0.850, 0.04, True, True, False, "SOUTH_ZONE")
         if grab.exit_reason == GOAL_DONE:
             grab = yield GrabStand(SIDE_RIGHT, 0.100, 0.850, 0.04, False, True)
 
@@ -532,6 +531,7 @@ class GrabSouthCornerStandsDirect(State):
         yield RotateTo(0)
         yield SafeMoveLineTo(self.x1, self.y1)
         yield SafeMoveArc(self.cx, self.cy, self.r, [ 0.0 ], DIRECTION_FORWARD)
+        self.send_packet(packets.InterbotUnlock("CROSS_FIELD"))
         yield SafeMoveLineTo(self.x3, self.y3)
         self.send_packet(packets.EnsureBuild(SIDE_LEFT))
         self.send_packet(packets.EnsureBuild(SIDE_RIGHT))
@@ -668,7 +668,11 @@ class BuildSpotlightPlatform(State):
     def on_build_spotlight(self, packet):
         if packet.side == SIDE_RIGHT:
             if not packet.finished:
-                yield MoveLineTo(1.778, 1.08)
+                a = math.pi / 4.0
+                dist = 0.1
+                x = self.fsm.build_spotlight_platform_x + math.cos(a) * dist
+                y = self.fsm.build_spotlight_platform_y + math.sin(a) * dist
+                yield MoveLineTo(x, y)
                 self.send_packet(packets.BuildSpotlight(SIDE_RIGHT, platform_mode=True, finished=True))
             else:
                 yield MoveLineRelative(-0.15)
