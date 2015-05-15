@@ -19,7 +19,7 @@ import statemachines.testssecondary as testssecondary
 
 CUP_GRAB_RATION_DECC=1.0
 GRAB_OFFSET = -(ROBOT_CENTER_X + 0.05)
-
+HIGH_BORDER_OFFSET = 0.009
 
 
 
@@ -188,7 +188,7 @@ class CalibratePosition(State):
             yield SpeedControl(0.2)
             yield MoveLineTo(turn_x, 0.0)
             yield SpeedControl()
-            yield DefinePosition(None, ROBOT_CENTER_X, math.pi / 2.0)
+            yield DefinePosition(None, ROBOT_CENTER_X + HIGH_BORDER_OFFSET, math.pi / 2.0)
             yield MoveLineTo(turn_x, start_y)
             yield RotateTo(0)
             yield MoveLineTo(start_x, start_y)
@@ -275,7 +275,8 @@ class GrabSouthCornerCup(State):
         yield SpeedControl(0.2)
         y = 0.0 if mine else 3.0
         yield MoveLineTo(goal.x, y)
-        ry = ROBOT_CENTER_X if mine else 3.0 - ROBOT_CENTER_X
+        offset = ROBOT_CENTER_X + HIGH_BORDER_OFFSET
+        ry = offset if mine else 3.0 - offset
         yield DefinePosition(None, ry, a)
         yield SpeedControl()
         yield MoveLineTo(goal.x, cup_y)
@@ -411,7 +412,7 @@ class KickTheirsClap(State):
         yield RotateTo(math.pi)
         yield SpeedControl(0.2)
         yield MoveLineTo(2.50, goal.y + offset)
-        yield DefinePosition(2.0 - ROBOT_CENTER_X, None, math.pi)
+        yield DefinePosition(2.0 - (ROBOT_CENTER_X + HIGH_BORDER_OFFSET), None, math.pi)
         yield SpeedControl()
         yield MoveLineTo(goal.x, goal.y + offset)
         if self.robot.team == TEAM_LEFT:
