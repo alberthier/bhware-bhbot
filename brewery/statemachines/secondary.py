@@ -210,8 +210,7 @@ class StaticStrategy(State):
             yield from self.execute_goal("DEPOSIT_CARPET_LEFT")
             yield LookAtOpposite(1.0, 0.55)
             yield SafeMoveLineTo(1.0, 0.55)
-            self.send_packet(packets.InterbotUnlock("NORTH_ZONE"))
-            yield from self.execute_goal("DEPOSIT_CUP_HOME")
+            yield from self.execute_goal("DEPOSIT_CUP_HOME", None, "NORTH_ZONE")
             yield WaitForUnlock("SOUTH_ZONE", 5000)
             yield SafeMoveLineTo(1.0, 0.55)
             yield from self.execute_goal("GRAB_SOUTH_MINE_CUP")
@@ -222,7 +221,7 @@ class StaticStrategy(State):
         yield None
 
 
-    def execute_goal(self, name, forced_direction = None):
+    def execute_goal(self, name, forced_direction = None, unlock_zone = None):
         goal = self.robot.goal_manager.get_goals(name)[0]
         x, y = get_offset_position(self.robot.pose, goal.x, goal.y, goal.offset)
         direction = forced_direction if forced_direction is not None else goal.direction
@@ -231,6 +230,8 @@ class StaticStrategy(State):
         else:
             yield LookAtOpposite(x, y)
         yield SafeMoveLineTo(x, y)
+        if unlock_zone is not None:
+            self.send_packet(packets.InterbotUnlock(unlock_zone))
         goal.doing()
         state = yield goal.get_state()
         if state.exit_reason == GOAL_DONE :

@@ -674,7 +674,14 @@ class BuildSpotlightPlatform(State):
                 yield MoveLineTo(x, y)
                 self.send_packet(packets.BuildSpotlight(SIDE_RIGHT, platform_mode=True, finished=True))
             else:
-                yield MoveLineRelative(-0.15)
+                a = (math.pi / 4.0) + math.pi
+                dist = 0.15
+                x = self.fsm.build_spotlight_platform_x + math.cos(a) * dist
+                y = self.fsm.build_spotlight_platform_y + math.sin(a) * dist
+                while True:
+                    move = yield SafeMoveLineTo(x, y)
+                    if move.exit_reason == TRAJECTORY_DESTINATION_REACHED:
+                        break
                 self.fsm.builders[SIDE_RIGHT].enabled = True
                 self.send_packet(packets.StandbuilderIdle(SIDE_RIGHT))
                 self.exit_reason = GOAL_DONE
