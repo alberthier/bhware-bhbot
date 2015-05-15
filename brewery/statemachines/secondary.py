@@ -130,12 +130,12 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(KickTheirsClap)
                 .build(),
-            # GCG("GRAB_THEIRS_STAIRS_CUP")
-            #     .weight(15)
-            #     .coords(0.830, 3.0 - 0.910)
-            #     .offset(GRAB_OFFSET)
-            #     .state(GrabCup)
-            #     .build(),
+            GCG("GRAB_THEIRS_STAIRS_CUP")
+                .weight(15)
+                .coords(0.830, 3.0 - 0.910)
+                .offset(GRAB_OFFSET)
+                .state(GrabCup)
+                .build(),
         )
 
     def on_controller_status(self, packet):
@@ -247,7 +247,13 @@ class GrabCup(Timer):
 
     def __init__(self):
         super().__init__(500)
+
+
+    def on_enter(self):
         self.exit_reason = GOAL_DONE
+        super_on_enter = super().on_enter()
+        if super_on_enter:
+            yield from super_on_enter
 
 
     def on_cup_grabbed(self, packet):
