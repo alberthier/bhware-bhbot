@@ -108,7 +108,7 @@ class Main(State):
             SIDE_RIGHT: StateMachine(self.event_loop, "standbuilder", side=SIDE_RIGHT)
         }
 
-
+        self.send_packet(packets.Text("Main robot initializing"))
 
         gm=self.robot.goal_manager
         gm.score_estimator=ScoreEstimator()
@@ -223,6 +223,7 @@ class Main(State):
 
     def on_start(self, packet):
         if packet.value == 0:
+            self.send_packet(packets.Text("Match started"))
             self.yield_at(89500, EndOfMatch())
 
 
