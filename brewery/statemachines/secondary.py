@@ -351,7 +351,7 @@ class DepositCup(State):
         yield Timer(500)
         self.fsm.cup_grabber.enabled = True
         self.robot.holding_cup = False
-        if cup_presence.value == 0:
+        if True or cup_presence.value == 0: # If True to force this behavior. Sensor isn't reliable. Maybe we should add a timer before reading the value
             self.robot.handled_cup_zones.append(goal.identifier)
             self.exit_reason = GOAL_DONE
         else:
