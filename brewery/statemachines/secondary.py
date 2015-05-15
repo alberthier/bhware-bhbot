@@ -210,7 +210,7 @@ class StaticStrategy(State):
             yield from self.execute_goal("DEPOSIT_CARPET_LEFT")
             yield LookAtOpposite(1.0, 0.55)
             yield SafeMoveLineTo(1.0, 0.55)
-            yield from self.execute_goal("DEPOSIT_CUP_HOME", None, "NORTH_ZONE")
+            yield from self.execute_goal("DEPOSIT_CUP_HOME")
             yield WaitForUnlock("SOUTH_ZONE", 5000)
             yield SafeMoveLineTo(1.0, 0.55)
             yield from self.execute_goal("GRAB_SOUTH_MINE_CUP")
@@ -230,8 +230,6 @@ class StaticStrategy(State):
         else:
             yield LookAtOpposite(x, y)
         yield SafeMoveLineTo(x, y)
-        if unlock_zone is not None:
-            self.send_packet(packets.InterbotUnlock(unlock_zone))
         goal.doing()
         state = yield goal.get_state()
         if state.exit_reason == GOAL_DONE :
@@ -339,6 +337,7 @@ class DepositCup(State):
         if goal.identifier == "DEPOSIT_CUP_HOME":
             yield RotateTo(math.pi / 2.0)
             yield MoveLineTo(1.0, 0.30)
+            self.send_packet(packets.InterbotUnlock("NORTH_ZONE"))
         else:
             yield RotateTo(-math.pi / 2.0)
         yield Timer(500)
