@@ -588,7 +588,7 @@ class KickMineClaps(State):
             self.commands = [RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_OPEN, RIGHT_CLAPMAN_CLOSE]
         else:
             self.commands = [LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE, LEFT_CLAPMAN_OPEN, LEFT_CLAPMAN_CLOSE]
-        points = [(goal.x, 0.28), (goal.x, 0.72), (goal.x, 0.88)]
+        points = [(goal.x, 0.28), (goal.x, 0.65), (goal.x, 0.88)]
 
         finish_command = self.commands[-1]
 
