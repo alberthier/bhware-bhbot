@@ -5,6 +5,7 @@ import math
 
 import statemachine
 import packets
+import mediahelpers
 
 from definitions import *
 
@@ -84,6 +85,7 @@ class Main(statemachine.Timer):
                 self.log("{} opponent detected at ({:.2f}, {:.2f})".format(self.opponent_name(), self.x, self.y))
                 self.set_detected(self.opponent_direction)
                 self.send_packet(packets.OpponentDetected(robot = self.fsm.opponent_type, direction = self.opponent_direction, x = self.x, y = self.y))
+                mediahelpers.safe_say(self, "OPPONENT_DETECTED")
         elif self.opponent_direction is None and previous_direction is not None:
             self.opponent_disappeared()
 
