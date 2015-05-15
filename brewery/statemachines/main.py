@@ -109,6 +109,7 @@ class Main(State):
         }
 
         self.send_packet(packets.Text("Main robot initializing"))
+        self.send_packet(packets.Say("Le docteur d'enfer est prêt à en découdre"))
 
         gm=self.robot.goal_manager
         gm.score_estimator=ScoreEstimator()
@@ -223,6 +224,7 @@ class Main(State):
 
     def on_start(self, packet):
         if packet.value == 0:
+            self.send_packet(packets.Say("C'est parti ! Faites entrer le clone !"))
             self.send_packet(packets.Text("Match started"))
             self.yield_at(89500, EndOfMatch())
 

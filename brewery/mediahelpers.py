@@ -6,6 +6,11 @@ from definitions import *
 
 def safe_say(state, category):
     try:
-        state.event_loop.send_packet(packets.Say(random.choice(TEXTS[category])))
+        data = random.choice(TEXTS[category])
+        if data.startswith("MEDIA"):
+            path=data.split(":")[1]
+            state.event_loop.send_packet(packets.PlayMedia(path))
+        else:
+            state.event_loop.send_packet(packets.Say(data))
     except Exception as e:
         logger.error("safe_say: {}".format(e))
