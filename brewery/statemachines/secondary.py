@@ -31,7 +31,8 @@ class GrabCupGoal(goalmanager.Goal):
 
 
     def is_available(self):
-        return not self.goal_manager.event_loop.robot.holding_cup and super().is_available()
+        robot = self.goal_manager.event_loop.robot
+        return len(robot.handled_cup_zones) < 3 and not robot.holding_cup and super().is_available()
 
 
 
@@ -43,7 +44,8 @@ class DepositCupGoal(goalmanager.Goal):
 
 
     def is_available(self):
-        return self.goal_manager.event_loop.robot.holding_cup and super().is_available()
+        robot = self.goal_manager.event_loop.robot
+        return robot.holding_cup and self.identifier not in robot.handled_cup_zones and super().is_available()
 
 
 
@@ -58,6 +60,7 @@ class Main(State):
         self.fsm.cup_grabber = StateMachine(self.event_loop, "cupgrabber")
 
         self.robot.holding_cup = False
+        self.robot.handled_cup_zones = []
 
         G=goalmanager.GoalBuilder
         GCG=functools.partial(goalmanager.GoalBuilder, ctor=GrabCupGoal)
@@ -85,7 +88,7 @@ class Main(State):
             DCG("DEPOSIT_CUP_HOME")
                 .weight(4)
                 .coords(1.0, 0.5)
-                .state(DepositCup, (True,))
+                .state(DepositCup)
                 .build(),
             G("GRAB_SOUTH_MINE_CUP")
                 .weight(5)
@@ -102,7 +105,7 @@ class Main(State):
             DCG("DEPOSIT_OPP_NORTH")
                 .weight(8)
                 .coords(0.55, 2.70)
-                .state(DepositCup, (False,))
+                .state(DepositCup)
                 .build(),
             GCG("GRAB_PLATFORM_CUP")
                 .weight(7)
@@ -119,7 +122,7 @@ class Main(State):
             DCG("DEPOSIT_OPP_SOUTH")
                 .weight(6)
                 .coords(1.45, 2.70)
-                .state(DepositCup, (False,))
+                .state(DepositCup)
                 .build(),
             G("KICK_THEIRS_CLAP")
                 .weight(7)
@@ -249,6 +252,14 @@ class GrabSouthCornerCup(State):
 
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
+        if goal.identifier == "GRAB_SOUTH_THEIRS_CUP" and "DEPOSIT_OPP_SOUTH" in self.robot.handled_cup_zones:
+            yield from self.grab_simple()
+        else:
+            yield from self.grab_with_recalibrate()
+
+
+    def grab_with_recalibrate(self):
+        goal = self.robot.goal_manager.get_current_goal()
         mine = goal.y < 1.5
         cup_y = 0.250 if mine else 3.0 - 0.250
 
@@ -278,6 +289,14 @@ class GrabSouthCornerCup(State):
         yield None
 
 
+    def grab_simple(self):
+        yield LookAtOpposite(1.750 + GRAB_OFFSET, cup_y)
+        yield SafeMoveLineTo(1.750 + GRAB_OFFSET, cup_y)
+        grab = yield GrabCup()
+        self.exit_reason = grab.exit_reason
+        yield None
+
+
 
 
 class GrabPlatformCup(State):
@@ -296,14 +315,12 @@ class GrabPlatformCup(State):
 
 
 
+
 class DepositCup(State):
 
-    def __init__(self, home):
-        self.home = home
-
-
     def on_enter(self):
-        if self.home:
+        goal = self.robot.goal_manager.get_current_goal()
+        if goal.identifier == "DEPOSIT_CUP_HOME":
             yield RotateTo(math.pi / 2.0)
             yield MoveLineTo(1.0, 0.30)
         else:
@@ -312,7 +329,8 @@ class DepositCup(State):
         yield Trigger(CUP_GRIPPER_HALF_OPEN)
         yield Timer(500)
         yield Trigger(CUP_GRIPPER_OPEN)
-        if self.home:
+        cup_presence = yield GetInputStatus(SECONDARY_INPUT_CUP_PRESENCE)
+        if goal.identifier == "DEPOSIT_CUP_HOME":
             yield MoveLineTo(1.0, 0.65)
         else:
             yield MoveLineRelative(0.05)
@@ -321,7 +339,12 @@ class DepositCup(State):
         yield Timer(500)
         self.fsm.cup_grabber.enabled = True
         self.robot.holding_cup = False
-        self.exit_reason = GOAL_DONE
+        if cup_presence.value == 0:
+            self.robot.handled_cup_zones.append(goal.identifier)
+            self.exit_reason = GOAL_DONE
+        else:
+            self.log("We had  no cup :(")
+            self.exit_reason = GOAL_FAILED
         yield None
 
 
