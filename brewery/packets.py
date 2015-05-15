@@ -947,6 +947,13 @@ class LiftBulb(BasePacket):
     TYPE = 269
 
 
+
+
+class EnsureGrab(BasePacket):
+
+    TYPE = 270
+
+
 ################################################################################
 # Packets lookup setup
 

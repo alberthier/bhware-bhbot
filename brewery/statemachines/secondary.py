@@ -254,6 +254,7 @@ class GrabCup(Timer):
         super_on_enter = super().on_enter()
         if super_on_enter:
             yield from super_on_enter
+        self.send_packet(packets.EnsureGrab())
 
 
     def on_cup_grabbed(self, packet):

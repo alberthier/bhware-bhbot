@@ -35,9 +35,16 @@ class Main(State):
 class GrabCup(State):
 
     def on_cup_presence(self, packet):
-        if packet.value == 0 and not self.robot.holding_cup and self.fsm.enabled:
-            yield Timer(50)
+        if packet.value == 0:
+            yield from self.do_action()
+
+    def on_ensure_grab(self, packet):
+        yield from self.do_action()
+
+    def do_action(self):
+        if not self.robot.grabbing_in_progress and not self.robot.holding_cup and self.fsm.enabled:
             self.robot.grabbing_in_progress = True
+            yield Timer(50)
             self.send_packet(packets.Stop())
             yield Trigger(CUP_GRIPPER_ON_CUP)
             yield Timer(150)
