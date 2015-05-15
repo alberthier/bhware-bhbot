@@ -330,12 +330,12 @@ class StaticStrategy(State):
             adjust = -adjust
 
         p1 = Pose(*left_builder_at_point(self.robot.pose, 1.400, 1.300))
-        p2 = Pose(*get_offset_position(self.robot.pose, p1.x, p1.y, 0.05))
-        r = distance(self.robot.pose.x, self.robot.pose.y, p2.x, p2.y)
-        a1 = math.atan2(p2.y - self.robot.pose.y, p2.x - self.robot.pose.x)
+        p2 = Pose(*get_offset_position(self.robot.pose, p1.virt.x, p1.virt.y, 0.05))
+        r = distance(self.robot.pose.virt.x, self.robot.pose.virt.y, p2.virt.x, p2.virt.y)
+        a1 = math.atan2(p2.virt.y - self.robot.pose.virt.y, p2.virt.x - self.robot.pose.virt.x)
 
-        xr2 = self.robot.pose.x + r * math.cos(a1 + adjust)
-        yr2 = self.robot.pose.y + r * math.sin(a1 + adjust)
+        xr2 = self.robot.pose.virt.x + r * math.cos(a1 + adjust)
+        yr2 = self.robot.pose.virt.y + r * math.sin(a1 + adjust)
         xr1, yr1 = get_offset_position(self.robot.pose, xr2, yr2, -0.3)
 
         yield LookAt(xr1, yr1)
