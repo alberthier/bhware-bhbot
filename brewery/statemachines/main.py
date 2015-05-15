@@ -524,7 +524,7 @@ class GrabSouthCornerStandsDirect(State):
 
         self.x1, self.y1 = 1.400, 0.730
         self.x2, self.y2 = 1.800, 0.330
-        self.x3, self.y3 = 1.800, 0.170
+        self.x3, self.y3 = 1.800, 0.180
         self.cx, self.cy = self.x1, self.y2
         self.r = self.x2 - self.x1
 
