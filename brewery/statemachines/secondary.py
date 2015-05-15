@@ -96,12 +96,12 @@ class Main(State):
                 .direction(DIRECTION_BACKWARDS)
                 .state(GrabSouthCornerCup)
                 .build(),
-            # G("GRAB_SOUTH_THEIRS_CUP")
-            #     .weight(10)
-            #     .coords(1.40, 2.50)
-            #     .direction(DIRECTION_BACKWARDS)
-            #     .state(GrabSouthCornerCup)
-            #     .build(),
+            G("GRAB_SOUTH_THEIRS_CUP")
+                .weight(10)
+                .coords(1.40, 2.50)
+                .direction(DIRECTION_BACKWARDS)
+                .state(GrabSouthCornerCup)
+                .build(),
             DCG("DEPOSIT_OPP_NORTH")
                 .weight(8)
                 .coords(0.55, 2.70)
@@ -130,6 +130,12 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(KickTheirsClap)
                 .build(),
+            # GCG("GRAB_THEIRS_STAIRS_CUP")
+            #     .weight(15)
+            #     .coords(0.830, 3.0 - 0.910)
+            #     .offset(GRAB_OFFSET)
+            #     .state(GrabCup)
+            #     .build(),
         )
 
     def on_controller_status(self, packet):
