@@ -398,7 +398,6 @@ class StaticStrategy(State):
             yield SafeMoveLineTo(1.00, 0.60)
             yield BuildSpotlightHome()
             self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
-            yield SafeMoveLineTo(1.00, 0.60)
 
         except OpponentInTheWay:
             pass
