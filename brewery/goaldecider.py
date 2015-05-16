@@ -11,7 +11,7 @@ import goalmanager
 
 from definitions import *
 
-MEAN_SPEED_PER_S=0.1
+MEAN_SPEED_PER_S=0.2
 DEFAULT_GOAL_ESTIMATED_DURATION_S=10
 MAX_STAND_PER_BUILDER=4
 
@@ -94,6 +94,10 @@ class WorldState:
             self._remaining_deposit_goals = len([ g for g in self.remaining_goals if "BUILD" in g.tags ])
         return self._remaining_deposit_goals
 
+    @property
+    def remaining_grab_goals(self):
+        return len([ g for g in self.remaining_goals if "GRAB" in g.tags ])
+
     def decrement_deposit_goals(self):
         if self._remaining_deposit_goals:
             self._remaining_deposit_goals-=1
@@ -127,14 +131,20 @@ class WorldState:
         elapsed_time = distance / MEAN_SPEED_PER_S
         self.traveled_distance+=distance
 
-        if self.remaining_time - elapsed_time <= 0.0 :
+        if self.remaining_time - elapsed_time <= -10 :
             raise NoTimeToAttain(goal, "remaining: {} elapsed: {}".format(self.remaining_time, elapsed_time))
 
         self.remaining_time-=elapsed_time
 
+        if goal.tags.issuperset({"BUILD", "SPOTLIGHT"}):
+            not_before = goal.not_before_timecode_if_can_still_grab()
+
+            if not_before and self.remaining_time > not_before :
+                raise GoalImpossibleToExecute(goal, "precondition was not met: {}".format(not_before))
+
         estimated_duration = goal.estimated_duration or DEFAULT_GOAL_ESTIMATED_DURATION_S
 
-        if self.remaining_time - estimated_duration <= 0.0 :
+        if self.remaining_time - estimated_duration <= -10 :
             raise NoTimeToExecute(goal, "remaining: {} estimated: {}".format(self.remaining_time, estimated_duration))
 
         self.robot_pose = goal.pose.clone()

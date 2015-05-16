@@ -127,7 +127,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabNorthCornerStand)
                 .builder_action(1,0)
-                .estimated_duration(5)
+                .estimated_duration(3)
                 .build(),
             G("GRAB_STAIRS_STAND")
                 .weight(2)
@@ -143,7 +143,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterWestStand)
                 .builder_action(1,0)
-                .estimated_duration(5)
+                .estimated_duration(3)
                 .disabled()
                 .build(),
             G("GRAB_CENTER_EAST_STAND")
@@ -152,7 +152,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(GrabCenterEastStand)
                 .builder_action(1,0)
-                .estimated_duration(5)
+                .estimated_duration(3)
                 .disabled()
                 .build(),
             G("GRAB_CENTER_SOUTH_STAND")
@@ -177,6 +177,7 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(KickMineClaps)
                 .not_before(["GRAB_SOUTH_CORNER_STANDS"])
+                .estimated_duration(5)
                 .build(),
             G("BUILD_SPOTLIGHT_HOME")
                 .weight(10)
@@ -184,7 +185,8 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightHome)
                 .builder_action(-1,0)
-                .estimated_duration(15)
+                .estimated_duration(6)
+                .not_before_timecode_if_can_still_grab(50)
                 .build(),
 #            G("KICK_THEIR_CLAP")
 #                .weight(9)
@@ -198,7 +200,8 @@ class Main(State):
                 .direction(DIRECTION_FORWARD)
                 .state(BuildSpotlightPlatform)
                 .builder_action(0,-1)
-                .estimated_duration(15)
+                .estimated_duration(6)
+                .not_before_timecode_if_can_still_grab(50)
                 .build(),
             G("THE_BITCHY_WAY_NORTH")
                 .weight(20)
@@ -206,7 +209,7 @@ class Main(State):
                 .direction(DIRECTION_BACKWARDS)
                 .state(TheBitchyWay)
                 .estimated_duration(15)
-                .not_before(["ALL", "BUILD_SPOTLIGHT_PLATFORM", "BUILD_SPOTLIGHT_HOME"])
+                .not_before(["ALL", "BUILD_SPOTLIGHT_PLATFORM", "BUILD_SPOTLIGHT_HOME", "KICK_MINE_CLAPS"])
                 .build(),
             G("THE_BITCHY_WAY_SOUTH")
                 .weight(20)
@@ -214,7 +217,7 @@ class Main(State):
                 .direction(DIRECTION_BACKWARDS)
                 .state(TheBitchyWay)
                 .estimated_duration(15)
-                .not_before(["ALL", "BUILD_SPOTLIGHT_PLATFORM", "BUILD_SPOTLIGHT_HOME"])
+                .not_before(["ALL", "BUILD_SPOTLIGHT_PLATFORM", "BUILD_SPOTLIGHT_HOME", "KICK_MINE_CLAPS"])
                 .build(),
             # G("BUILD_SPOTLIGHT_PLATFORM_ALTERNATE_LEFT")
             #     .weight(15)

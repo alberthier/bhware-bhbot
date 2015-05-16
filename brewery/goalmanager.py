@@ -39,7 +39,7 @@ class Goal:
                  "goal_manager", "is_current", "is_blacklisted", "uid", "estimated_duration",
                  "builder_action",
                  "ratio_decc", "cached_pose",
-                 "stats", "tags", "_not_before"
+                 "stats", "tags", "_not_before", "_not_before_timecode_if_can_still_grab"
                  ]
 
     def __init__(self, identifier, weight, x, y, offset, direction, handler_state, ctor_parameters = None, shared = False, navigate = True):
@@ -70,6 +70,7 @@ class Goal:
         self.stats=GoalStats(identifier)
         self.tags=set(self.identifier.upper().split("_"))
         self._not_before = None
+        self._not_before_timecode_if_can_still_grab = None
 
 
 
@@ -90,6 +91,7 @@ class Goal:
         n.ratio_decc = self.ratio_decc
         n.tags = self.tags
         n._not_before = self._not_before
+        n._not_before_timecode_if_can_still_grab = self._not_before_timecode_if_can_still_grab
         return n
 
 
@@ -111,6 +113,10 @@ class Goal:
             not_before_filtered = self._not_before - {"ALL"}
             return all((state in current_states for state in not_before_filtered))
 
+    def not_before_timecode_if_can_still_grab(self, timecode = None):
+        if timecode:
+            self._not_before_timecode_if_can_still_grab = timecode
+        return self._not_before_timecode_if_can_still_grab
 
     @property
     def pose(self):
@@ -482,6 +488,7 @@ class GoalBuilder:
         self._builder_action=None
         self._estimated_duration = None
         self._not_before = None
+        self._not_before_timecode_if_can_still_grab = None
 
     @tools.newobj
     def identifier(self, identifier):
@@ -530,6 +537,10 @@ class GoalBuilder:
     def not_before(self, states):
         self._not_before = states
 
+    @tools.newobj
+    def not_before_timecode_if_can_still_grab(self, timecode):
+        self._not_before_timecode_if_can_still_grab = timecode
+
     def build(self):
         logger.log("Building goal {}".format(self.goal_id))
 
@@ -557,6 +568,9 @@ class GoalBuilder:
 
         if self._not_before:
             g.not_before(self._not_before)
+
+        if self._not_before_timecode_if_can_still_grab:
+            g.not_before_timecode_if_can_still_grab(self._not_before_timecode_if_can_still_grab)
 
         return g
 
