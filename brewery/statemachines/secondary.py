@@ -329,6 +329,11 @@ class GrabPlatformCup(State):
         yield LookAtOpposite(xc, yc)
         yield SafeMoveLineTo(xc, yc)
         grab = yield GrabCup()
+        goal = self.robot.goal_manager.get_current_goal()
+        try:
+            yield SafeMoveLineTo(goal.x, goal.y)
+        except:
+            pass
         self.exit_reason = grab.exit_reason
         yield None
 
