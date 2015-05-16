@@ -763,12 +763,26 @@ class TheBitchyWay(State):
 
         try:
             yield LookAt(cdp_x, cdp_y)
+            yield Trigger(LEFT_BUILDER_PLIERS_LEFT_INIT,
+                          LEFT_BUILDER_PLIERS_RIGHT_INIT,
+                          RIGHT_BUILDER_PLIERS_LEFT_INIT,
+                          RIGHT_BUILDER_PLIERS_RIGHT_INIT,
+                          LEFT_BUILDER_GRIPPER_LEFT_DEPOSIT,
+                          LEFT_BUILDER_GRIPPER_RIGHT_DEPOSIT,
+                          RIGHT_BUILDER_GRIPPER_LEFT_DEPOSIT,
+                          RIGHT_BUILDER_GRIPPER_RIGHT_DEPOSIT,
+                          )
             yield SafeMoveLineTo(cdp_x, cdp_y)
+            yield Trigger(LEFT_BUILDER_GRIPPER_LEFT_LIGHT,
+                          LEFT_BUILDER_GRIPPER_RIGHT_LIGHT,
+                          RIGHT_BUILDER_GRIPPER_LEFT_LIGHT,
+                          RIGHT_BUILDER_GRIPPER_RIGHT_LIGHT,
+                          )
             yield SafeMoveLineTo(cdp_x, THE_BITCHY_WAY_Y)
         except:
             yield SafeMoveLineTo(cdp_x, THE_BITCHY_WAY_Y)
 
-        # YEAAAAHH FROZEN BITCHES !!!!!!!!
+        # YEAAAAHH BITCHES !!!!!!!!
 
         self.exit_reason = GOAL_DONE
         yield None
