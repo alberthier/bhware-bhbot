@@ -252,7 +252,9 @@ class GrabCup(Timer):
         super_on_enter = super().on_enter()
         if super_on_enter:
             yield from super_on_enter
-        self.send_packet(packets.EnsureGrab())
+        goal = self.robot.goal_manager.get_current_goal()
+        if goal is not None and goal.identifier in ["GRAB_SOUTH_MINE_CUP", "GRAB_STAIRS_CUP"]:
+            self.send_packet(packets.EnsureGrab())
 
 
     def on_cup_grabbed(self, packet):
