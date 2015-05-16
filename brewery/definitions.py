@@ -463,3 +463,31 @@ CLAPMAN_CLOSE = makeServoMoveCommand(CLAPMAN, 504)
 CLAPMAN_OPEN  = makeServoMoveCommand(CLAPMAN, 191)
 
 STAND_GOAL_OFFSET = -0.25
+
+TEXTS = {
+    "GOAL_DONE" : [
+        "Ha ha ha ha ha",
+        "Je suis le plus fort",
+        "A nous la victoire !",
+        "Je n'ai peur de personne, même pas R C V A",
+        "Mission accomplie !",
+        "Mou ha ha ha haaaa",
+        "MEDIA:/mnt/sdcard/bhteam/RireLong.mp4"
+    ],
+    "GOAL_DOING" : [
+        "Au boulot !"
+    ],
+    "GOAL_FAILED" : [
+        "Quelle merde !",
+        "Au cachot",
+        "Mince, c'est loupé !"
+    ],
+    "OPPONENT_DETECTED" : [
+        "Pousses-toi de là !",
+        "Touches pas à ce truc !",
+        "Enlèves-toi de mon chemin !",
+        "Tu es un ersatz de méchant, tu es la sucrette du mal"
+    ],
+    "DONT_REMOVE_ME_ITS_UGLY" : "Because of get_servos_commands()"
+}
+

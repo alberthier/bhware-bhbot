@@ -10,6 +10,7 @@ import packets
 import position
 import statemachine
 import tools
+import mediahelpers
 
 from definitions import *
 
@@ -433,6 +434,16 @@ class GoalManager:
         logger.log("Goal {} : {}".format(GOAL_STATUS.lookup_by_value[new_status], goal_to_update.identifier))
 
         self.internal_goal_update(goal_to_update.identifier, new_status)
+
+        if new_status == GOAL_DONE:
+            self.event_loop.send_packet(packets.Text("Goal DONE: {}".format(goal_to_update.identifier)))
+            mediahelpers.safe_say(self, "GOAL_DONE")
+        elif new_status == GOAL_FAILED:
+            self.event_loop.send_packet(packets.Text("Goal FAILED: {}".format(goal_to_update.identifier)))
+            mediahelpers.safe_say(self, "GOAL_FAILED")
+        elif new_status == GOAL_DOING:
+            self.event_loop.send_packet(packets.Text("Doing goal: {}".format(goal_to_update.identifier)))
+            mediahelpers.safe_say(self, "GOAL_DOING")
 
         if goal_to_update.shared :
             logger.log('A shared goal status changed, notifying my buddy : {} -> {}'.format(goal_to_update.identifier, goal_to_update.status))
