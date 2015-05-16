@@ -26,6 +26,10 @@ LEFT_START_X = 1.000
 LEFT_START_Y = 0.070 + ROBOT_CENTER_Y
 LEFT_START_ANGLE = math.pi / 2.0
 
+THE_BITCHY_WAY_NORTH_X = 0.57
+THE_BITCHY_WAY_SOUTH_X = 2.0 - THE_BITCHY_WAY_NORTH_X
+THE_BITCHY_WAY_Y = 0.70
+
 
 def left_builder_at_pose(x, y, angle):
     return get_center_pose_for_point(0.150, 0.0725, x, y, angle)
@@ -198,17 +202,17 @@ class Main(State):
                 .build(),
             G("THE_BITCHY_WAY_NORTH")
                 .weight(20)
-                .coords(0.57, 0.70)
+                .coords(THE_BITCHY_WAY_NORTH_X, THE_BITCHY_WAY_Y)
                 .direction(DIRECTION_BACKWARDS)
-                .state(TheBitchyWayNorth)
+                .state(TheBitchyWay)
                 .estimated_duration(15)
                 .not_before(["ALL", "BUILD_SPOTLIGHT_PLATFORM", "BUILD_SPOTLIGHT_HOME"])
                 .build(),
             G("THE_BITCHY_WAY_SOUTH")
                 .weight(20)
-                .coords(1.43, 0.70)
+                .coords(THE_BITCHY_WAY_SOUTH_X, THE_BITCHY_WAY_Y)
                 .direction(DIRECTION_BACKWARDS)
-                .state(TheBitchyWaySouth)
+                .state(TheBitchyWay)
                 .estimated_duration(15)
                 .not_before(["ALL", "BUILD_SPOTLIGHT_PLATFORM", "BUILD_SPOTLIGHT_HOME"])
                 .build(),
@@ -424,6 +428,16 @@ class StaticStrategy(State):
             yield SafeMoveLineTo(1.00, 0.60)
             yield BuildSpotlightHome()
             self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
+
+            yield LookAtOpposite(THE_BITCHY_WAY_NORTH_X, THE_BITCHY_WAY_Y)
+            yield SafeMoveLineTo(THE_BITCHY_WAY_NORTH_X, THE_BITCHY_WAY_Y)
+            yield TheBitchyWay()
+            self.robot.goal_manager.update_goal_status("THE_BITCHY_WAY_NORTH", GOAL_DONE)
+            yield LookAtOpposite(THE_BITCHY_WAY_SOUTH_X, THE_BITCHY_WAY_Y)
+            yield SafeMoveLineTo(THE_BITCHY_WAY_SOUTH_X, THE_BITCHY_WAY_Y)
+            yield TheBitchyWay()
+            self.robot.goal_manager.update_goal_status("THE_BITCHY_WAY_SOUTH", GOAL_DONE)
+
         except OpponentInTheWay:
             pass
         yield None
@@ -738,53 +752,23 @@ class BuildSpotlightHome(State):
 
 
 
-class TheBitchyWayNorth(State):
+class TheBitchyWay(State):
 
     def on_enter(self):
-        cdp_x1 = 0.57
-        cdp_y1 = 0.70
-        cdp_x2 = 0.57
-        cdp_y2 = 0.6
-        cdp_x3 = 0.57
-        cdp_y3 = 0.25
+        if self.robot.pose.x < 1.0:
+            cdp_x = THE_BITCHY_WAY_NORTH_X
+        else:
+            cdp_x = THE_BITCHY_WAY_SOUTH_X
+        cdp_y = 0.25
 
         try:
-            yield LookAt(cdp_x1, cdp_y1)
-            yield SafeMoveLineTo(cdp_x1, cdp_y1)
-            yield LookAt(cdp_x2, cdp_y2)
-            yield SafeMoveLineTo(cdp_x3, cdp_y3)
-            yield SafeMoveLineTo(cdp_x1, cdp_y1)
+            yield LookAt(cdp_x, cdp_y)
+            yield SafeMoveLineTo(cdp_x, cdp_y)
+            yield SafeMoveLineTo(cdp_x, THE_BITCHY_WAY_Y)
         except:
-            yield SafeMoveLineTo(cdp_x2, cdp_y2)
+            yield SafeMoveLineTo(cdp_x, THE_BITCHY_WAY_Y)
 
         # YEAAAAHH FROZEN BITCHES !!!!!!!!
-
-        self.exit_reason = GOAL_DONE
-        yield None
-
-
-
-
-class TheBitchyWaySouth(State):
-
-    def on_enter(self):
-        cdp_x1 = 1.43
-        cdp_y1 = 0.70
-        cdp_x2 = 1.43
-        cdp_y2 = 0.6
-        cdp_x3 = 1.43
-        cdp_y3 = 0.25
-
-        try:
-            yield LookAt(cdp_x1, cdp_y1)
-            yield SafeMoveLineTo(cdp_x1, cdp_y1)
-            yield LookAt(cdp_x2, cdp_y2)
-            yield SafeMoveLineTo(cdp_x3, cdp_y3)
-            yield SafeMoveLineTo(cdp_x1, cdp_y1)
-        except:
-            yield SafeMoveLineTo(cdp_x2, cdp_y2)
-
-        # YEAAAAHH HOT BITCHES !!!!!!!!
 
         self.exit_reason = GOAL_DONE
         yield None
