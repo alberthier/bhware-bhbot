@@ -196,6 +196,14 @@ class Main(State):
                 .builder_action(0,-1)
                 .estimated_duration(15)
                 .build(),
+            G("THE_BITCHY_WAY")
+                .weight(20)
+                .coords(1.0,1.0) # TODO
+                .direction(DIRECTION_FORWARD)
+                .state(BuildSpotlightPlatform)
+                .estimated_duration(15)
+                .not_before(["ALL", "BUILD_SPOTLIGHT_PLATFORM", "BUILD_SPOTLIGHT_HOME"])
+                .build(),
             # G("BUILD_SPOTLIGHT_PLATFORM_ALTERNATE_LEFT")
             #     .weight(15)
             #     .coords(1.73, 1.96)
