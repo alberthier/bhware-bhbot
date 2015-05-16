@@ -472,7 +472,7 @@ TEXTS = {
         "Je n'ai peur de personne, même pas R C V A",
         "Mission accomplie !",
         "Mou ha ha ha haaaa",
-        "MEDIA:/mnt/sdcard/bhteam/RireLong.mp4"
+        "MEDIA:/mnt/sdcard/bhteam/RireCourt.mp4"
     ],
     "GOAL_DOING" : [
         "Au boulot !"
@@ -481,13 +481,16 @@ TEXTS = {
         "Quelle merde !",
         "Au cachot",
         "Mince, c'est loupé !"
+        "MEDIA:/mnt/sdcard/bhteam/Contrarie.mp4"
     ],
     "OPPONENT_DETECTED" : [
         "Pousses-toi de là !",
         "Touches pas à ce truc !",
         "Enlèves-toi de mon chemin !",
         "Tu es un ersatz de méchant, tu es la sucrette du mal"
+        "MEDIA:/mnt/sdcard/bhteam/Calin.mp4"
+        "MEDIA:/mnt/sdcard/bhteam/Pleurer.mp4"
+        "MEDIA:/mnt/sdcard/bhteam/Contrarie.mp4"
     ],
     "DONT_REMOVE_ME_ITS_UGLY" : "Because of get_servos_commands()"
 }
-
