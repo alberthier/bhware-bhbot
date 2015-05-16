@@ -106,12 +106,12 @@ class Main(State):
                 .coords(0.55, 2.70)
                 .state(DepositCup)
                 .build(),
-            GCG("GRAB_PLATFORM_CUP")
-                .weight(7)
-                .coords(1.65, 1.28)
-                .offset(GRAB_OFFSET)
-                .state(GrabPlatformCup)
-                .build(),
+            # GCG("GRAB_PLATFORM_CUP")
+            #     .weight(7)
+            #     .coords(1.65, 1.28)
+            #     .offset(GRAB_OFFSET)
+            #     .state(GrabPlatformCup)
+            #     .build(),
             GCG("GRAB_PLATFORM_CUP")
                 .weight(7)
                 .coords(1.65, 1.72)
