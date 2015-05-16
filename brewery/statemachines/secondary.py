@@ -213,7 +213,8 @@ class StaticStrategy(State):
             yield WaitForUnlock("SOUTH_ZONE", 5000)
             yield SafeMoveLineTo(1.0, 0.55)
             yield from self.execute_goal("GRAB_SOUTH_MINE_CUP")
-            yield MoveLineTo(1.40, 0.2)
+            yield MoveLineTo(1.40, 0.25)
+            yield RotateTo(-math.pi/2)
             yield WaitForUnlock("CROSS_FIELD", 20000)
         except OpponentInTheWay:
             pass
