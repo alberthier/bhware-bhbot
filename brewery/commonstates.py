@@ -1100,7 +1100,10 @@ class EscapeToAnywhere(statemachine.Timer):
         # We cannot use a simple while here. We have to give control back to the eventloop at each try
         # otherwise we will block all communications / statemachines
         x = random.randrange(300, 1700) / 1000.0
-        y = random.randrange(600, 2700) / 1000.0
+        if IS_MAIN_ROBOT:
+            y = random.randrange(600, 1400) / 1000.0
+        else:
+            y = random.randrange(1600, 2700) / 1000.0
         move = yield Navigate(x, y)
         exit_reason = move.exit_reason
         if exit_reason == TRAJECTORY_BLOCKED:
