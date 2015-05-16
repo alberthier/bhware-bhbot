@@ -406,6 +406,59 @@ class StaticStrategy(State):
             yield BuildSpotlightHome()
             self.robot.goal_manager.update_goal_status("BUILD_SPOTLIGHT_HOME", GOAL_DONE)
 
+            cdp_x1 = 0.57
+            cdp_y1 = 0.73
+            cdp_x2 = 0.57
+            cdp_y2 = 0.6
+            cdp_x3 = 0.57
+            cdp_y3 = 0.25
+
+            try:
+                yield SafeMoveLineTo(1.00, cdp_y1)
+                yield LookAt(cdp_x1, cdp_y1)
+                yield SafeMoveLineTo(cdp_x1, cdp_y1)
+                yield LookAt(cdp_x2, cdp_y2)
+                yield Trigger(LEFT_BUILDER_PLIERS_LEFT_INIT,
+                              LEFT_BUILDER_PLIERS_RIGHT_INIT,
+                              RIGHT_BUILDER_PLIERS_LEFT_INIT,
+                              RIGHT_BUILDER_PLIERS_RIGHT_INIT,
+                              LEFT_BUILDER_GRIPPER_LEFT_DEPOSIT,
+                              LEFT_BUILDER_GRIPPER_RIGHT_DEPOSIT,
+                              RIGHT_BUILDER_GRIPPER_LEFT_DEPOSIT,
+                              RIGHT_BUILDER_GRIPPER_RIGHT_DEPOSIT,
+                              )
+                yield SafeMoveLineTo(cdp_x3, cdp_y3)
+                yield SafeMoveLineTo(cdp_x1, cdp_y1)
+            except:
+                yield SafeMoveLineTo(cdp_x2, cdp_y2)
+
+            cdp_x1 = 1.425
+            cdp_y1 = 0.73
+            cdp_x2 = 1.425
+            cdp_y2 = 0.6
+            cdp_x3 = 1.425
+            cdp_y3 = 0.25
+
+            try:
+                yield LookAt(1.00, cdp_y1)
+                yield SafeMoveLineTo(1.00, cdp_y1)
+                yield LookAt(cdp_x1, cdp_y1)
+                yield SafeMoveLineTo(cdp_x1, cdp_y1)
+                yield LookAt(cdp_x2, cdp_y2)
+                yield Trigger(LEFT_BUILDER_PLIERS_LEFT_INIT,
+                              LEFT_BUILDER_PLIERS_RIGHT_INIT,
+                              RIGHT_BUILDER_PLIERS_LEFT_INIT,
+                              RIGHT_BUILDER_PLIERS_RIGHT_INIT,
+                              LEFT_BUILDER_GRIPPER_LEFT_DEPOSIT,
+                              LEFT_BUILDER_GRIPPER_RIGHT_DEPOSIT,
+                              RIGHT_BUILDER_GRIPPER_LEFT_DEPOSIT,
+                              RIGHT_BUILDER_GRIPPER_RIGHT_DEPOSIT,
+                              )
+                yield SafeMoveLineTo(cdp_x3, cdp_y3)
+                yield SafeMoveLineTo(cdp_x1, cdp_y1)
+            except:
+                yield SafeMoveLineTo(cdp_x2, cdp_y2)
+
         except OpponentInTheWay:
             pass
         yield None
