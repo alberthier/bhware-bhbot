@@ -805,4 +805,4 @@ class EndOfMatch(statemachine.State):
         yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
         goalmanager.on_end_of_match(self.robot.goal_manager, self.robot)
         tools.on_end_of_match()
-        self.send_packet(packets.Play("/mnt/sdcard/bhteam/RireLong.mp4"))
+        self.send_packet(packets.PlayMedia("/mnt/sdcard/bhteam/RireLong.mp4"))
