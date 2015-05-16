@@ -125,7 +125,7 @@ class Main(State):
                 .build(),
             G("KICK_THEIRS_CLAP")
                 .weight(7)
-                .coords(2.0 - 0.0825 - 0.070, 2.55)
+                .coords(1.45, 2.55)
                 .direction(DIRECTION_FORWARD)
                 .state(KickTheirsClap)
                 .build(),
@@ -416,16 +416,18 @@ class KickTheirsClap(State):
     def on_enter(self):
         goal = self.robot.goal_manager.get_current_goal()
         offset = 0
+        clap_x = 2.0 - 0.0825 - 0.070
+        clap_y = goal.y
+        yield RotateTo(math.pi)
+        yield SpeedControl(0.2)
+        yield SafeMoveLineTo(3.00, goal.y + offset)
+        yield DefinePosition(2.0 - (ROBOT_CENTER_X + HIGH_BORDER_OFFSET), None, math.pi)
+        yield SpeedControl()
+        yield SafeMoveLineTo(clap_x, clap_y)
         if self.robot.team == TEAM_RIGHT:
             offset = 0.1
             yield RotateTo(-math.pi / 2)
-            yield MoveLineTo(goal.x, goal.y + offset)
-        yield RotateTo(math.pi)
-        yield SpeedControl(0.2)
-        yield MoveLineTo(2.50, goal.y + offset)
-        yield DefinePosition(2.0 - (ROBOT_CENTER_X + HIGH_BORDER_OFFSET), None, math.pi)
-        yield SpeedControl()
-        yield MoveLineTo(goal.x, goal.y + offset)
+            yield MoveLineTo(clap_x, clap_y + offset)
         if self.robot.team == TEAM_LEFT:
             yield RotateTo(3 * math.pi / 4)
             yield Trigger(CLAPMAN_OPEN)
@@ -434,7 +436,7 @@ class KickTheirsClap(State):
             yield RotateTo(-3 * math.pi / 4)
             yield Trigger(CLAPMAN_OPEN)
             yield RotateTo(-math.pi / 2)
-        yield SafeMoveLineTo(goal.x, 2.300 + offset)
+        yield SafeMoveLineTo(clap_x, 2.300 + offset)
         yield RotateTo(math.pi)
         yield Trigger(CLAPMAN_CLOSE)
         self.exit_reason = GOAL_DONE
