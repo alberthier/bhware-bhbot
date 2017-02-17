@@ -7,9 +7,10 @@ import math
 import time
 import random
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtSvg import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtSvg import *
 
 import position
 import packets
@@ -164,7 +165,7 @@ class GraphicsRobotObject(QObject):
         duration = abs(int((angle_deg - current) / 360.0 * 1000.0))
         rotate_animation = QPropertyAnimation()
         rotate_animation.setTargetObject(self)
-        rotate_animation.setPropertyName("angle")
+        rotate_animation.setPropertyName(b"angle")
         rotate_animation.setDuration(duration)
         rotate_animation.setStartValue(current)
         rotate_animation.setEndValue(angle_deg)
@@ -182,7 +183,7 @@ class GraphicsRobotObject(QObject):
         duration = math.sqrt(math.pow(d_field_x, 2) + math.pow(d_field_y, 2))
         pos_animation = QPropertyAnimation()
         pos_animation.setTargetObject(self)
-        pos_animation.setPropertyName("position")
+        pos_animation.setPropertyName(b"position")
         pos_animation.setDuration(duration)
         pos_animation.setStartValue(self.item.pos())
         pos_animation.setEndValue(QPointF(ref_x, ref_y))
@@ -198,7 +199,7 @@ class GraphicsRobotObject(QObject):
         duration = abs(r * da)
         pos_animation = QPropertyAnimation()
         pos_animation.setTargetObject(self)
-        pos_animation.setPropertyName("position")
+        pos_animation.setPropertyName(b"position")
         pos_animation.setDuration(duration)
         pos_animation.setStartValue(self.item.pos())
         for i in range(10):
@@ -547,7 +548,7 @@ class GameElementsLayer(fieldview.Layer):
     def __init__(self, field_view_controller):
         fieldview.Layer.__init__(self, field_view_controller, "Game elements", "#f1be01")
         self.main_bar = field_view_controller.ui.main_bar
-        self.scene().changed.connect(self.scene_changed)
+        #self.scene().changed.connect(self.scene_changed)
 
         self.movable_elements = []
         for x, y in [(850, 100), (90, 200), (850, 200), (90, 1750), (90, 1850), (870, 1355), (1300, 1400), (1100, 1770)]:
@@ -566,7 +567,6 @@ class GameElementsLayer(fieldview.Layer):
             self.addToGroup(piece)
 
         self.setup()
-
 
 
     def setup(self):

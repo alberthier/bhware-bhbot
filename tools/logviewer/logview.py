@@ -1,8 +1,9 @@
 # encoding: utf-8
 
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 import collections
 
 import packets
@@ -141,7 +142,7 @@ class LogViewController(QObject):
         filter_model.setSourceModel(log_model)
         self.ui.log_view.setModel(filter_model)
         self.ui.log_view.doubleClicked.connect(self.packet_double_clicked)
-        self.ui.log_view.header().setResizeMode(QHeaderView.ResizeToContents)
+        self.ui.log_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
 
 
     def process_log_line(self, log_line, lineno, last_lineno):

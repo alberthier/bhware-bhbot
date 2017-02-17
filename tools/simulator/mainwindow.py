@@ -2,9 +2,10 @@
 
 import os
 
-from PyQt4.QtGui import *
-from PyQt4 import uic
-from PyQt4.Qt import Qt
+from PyQt5.QtWidgets import *
+from PyQt5 import uic
+from PyQt5.QtGui import *
+from PyQt5.Qt import Qt
 
 from mainbar import *
 from outputview import *

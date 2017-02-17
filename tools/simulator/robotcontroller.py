@@ -3,9 +3,9 @@
 import os
 import random
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtNetwork import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtNetwork import *
 
 import packets
 import binarizer
@@ -100,7 +100,7 @@ class RobotController(object):
 
             brewery = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "brewery", "brewery.py")
             self.process = QProcess()
-            self.process.setReadChannelMode(QProcess.MergedChannels)
+            self.process.setProcessChannelMode(QProcess.MergedChannels)
             self.process.readyRead.connect(self.read_output)
             args = ["--color", "always"]
 
