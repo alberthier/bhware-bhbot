@@ -505,44 +505,6 @@ class GraphRoutingLayer(fieldview.Layer):
 
 
 
-class Stand(QGraphicsEllipseItem):
-
-    def __init__(self, game_elements_layer, x, y, color):
-        QGraphicsPathItem.__init__(self)
-        self.game_elements_layer = game_elements_layer
-        self.x = x
-        self.y = y
-        self.setBrush(QBrush(QColor(color), Qt.SolidPattern))
-        self.setPen(QPen(QColor(color).darker(135), 10))
-        self.setRect(0.0, 0.0, 60.0, 60.0)
-
-
-    def setup(self):
-        self.setParentItem(self.game_elements_layer)
-        self.setPos(self.x, self.y)
-
-
-
-
-class Cup(QGraphicsEllipseItem):
-
-    def __init__(self, game_elements_layer, x, y):
-        QGraphicsPathItem.__init__(self)
-        self.game_elements_layer = game_elements_layer
-        self.x = x
-        self.y = y
-        self.setBrush(QBrush(QColor("#ffffff"), Qt.SolidPattern))
-        self.setPen(QPen(QColor("#ffffff").darker(150), 10))
-        self.setRect(0.0, 0.0, 95.0, 95.0)
-
-
-    def setup(self):
-        self.setParentItem(self.game_elements_layer)
-        self.setPos(self.x, self.y)
-
-
-
-
 class GameElementsLayer(fieldview.Layer):
 
     def __init__(self, field_view_controller):
@@ -551,16 +513,6 @@ class GameElementsLayer(fieldview.Layer):
         #self.scene().changed.connect(self.scene_changed)
 
         self.movable_elements = []
-        for x, y in [(850, 100), (90, 200), (850, 200), (90, 1750), (90, 1850), (870, 1355), (1300, 1400), (1100, 1770)]:
-            y -= 30
-            self.movable_elements.append(Stand(self, x - 30, y, TEAM_LEFT_COLOR))
-            self.movable_elements.append(Stand(self, 3000 - x - 30, y, TEAM_RIGHT_COLOR))
-        for x, y in [(250, 1750), (910, 800)]:
-            y -= 47.5
-            self.movable_elements.append(Cup(self, x - 47.5, y))
-            self.movable_elements.append(Cup(self, 3000 - x - 47.5, y))
-        self.movable_elements.append(Cup(self, 1500 - 47.5, 1650 - 47.5))
-
         self.elements = self.movable_elements
 
         for piece in self.elements:
