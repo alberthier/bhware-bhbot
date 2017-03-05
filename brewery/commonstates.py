@@ -797,7 +797,9 @@ class Trigger(statemachine.Timer):
                 Trigger((ACTUATOR_TYPE_SERVO_AX, 1, 154, 1000), (ACTUATOR_TYPE_OUTPUT, 2, ACTION_ON))
         """
         if len(args) > 0:
-            if type(args[0]) == tuple:
+            if type(args[0]) == list:
+                self.commands = args[0]
+            elif type(args[0]) == tuple:
                 self.commands = list(args)
             elif len(args) == 3 or len(args) == 4:
                 self.commands = [ args ]

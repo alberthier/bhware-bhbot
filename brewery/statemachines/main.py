@@ -41,10 +41,19 @@ class Main(State):
         if packet.value == 0:
             self.yield_at(89500, EndOfMatch())
             yield MoveLineTo(1.0, 1.5)
-            yield Trigger(RIGHT_BUILDER_PLIERS_RIGHT_INIT, RIGHT_BUILDER_GRIPPER_LEFT_INIT)
-            yield Trigger(makeServoMoveCommand(LEFT_BUILDER_PLIERS_LEFT, 500))
-            rp = yield ReadServoPosition(LEFT_BUILDER_PLIERS_LEFT_ID)
-            print(rp.value)
+
+            #yield Trigger(RIGHT_BUILDER_PLIERS_RIGHT_INIT, RIGHT_BUILDER_GRIPPER_LEFT_INIT)
+            #yield Trigger(makeServoMoveCommand(LEFT_BUILDER_PLIERS_LEFT, 500))
+            #rp = yield ReadServoPosition(LEFT_BUILDER_PLIERS_LEFT_ID)
+            #print(rp.value)
+
+            l_servoID = [LEFT_BUILDER_PLIERS_LEFT_ID, LEFT_BUILDER_PLIERS_RIGHT_ID, LEFT_BUILDER_GRIPPER_LEFT_ID, LEFT_BUILDER_GRIPPER_RIGHT_ID, LEFT_BUILDER_LIGHTER_ID]
+
+            yield ServoTorqueControl(l_servoID, False)
+
+            ArmPosition = yield ReadArmServoPosition(l_servoID)
+            
+            yield MoveArmServoPosition(ArmPosition.l_servoPosition)
 
 
 
@@ -69,6 +78,37 @@ class CalibratePosition(State):
 
 
 
+class ReadArmServoPosition(State):
+    def __init__(self, l_servoID):
+        self.l_servoID = l_servoID
+
+    def on_enter(self):
+        l_servoPosition = []
+        for servoID in self.l_servoID :
+            ret = yield ReadServoPosition(servoID)
+            l_servoPosition.append([servoID, ret.value])
+        self.l_servoPosition = l_servoPosition
+
+        print("Positions of the arm:")
+        print(l_servoPosition)
+        
+        yield None
+
+
+class MoveArmServoPosition(State):
+
+    def __init__(self, l_servoPosition):
+        self.l_servoPosition = l_servoPosition
+
+    def on_enter(self):
+        l_ServoCommand =[]
+        for servoPosition in self.l_servoPosition :
+            servoID = servoPosition[0]
+            position = servoPosition[1]
+            l_ServoCommand.append(makeServoMoveCommand((servoID, SERVO_TIMEOUT), position))
+            
+        yield Trigger(l_ServoCommand)
+        yield None
 
 
 ##################################################
