@@ -31,7 +31,7 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
-            yield Initialize()
+            #yield Initialize()
             yield AntiBlocking(True)
             yield GetInputStatus(MAIN_INPUT_TEAM)
             yield CalibratePosition()
@@ -40,20 +40,25 @@ class Main(State):
     def on_start(self, packet):
         if packet.value == 0:
             self.yield_at(89500, EndOfMatch())
-            yield MoveLineTo(1.0, 1.5)
+            #yield MoveLineTo(1.0, 1.5)
 
             #yield Trigger(RIGHT_BUILDER_PLIERS_RIGHT_INIT, RIGHT_BUILDER_GRIPPER_LEFT_INIT)
             #yield Trigger(makeServoMoveCommand(LEFT_BUILDER_PLIERS_LEFT, 500))
             #rp = yield ReadServoPosition(LEFT_BUILDER_PLIERS_LEFT_ID)
             #print(rp.value)
 
-            l_servoID = [LEFT_BUILDER_PLIERS_LEFT_ID, LEFT_BUILDER_PLIERS_RIGHT_ID, LEFT_BUILDER_GRIPPER_LEFT_ID, LEFT_BUILDER_GRIPPER_RIGHT_ID, LEFT_BUILDER_LIGHTER_ID]
+            # STORAGE_FINGER_LEFT_ID
+            rp = yield ReadServoPosition((0,202))
+            print(rp.value)
 
-            yield ServoTorqueControl(l_servoID, False)
 
-            ArmPosition = yield ReadArmServoPosition(l_servoID)
+            #l_servoID = [LEFT_BUILDER_PLIERS_LEFT_ID, LEFT_BUILDER_PLIERS_RIGHT_ID, LEFT_BUILDER_GRIPPER_LEFT_ID, LEFT_BUILDER_GRIPPER_RIGHT_ID, LEFT_BUILDER_LIGHTER_ID]
+
+            #yield ServoTorqueControl(l_servoID, False)
+
+            #ArmPosition = yield ReadArmServoPosition(l_servoID)
             
-            yield MoveArmServoPosition(ArmPosition.l_servoPosition)
+            #yield MoveArmServoPosition(ArmPosition.l_servoPosition)
 
 
 
@@ -63,9 +68,10 @@ class Main(State):
 class Initialize(State):
 
     def on_enter(self):
-        yield Trigger(LEFT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_CLOSE)
-        yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
-        yield None
+        #yield Trigger(LEFT_CLAPMAN_CLOSE, RIGHT_CLAPMAN_CLOSE)
+        #yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
+        #yield None
+        None
 
 
 
@@ -121,5 +127,5 @@ class EndOfMatch(statemachine.State):
 
     def on_enter(self):
         self.send_packet(packets.Stop())
-        yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
+        #yield ServoTorqueControl([LEFT_CLAPMAN_ID, RIGHT_CLAPMAN_ID], False)
         tools.on_end_of_match()
