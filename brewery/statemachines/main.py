@@ -47,7 +47,7 @@ class Main(State):
 
             self.l_servoID = [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]
 
-            #yield CalibratePosition()
+            yield CalibratePosition()
 
             #rp = yield ReadServoPosition(STORAGE_FINGER_LEFT_ID)
             #print("STORAGE_FINGER_LEFT_ID")
@@ -149,6 +149,9 @@ class Main(State):
             else:
                 print("Erase arm traj")
                 self.l_armPosition = []
+                
+            #yield StaticStrategy()
+                
             None
 
 
@@ -170,7 +173,7 @@ class Initialize(State):
 class CalibratePosition(State):
 
     def on_enter(self):
-        yield DefinePosition(1.0, 0.07 + ROBOT_CENTER_X, math.pi / 2.0)
+        yield DefinePosition(0.15, 0.923, 0.0)
         yield None
 
 
@@ -205,6 +208,52 @@ class MoveArmServoPosition(State):
             l_ServoCommand.append(makeServoMoveCommand((servoID, ARM_SERVO_TIMEOUT), position))
             
         yield Trigger(l_ServoCommand)
+        yield None
+
+
+class StaticStrategy(State):
+    def on_enter(self):
+        # Deplacement vers fusee polychrome bleu
+        yield MoveLineTo(0.927, 0.923)
+        yield RotateTo(-math.pi/4.0)
+        yield MoveLineTo(1.25, 0.6)
+        yield RotateTo(-math.pi/2.0)
+        yield MoveLineTo(1.25, 0.3)
+        
+        # Travail sur fusee polychrome bleu pour dépose 4 elements
+        
+        # Deplacement vers fusee bleu
+        yield MoveLineTo(1.250, 0.600)
+        yield RotateTo(-math.pi/4.0)
+        yield MoveLineTo(0.700, 1.150)
+        yield RotateTo(math.pi)
+        yield MoveLineTo(0.350, 1.150)
+        
+        # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
+        
+        # Deplacement vers base lunaire centrale
+        yield MoveLineTo(1.210, 1.130)
+        yield RotateTo(-math.pi/4.0)
+        yield MoveLineTo(1.238, 1.101)
+        
+        # Depose des elements dans branche bleu base lunaire centrale
+        
+        # Deplacement vers cratere bleu
+        yield MoveLineTo(1.210, 1.130)
+        yield RotateTo(math.radians(37.0))
+        yield MoveLineTo(0.765, 0.811)
+        
+        # Prise des roches dans cratere
+        
+        # Deplacement vers zone de depart bleu
+        yield MoveLineTo(0.959, 0.950)
+        yield RotateTo(0.0)
+        yield MoveLineTo(0.450, 0.944)
+        
+        # Depose roche dans zone de depart bleu
+        
+        # Fin du match
+        
         yield None
 
 

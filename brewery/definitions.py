@@ -43,9 +43,9 @@ def setup_definitions(is_main_robot):
 
     if is_main_robot:
         globals()["ROBOT_X_SIZE"]          = 0.300
-        globals()["ROBOT_Y_SIZE"]          = 0.290
+        globals()["ROBOT_Y_SIZE"]          = 0.294
         globals()["ROBOT_CENTER_X"]        = 0.150
-        globals()["ROBOT_CENTER_Y"]        = 0.145
+        globals()["ROBOT_CENTER_Y"]        = 0.147
         globals()["ROBOT_GYRATION_RADIUS"] = MAIN_ROBOT_GYRATION_RADIUS
         globals()["INPUT"]                 = MAIN_INPUT
         globals()["SERVOS_IDS"]            = MAIN_SERVO_IDS
