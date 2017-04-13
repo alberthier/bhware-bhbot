@@ -77,8 +77,8 @@
         <rect x="2892" y="722"  width="28" height="450" fill="#f0f1ec" />
 
         <!-- Craters -->
-        <circle cx="540" cy="650" r="112" stroke-width="30" stroke="#b8b9a7" fill="transparent" />
-        <circle cx="2350" cy="650" r="112" stroke-width="30" stroke="#b8b9a7" fill="transparent" />
+        <circle cx="650" cy="540" r="112" stroke-width="30" stroke="#b8b9a7" fill="transparent" />
+        <circle cx="2350" cy="540" r="112" stroke-width="30" stroke="#b8b9a7" fill="transparent" />
         <circle cx="1070" cy="1870" r="112" stroke-width="30" stroke="#b8b9a7" fill="transparent" />
         <circle cx="1930" cy="1870" r="112" stroke-width="30" stroke="#b8b9a7" fill="transparent" />
 
