@@ -68,58 +68,97 @@ class Map:
         self.ubo_zone = self.add_zone(self.create_rect_coords(0.0, 0.0, 0.0, 0.0, 0.0))
 
         # Add Field obstacles
-        offset = ROBOT_GYRATION_RADIUS * math.cos(math.pi / 4.0) + 0.01
-        if not IS_MAIN_ROBOT:
-            offset += 0.03
-
-        popcorn_loc = 0.300 - 0.035 - offset
-        self.add_zone([(0.0, popcorn_loc),
-                       (0.07 + offset, popcorn_loc),
-                       (0.07 + offset, FIELD_Y_SIZE - popcorn_loc),
-                       (0.0, FIELD_Y_SIZE - popcorn_loc)])
-        steps_loc = 0.967 - offset
-        self.add_zone([(0.0, steps_loc),
-                       (0.580 + offset, steps_loc),
-                       (0.580 + offset, FIELD_Y_SIZE - steps_loc),
-                       (0.0, FIELD_Y_SIZE - steps_loc)])
-        start_loc = 0.8 - 0.022 - offset
-        if team == TEAM_LEFT:
-            self.add_zone([(start_loc, 0.0),
-                           (start_loc, 0.4 + offset),
-                           (FIELD_X_SIZE - start_loc, 0.4 + offset),
-                           (FIELD_X_SIZE - start_loc, 0.0)])
-        else:
-            self.add_zone([(start_loc, 0.0),
-                           (start_loc, 0.4 + offset + 0.25),
-                           (FIELD_X_SIZE - start_loc, 0.4 + offset + 0.25),
-                           (FIELD_X_SIZE - start_loc, 0.0)])
-        if team == TEAM_LEFT:
-            self.add_zone([(start_loc, FIELD_Y_SIZE),
-                           (start_loc, FIELD_Y_SIZE - 0.4 - offset - 0.25),
-                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset - 0.25),
-                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
-        else:
-            self.add_zone([(start_loc, FIELD_Y_SIZE),
-                           (start_loc, FIELD_Y_SIZE - 0.4 - offset),
-                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset),
-                           (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
-        platfrom_loc = 1.2 - offset
-        self.add_zone([(FIELD_X_SIZE, platfrom_loc),
-                       (FIELD_X_SIZE - 0.1 - offset, platfrom_loc),
-                       (FIELD_X_SIZE - 0.1 - offset, FIELD_Y_SIZE - platfrom_loc),
-                       (FIELD_X_SIZE, FIELD_Y_SIZE - platfrom_loc)])
-
-        if not IS_MAIN_ROBOT:
-            zones = []
-            off = 0.10 + offset
-            zones.append([(1.650 - off, 1.500 - off),
-                          (1.650 - off, 1.500 + off),
-                          (1.650 + off, 1.500 + off),
-                          (1.650 + off, 1.500 - off)])
-            for coords in zones:
-                if team == TEAM_RIGHT:
-                    coords = list(map(lambda c: (c[0], 3.0 - c[1]), coords))
-                self.add_zone(coords)
+        self.add_zone([(0.0, 0.0),
+                       (0.0, 0.70),
+                       (0.45, 0.94),
+                       (0.65, 0.94),
+                       (0.85, 0.77),
+                       (0.85, 0.0)])
+                       
+        self.add_zone([(0.0,  FIELD_Y_SIZE - 0.0),
+                       (0.0,  FIELD_Y_SIZE - 0.70),
+                       (0.45, FIELD_Y_SIZE - 0.94),
+                       (0.65, FIELD_Y_SIZE - 0.94),
+                       (0.85, FIELD_Y_SIZE - 0.77),
+                       (0.85, FIELD_Y_SIZE - 0.0)])
+                       
+        self.add_zone([(FIELD_X_SIZE, 0.0),
+                       (FIELD_X_SIZE - 0.68, 0.0),
+                       (FIELD_X_SIZE - 0.68, FIELD_Y_SIZE),
+                       (FIELD_X_SIZE, FIELD_Y_SIZE)])
+                       
+        self.add_zone([(FIELD_X_SIZE, 0.67),
+                       (FIELD_X_SIZE - 0.60, 0.67),
+                       (FIELD_X_SIZE - 0.83, 0.90),
+                       (FIELD_X_SIZE - 0.72, 1.22),
+                       (FIELD_X_SIZE, 1.22)])
+                       
+        self.add_zone([(FIELD_X_SIZE, FIELD_Y_SIZE - 1.22),
+                       (FIELD_X_SIZE - 0.72, FIELD_Y_SIZE - 1.22),
+                       (FIELD_X_SIZE - 0.83, FIELD_Y_SIZE - 0.90),
+                       (FIELD_X_SIZE - 0.60, FIELD_Y_SIZE - 0.67),
+                       (FIELD_X_SIZE, FIELD_Y_SIZE - 0.67)])
+                       
+        self.add_zone([(FIELD_X_SIZE, 1.22),
+                       (1.1, 1.22),
+                       (1.0, 1.32),
+                       (1.0, 1.68),
+                       (1.1, 1.78),
+                       (FIELD_X_SIZE, 1.78)])
+        
+        
+        #~ offset = ROBOT_GYRATION_RADIUS * math.cos(math.pi / 4.0) + 0.01
+        #~ if not IS_MAIN_ROBOT:
+            #~ offset += 0.03
+#~ 
+        #~ popcorn_loc = 0.300 - 0.035 - offset
+        #~ self.add_zone([(0.0, popcorn_loc),
+                       #~ (0.07 + offset, popcorn_loc),
+                       #~ (0.07 + offset, FIELD_Y_SIZE - popcorn_loc),
+                       #~ (0.0, FIELD_Y_SIZE - popcorn_loc)])
+        #~ steps_loc = 0.967 - offset
+        #~ self.add_zone([(0.0, steps_loc),
+                       #~ (0.580 + offset, steps_loc),
+                       #~ (0.580 + offset, FIELD_Y_SIZE - steps_loc),
+                       #~ (0.0, FIELD_Y_SIZE - steps_loc)])
+        #~ start_loc = 0.8 - 0.022 - offset
+        #~ if team == TEAM_LEFT:
+            #~ self.add_zone([(start_loc, 0.0),
+                           #~ (start_loc, 0.4 + offset),
+                           #~ (FIELD_X_SIZE - start_loc, 0.4 + offset),
+                           #~ (FIELD_X_SIZE - start_loc, 0.0)])
+        #~ else:
+            #~ self.add_zone([(start_loc, 0.0),
+                           #~ (start_loc, 0.4 + offset + 0.25),
+                           #~ (FIELD_X_SIZE - start_loc, 0.4 + offset + 0.25),
+                           #~ (FIELD_X_SIZE - start_loc, 0.0)])
+        #~ if team == TEAM_LEFT:
+            #~ self.add_zone([(start_loc, FIELD_Y_SIZE),
+                           #~ (start_loc, FIELD_Y_SIZE - 0.4 - offset - 0.25),
+                           #~ (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset - 0.25),
+                           #~ (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
+        #~ else:
+            #~ self.add_zone([(start_loc, FIELD_Y_SIZE),
+                           #~ (start_loc, FIELD_Y_SIZE - 0.4 - offset),
+                           #~ (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE - 0.4 - offset),
+                           #~ (FIELD_X_SIZE - start_loc, FIELD_Y_SIZE)])
+        #~ platfrom_loc = 1.2 - offset
+        #~ self.add_zone([(FIELD_X_SIZE, platfrom_loc),
+                       #~ (FIELD_X_SIZE - 0.1 - offset, platfrom_loc),
+                       #~ (FIELD_X_SIZE - 0.1 - offset, FIELD_Y_SIZE - platfrom_loc),
+                       #~ (FIELD_X_SIZE, FIELD_Y_SIZE - platfrom_loc)])
+#~ 
+        #~ if not IS_MAIN_ROBOT:
+            #~ zones = []
+            #~ off = 0.10 + offset
+            #~ zones.append([(1.650 - off, 1.500 - off),
+                          #~ (1.650 - off, 1.500 + off),
+                          #~ (1.650 + off, 1.500 + off),
+                          #~ (1.650 + off, 1.500 - off)])
+            #~ for coords in zones:
+                #~ if team == TEAM_RIGHT:
+                    #~ coords = list(map(lambda c: (c[0], 3.0 - c[1]), coords))
+                #~ self.add_zone(coords)
 
         self.pathfinder.field_config_done()
 

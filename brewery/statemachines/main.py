@@ -21,7 +21,27 @@ import statemachines.testscommon as testscommon
 import statemachines.testsmain as testsmain
 
 
+def readArmTrajTxt():
+    rt = yield GetInputStatus(MAIN_INPUT_TEAM)
+    rec = rt.value
 
+    if rec == 1:
+        l_armServoID = [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]
+        for servoID in l_armServoID:
+            # Speed control
+            yield Trigger(makeServoSetupCommand((servoID, 1000), 200))
+        #yield Trigger(STONE_GUIDE_HOLD)
+        
+        f_listArmPosition = open("/tmp/traj.txt", "r")
+        trajArm_fromFile = eval(f_listArmPosition.read())
+        f_listArmPosition.close()
+        
+        #yield Trigger(STORAGE_FINGER_LEFT_HOLD)
+        for l_servoPosition in trajArm_fromFile:
+            yield MoveArmServoPosition(l_servoPosition)
+            yield Timer(1000)
+        #yield Trigger(STORAGE_FINGER_LEFT_INIT)
+                
 
 class Main(State):
 
@@ -35,6 +55,44 @@ class Main(State):
             f_listArmPosition.close()
         else:
             self.l_armPosition = []
+            
+        gm=self.robot.goal_manager
+
+        G = goalmanager.GoalBuilder
+
+        gm.add(
+            G("POLY_ROCKET")
+                .weight(20)
+                .coords(1.25, 0.3+0.15)
+                .direction(DIRECTION_FORWARD)
+                .state(PolyRocket, [True])
+                .build(),
+            G("MONO_ROCKET")
+                .weight(20)
+                .coords(0.350+0.15, 1.150)
+                .direction(DIRECTION_FORWARD)
+                .state(MonoRocket, [True])
+                .build(),
+            G("CENTRAL_MOON_BASE_LAT_BRANCH")
+                .weight(20)
+                .coords(1.210, 1.130)
+                .direction(DIRECTION_AUTO)
+                .state(CentralMoonBaseLatBranch, [True])
+                .build(),
+            G("CRATER")
+                .weight(20)
+                .coords(0.795, 0.843)
+                .direction(DIRECTION_BACKWARDS)
+                .state(Crater, [True])
+                .build(),
+            G("STONE_DROP")
+                .weight(1)
+                .coords(0.450, 0.944)
+                .direction(DIRECTION_BACKWARDS)
+                .state(StoneDrop, [True])
+                .build()
+                )
+                
         None
 
 
@@ -128,35 +186,78 @@ class Main(State):
             
             #yield MoveArmServoPosition(ArmPosition.l_servoPosition)
 
-            rt = yield GetInputStatus(MAIN_INPUT_TEAM)
-            self.rec = rt.value
-
-            if self.rec == 1:
-                for servoID in self.l_servoID:
-                    yield Trigger(makeServoSetupCommand((servoID, 1000), 200))
-                #yield Trigger(STONE_GUIDE_HOLD)
-
-                f_listArmPosition = open("/tmp/traj.txt", "r")
-                trajArm_fromFile = eval(f_listArmPosition.read())
-                f_listArmPosition.close()
-
-                yield Trigger(STORAGE_FINGER_LEFT_HOLD)
-                #for l_servoPosition in self.l_armPosition:
-                for l_servoPosition in trajArm_fromFile:
-                    yield MoveArmServoPosition(l_servoPosition)
-                    yield Timer(1000)
-                yield Trigger(STORAGE_FINGER_LEFT_INIT)
-            else:
-                print("Erase arm traj")
-                self.l_armPosition = []
+            #readArmTrajTxt()
                 
-            #yield StaticStrategy()
+            yield ExecuteGoals()
+                
+            #~ yield StaticStrategy()
                 
             None
 
 
 
+class PolyRocket(State):
+    
+    def __init__(self, depl = True):
+        self.depl = depl
+    
+    def on_enter(self):
+        if self.depl == True:
+            yield RotateTo(-math.pi/2.0)
+            yield MoveLineTo(1.25, 0.3)
+            
+            yield MoveLineRelative(-0.05)
+        self.exit_reason = GOAL_DONE
+        yield None
 
+class MonoRocket(State):
+    def __init__(self, depl = True):
+        self.depl = depl
+        
+    def on_enter(self):
+        if self.depl == True:
+            yield RotateTo(math.pi)
+            yield MoveLineTo(0.350, 1.150)
+            yield MoveLineRelative(-0.05)
+        self.exit_reason = GOAL_DONE
+        yield None
+
+class CentralMoonBaseLatBranch(State):
+    def __init__(self, depl = True):
+        self.depl = depl
+        
+    def on_enter(self):
+        if self.depl == True:
+            yield RotateTo(-math.pi/4.0)
+            yield MoveLineTo(1.238, 1.101)
+            
+            yield MoveLineRelative(-0.05)
+        self.exit_reason = GOAL_DONE
+        yield None
+        
+class Crater(State):
+    def __init__(self, depl = True):
+        self.depl = depl
+        
+    def on_enter(self):
+        if self.depl == True:
+            yield LookAtOpposite(0.540, 0.650)
+            angle_from_crater_center_to_robot = angle_between(0.54, 0.65, self.robot.pose.x, self.robot.pose.y)
+            yield MoveLineTo(0.54 + (0.112 + ROBOT_CENTER_X) * math.cos(angle_from_crater_center_to_robot), 0.65 + (0.112 + ROBOT_CENTER_X) * math.sin(angle_from_crater_center_to_robot), direction = DIRECTION_BACKWARDS)
+            
+            yield MoveLineRelative(-0.05)
+        self.exit_reason = GOAL_DONE
+        yield None
+        
+class StoneDrop(State):
+    def __init__(self, depl = True):
+        self.depl = depl
+        
+    def on_enter(self):
+        if self.depl == True:
+            None
+        self.exit_reason = GOAL_DONE
+        yield None
 
 
 class Initialize(State):
@@ -221,6 +322,7 @@ class StaticStrategy(State):
         yield MoveLineTo(1.25, 0.3)
         
         # Travail sur fusee polychrome bleu pour dépose 4 elements
+        yield PolyRocket(False)
         
         # Deplacement vers fusee bleu
         yield MoveLineTo(1.250, 0.600)
@@ -230,6 +332,7 @@ class StaticStrategy(State):
         yield MoveLineTo(0.350, 1.150)
         
         # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
+        yield MonoRocket(False)
         
         # Deplacement vers base lunaire centrale
         yield MoveLineTo(1.210, 1.130)
@@ -237,6 +340,7 @@ class StaticStrategy(State):
         yield MoveLineTo(1.238, 1.101)
         
         # Depose des elements dans branche bleu base lunaire centrale
+        yield CentralMoonBaseLatBranch(False)
         
         # Deplacement vers cratere bleu
         yield MoveLineTo(1.210, 1.130)
@@ -244,6 +348,7 @@ class StaticStrategy(State):
         yield MoveLineTo(0.765, 0.811)
         
         # Prise des roches dans cratere
+        yield Crater(False)
         
         # Deplacement vers zone de depart bleu
         yield MoveLineTo(0.959, 0.950)
@@ -251,6 +356,7 @@ class StaticStrategy(State):
         yield MoveLineTo(0.450, 0.944)
         
         # Depose roche dans zone de depart bleu
+        yield StoneDrop(False)
         
         # Fin du match
         
