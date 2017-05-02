@@ -199,15 +199,46 @@ class Main(State):
             #readArmTrajTxt()
             
             # Test of arm traj sequence start by start
+            
+            #~ yield Trigger(ARM_7_HOLD)
+            #~ self.cnt_arm_action = 10
+            
             if self.cnt_arm_action == 0:
                 yield InitArm()
             elif self.cnt_arm_action == 1:
-                yield TestGrabModuleFromInit()
-                #yield TestGrabModuleLeftFromInit()
-                yield TestStockModuleFromGrabbedModuleRightFront()
+                #~ yield TestGrabModuleFromInit()
+                #~ yield TestStockModuleFromGrabbedModuleRightFront()
+                #~ yield TestTakeModuleFromStorageReturn()
+                #~ yield TestStockModuleFromGrabbedModuleRight()
+                #~ yield TestTakeModuleFromStorageReturn()
+                #~ yield TestStockModuleFromGrabbedModuleLeftFront()
+                #~ yield TestTakeModuleFromStorageReturn()
+                #~ yield TestStockModuleFromGrabbedModuleLeft()
+                
+                yield GrabPolyModuleFromInit()
+                yield OutputPolyModuleFromRocket()
+                yield DropPolyModule()
+                
+                #~ yield GrabPolyModuleFromDropZone()
+                #~ yield OutputPolyModuleFromRocket()
+                #~ yield DropTurnedPolyModule()
+                
+                #~ yield GrabPolyModuleFromDropZone()
+                #~ yield OutputPolyModuleFromRocket()
+                #~ yield DropPolyModule()
+                #~ 
+                #~ yield GrabPolyModuleFromDropZone()
+                #~ yield OutputPolyModuleFromRocket()
+                #~ yield DropTurnedPolyModule()
+                
             elif self.cnt_arm_action == 2:
-                #yield TestStockModuleFromGrabbedModuleRightFront()
+                #yield TestTakeModuleFromStorageReturn()
                 #yield TestStockModuleFromGrabbedModuleRight()
+                #yield TestStockModuleFromGrabbedModuleRightFront()
+                #yield DropPolyModule()
+                #yield GrabPolyModuleFromDropZone()
+                yield DropTurnedPolyModule()
+            elif self.cnt_arm_action == 3:
                 None
                 
             self.cnt_arm_action = self.cnt_arm_action + 1
@@ -236,18 +267,49 @@ class ReadArmTraj(State):
                 yield Timer(self.delay)
         yield None
 
+class ArmSpeed(State):
+    def __init__(self, speed):
+        self.speed = speed
+        
+    def on_enter(self):
+        for servoID in [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]:
+            # Speed control
+            yield Trigger(makeServoSetupCommand((servoID, 1000), self.speed))
+        yield None
+
 class InitArm(State):
     def on_enter(self):
-        yield Trigger(ARM_7_INIT)
+        yield ArmSpeed(110)
+        
+        #~ arm_traj_r0 = [
+        #~ [[(1, 5), 425], [(1, 207), 712], [(1, 107), 650], [(0, 204), 512], [(0, 206), 317], [(0, 105), 519]], 
+        #~ [[(1, 5), 425], [(1, 207), 679], [(1, 107), 650], [(0, 204), 512], [(0, 206), 194], [(0, 105), 519]], 
+        #~ [[(1, 5), 423], [(1, 207), 366], [(1, 107), 336], [(0, 204), 519], [(0, 206), 200], [(0, 105), 518]], 
+        #~ [[(1, 5), 424], [(1, 207), 358], [(1, 107), 405], [(0, 204), 517], [(0, 206), 578], [(0, 105), 518]], 
+        #~ [[(1, 5), 423], [(1, 207), 315], [(1, 107), 422], [(0, 204), 495], [(0, 206), 741], [(0, 105), 518]], 
+        #~ [[(1, 5), 423], [(1, 207), 282], [(1, 107), 392], [(0, 204), 497], [(0, 206), 770], [(0, 105), 519]]
+        #~ ]
+        
+        arm_traj_r1 = [
+        [[(1, 5), 408], [(1, 207), 642], [(1, 107), 494], [(0, 204), 511], [(0, 206), 257], [(0, 105), 547]], 
+        [[(1, 5), 409], [(1, 207), 558-50], [(1, 107), 422], [(0, 204), 511], [(0, 206), 260], [(0, 105), 547]], 
+        [[(1, 5), 412], [(1, 207), 466-50], [(1, 107), 350], [(0, 204), 511], [(0, 206), 309], [(0, 105), 547]], 
+        [[(1, 5), 412], [(1, 207), 369-30], [(1, 107), 293], [(0, 204), 510], [(0, 206), 309], [(0, 105), 547]], 
+        [[(1, 5), 412], [(1, 207), 359], [(1, 107), 308], [(0, 204), 510], [(0, 206), 396], [(0, 105), 546]], 
+        [[(1, 5), 412], [(1, 207), 342], [(1, 107), 412], [(0, 204), 511], [(0, 206), 519], [(0, 105), 546]], 
+        [[(1, 5), 412], [(1, 207), 351], [(1, 107), 479], [(0, 204), 510], [(0, 206), 518], [(0, 105), 546]], 
+        [[(1, 5), 414], [(1, 207), 362], [(1, 107), 480], [(0, 204), 497], [(0, 206), 801], [(0, 105), 541]]
+        ]
+        
         arm_traj = [
-        [[(1, 5), 425], [(1, 207), 712], [(1, 107), 650], [(0, 204), 512], [(0, 206), 317], [(0, 105), 519]], 
-        [[(1, 5), 425], [(1, 207), 679], [(1, 107), 650], [(0, 204), 512], [(0, 206), 194], [(0, 105), 519]], 
-        [[(1, 5), 423], [(1, 207), 366], [(1, 107), 336], [(0, 204), 519], [(0, 206), 200], [(0, 105), 518]], 
-        [[(1, 5), 424], [(1, 207), 358], [(1, 107), 405], [(0, 204), 517], [(0, 206), 578], [(0, 105), 518]], 
-        [[(1, 5), 423], [(1, 207), 315], [(1, 107), 422], [(0, 204), 495], [(0, 206), 741], [(0, 105), 518]], 
-        [[(1, 5), 423], [(1, 207), 282], [(1, 107), 392], [(0, 204), 497], [(0, 206), 770], [(0, 105), 519]]
+        [[(1, 5), 433], [(1, 207), 400], [(1, 107), 437], [(0, 204), 512], [(0, 206), 702], [(0, 105), 462]], 
+        [[(1, 5), 436], [(1, 207), 334], [(1, 107), 401], [(0, 204), 512], [(0, 206), 720], [(0, 105), 462]], 
+        [[(1, 5), 436], [(1, 207), 306], [(1, 107), 419], [(0, 204), 512], [(0, 206), 778], [(0, 105), 462]], 
+        [[(1, 5), 436], [(1, 207), 299], [(1, 107), 458], [(0, 204), 512], [(0, 206), 814], [(0, 105), 462]],
+        [[(1, 5), 414], [(1, 207), 362], [(1, 107), 480], [(0, 204), 497], [(0, 206), 801], [(0, 105), 541]]
         ]
         yield ReadArmTraj(arm_traj, 700)
+        yield Trigger(ARM_7_INIT)
         yield None
 
 class TestGrabModuleFromInit(State):
@@ -264,52 +326,220 @@ class TestGrabModuleFromInit(State):
         ]
         
         yield Trigger(ARM_7_OPEN)
-        for servoID in [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]:
-                # Speed control
-                servo_speed = 110
-                yield Trigger(makeServoSetupCommand((servoID, 1000), servo_speed))
+        yield ArmSpeed(110)
                 
-        arm_traj = [
+        ARM_2_shift_up = 10
+        arm_traj_1 = [
         [[(1, 5), 423], [(1, 207), 339], [(1, 107), 511], [(0, 204), 494], [(0, 206), 718], [(0, 105), 516]], 
         [[(1, 5), 415], [(1, 207), 283], [(1, 107), 359], [(0, 204), 481], [(0, 206), 617], [(0, 105), 512]], 
         #[[(1, 5), 415], [(1, 207), 296], [(1, 107), 352], [(0, 204), 480], [(0, 206), 500], [(0, 105), 512]], 
-        [[(1, 5), 415], [(1, 207), 296], [(1, 107), 352+10], [(0, 204), 480], [(0, 206), 420], [(0, 105), 512]], 
+        [[(1, 5), 415], [(1, 207), 296-ARM_2_shift_up], [(1, 107), 352+10], [(0, 204), 480], [(0, 206), 420], [(0, 105), 512]], 
         #[[(1, 5), 413], [(1, 207), 351], [(1, 107), 316], [(0, 204), 481], [(0, 206), 388], [(0, 105), 512]], 
-        [[(1, 5), 413], [(1, 207), 340], [(1, 107), 325+40], [(0, 204), 481], [(0, 206), 350], [(0, 105), 512]], 
+        [[(1, 5), 413], [(1, 207), 340-ARM_2_shift_up], [(1, 107), 325+40], [(0, 204), 481], [(0, 206), 350], [(0, 105), 512]], 
         #[[(1, 5), 410], [(1, 207), 371], [(1, 107), 275], [(0, 204), 481], [(0, 206), 301], [(0, 105), 512]], 
         [[(1, 5), 410], [(1, 207), 350], [(1, 107), 300+25], [(0, 204), 481], [(0, 206), 280], [(0, 105), 512]], 
         #[[(1, 5), 410], [(1, 207), 463], [(1, 107), 324], [(0, 204), 481], [(0, 206), 260], [(0, 105), 512]], 
-        [[(1, 5), 410], [(1, 207), 450], [(1, 107), 335+20], [(0, 204), 481], [(0, 206), 260], [(0, 105), 512]], 
-        [[(1, 5), 406], [(1, 207), 559], [(1, 107), 348], [(0, 204), 484], [(0, 206), 168], [(0, 105), 512]], 
-        [[(1, 5), 441], [(1, 207), 618], [(1, 107), 400], [(0, 204), 484], [(0, 206), 161], [(0, 105), 472]]
+        [[(1, 5), 410], [(1, 207), 450], [(1, 107), 335+20], [(0, 204), 481], [(0, 206), 260], [(0, 105), 512]]
+        ###[[(1, 5), 406], [(1, 207), 559], [(1, 107), 348], [(0, 204), 484], [(0, 206), 168], [(0, 105), 512]] ,
         ]
-
-        yield ReadArmTraj(arm_traj, delay=200, reverse=True)
+        yield ReadArmTraj(arm_traj_1, delay=200, reverse=True)
+        
+        yield ArmSpeed(200)
+        yield Timer(100)
+        arm_traj_2 = [
+        ####[[(1, 5), 441], [(1, 207), 618], [(1, 107), 400], [(0, 204), 484], [(0, 206), 161], [(0, 105), 472]]
+        [[(1, 5), 406], [(1, 207), 600], [(1, 107), 423], [(0, 204), 481], [(0, 206), 238], [(0, 105), 511]], 
+        #[[(1, 5), 408], [(1, 207), 674], [(1, 107), 511], [(0, 204), 480], [(0, 206), 237], [(0, 105), 512]], 
+        [[(1, 5), 409], [(1, 207), 711], [(1, 107), 560], [(0, 204), 480], [(0, 206), 239], [(0, 105), 512]], 
+        [[(1, 5), 427], [(1, 207), 738], [(1, 107), 597], [(0, 204), 491], [(0, 206), 245], [(0, 105), 506]]
+        ]
+        yield ReadArmTraj(arm_traj_2, delay=200, reverse=True)
+        yield Timer(50)
         yield Trigger(ARM_7_HOLD)
+        yield Timer(100)
+        yield ArmSpeed(200)
+        yield ReadArmTraj([
+        [[(1, 5), 423], [(1, 207), 631], [(1, 107), 441], [(0, 204), 498], [(0, 206), 208], [(0, 105), 506]],
+        [[(1, 5), 426], [(1, 207), 498], [(1, 107), 279], [(0, 204), 497], [(0, 206), 160], [(0, 105), 494]]
+        ], 100)
+        yield None
+        
+class GrabPolyModuleFromInit(State):
+    def on_enter(self):
+        yield Trigger(ARM_7_OPEN)
+        yield ArmSpeed(200)
+                
+        arm_traj_1 = [
+        [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+20], [(0, 204), 500], [(0, 206), 682], [(0, 105), 529]], 
+        #[[(1, 5), 416], [(1, 207), 331], [(1, 107), 329+20], [(0, 204), 501], [(0, 206), 482], [(0, 105), 536]], 
+        [[(1, 5), 423], [(1, 207), 463], [(1, 107), 227+20], [(0, 204), 500], [(0, 206), 169], [(0, 105), 512]],
+        ]
+        yield ReadArmTraj(arm_traj_1, delay=300, reverse=True)
+        
+        yield Timer(100)
+        yield ArmSpeed(110)
+        
+        arm_traj_2 = [
+        [[(1, 5), 506], [(1, 207), 565], [(1, 107), 344], [(0, 204), 501], [(0, 206), 174], [(0, 105), 427]], 
+        [[(1, 5), 529], [(1, 207), 612], [(1, 107), 402], [(0, 204), 511], [(0, 206), 175], [(0, 105), 410]], 
+        [[(1, 5), 537], [(1, 207), 656], [(1, 107), 472], [(0, 204), 511], [(0, 206), 204], [(0, 105), 410]], 
+        [[(1, 5), 559], [(1, 207), 668], [(1, 107), 498], [(0, 204), 511], [(0, 206), 222], [(0, 105), 403]]
+        ]
+        yield ReadArmTraj(arm_traj_2, delay=200, reverse=True)
+        
+        yield Timer(50)
+        yield Trigger(ARM_7_HOLD)
+        yield Timer(100)
+        
+        yield None
+        
+        
+class OutputPolyModuleFromRocket(State):
+    def on_enter(self):
+        yield ArmSpeed(110)
+        arm_traj = [
+        [[(1, 5), 574], [(1, 207), 581], [(1, 107), 378], [(0, 204), 511], [(0, 206), 195], [(0, 105), 383]], 
+        [[(1, 5), 618-10], [(1, 207), 470], [(1, 107), 259], [(0, 204), 509], [(0, 206), 166], [(0, 105), 322]], 
+        ]
+        yield ReadArmTraj(arm_traj, delay=700, reverse=True)
+        yield Timer(500)
+        yield ArmSpeed(180)
+        
+        yield ReadArmTraj([[[(1, 5), 451+30]]], reverse=True)
+        
+        yield Timer(500)
+        yield None
+        
+class DropPolyModule(State):
+    def on_enter(self): 
+        yield ArmSpeed(110+20)
+        arm_traj = [
+        [[(1, 5), 450], [(1, 207), 400], [(1, 107), 222], [(0, 204), 507], [(0, 206), 175], [(0, 105), 404]], 
+        [[(1, 5), 328], [(1, 207), 364], [(1, 107), 303], [(0, 204), 409], [(0, 206), 302-10], [(0, 105), 519]], 
+        [[(1, 5), 260], [(1, 207), 581], [(1, 107), 466], [(0, 204), 347], [(0, 206), 241-5], [(0, 105), 536]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=300, reverse=True)
+        yield Timer(500)
+        arm_traj = [
+        [[(1, 5), 251], [(1, 207), 656], [(1, 107), 585], [(0, 204), 424], [(0, 206), 310-2], [(0, 105), 548]]
+        #[[(1, 5), 313], [(1, 207), 519], [(1, 107), 435], [(0, 204), 507], [(0, 206), 282], [(0, 105), 610]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=700, reverse=True)
+        yield None
+        yield Timer(700)
+               
+        #~ yield ArmSpeed(110)
+        #~ arm_traj = [
+        #~ [[(1, 5), 476], [(1, 207), 394], [(1, 107), 284], [(0, 204), 508], [(0, 206), 243], [(0, 105), 322]], 
+        #~ [[(1, 5), 375], [(1, 207), 407], [(1, 107), 299], [(0, 204), 507], [(0, 206), 245], [(0, 105), 474]], 
+        #~ [[(1, 5), 313], [(1, 207), 519], [(1, 107), 435], [(0, 204), 507], [(0, 206), 282], [(0, 105), 610]]
+        #~ ]
+        #~ yield ReadArmTraj(arm_traj, delay=300, reverse=True)
+        #~ 
+        #~ yield Timer(800)
+        
+        yield ArmSpeed(110-50)
+        
+        ARM_7_DROP_int = [(0, 205), 162+140]
+        arm_traj = [
+        [ARM_7_DROP_int],
+        [[(1, 5), 306-30], [(1, 207), 470], [(1, 107), 498], [(0, 204), 509], [(0, 206), 395], [(0, 105), 619], ARM_7_DROP_int]
+        ]
+        yield ReadArmTraj(arm_traj, delay=400, reverse=True)
         yield Timer(300)
         yield None
+        
+class DropTurnedPolyModule(State):
+    def on_enter(self):        
+        yield ArmSpeed(110+20)
+        arm_traj = [
+        [[(1, 5), 450], [(1, 207), 400], [(1, 107), 222], [(0, 204), 507], [(0, 206), 175], [(0, 105), 404]], 
+        [[(1, 5), 328], [(1, 207), 364], [(1, 107), 303], [(0, 204), 409], [(0, 206), 302-10], [(0, 105), 519]], 
+        [[(1, 5), 260], [(1, 207), 581], [(1, 107), 466], [(0, 204), 347], [(0, 206), 241-5], [(0, 105), 536]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=300, reverse=True)
+        
+        yield Timer(500)
+        
+        yield ArmSpeed(110)
+        ARM_7_DROP_int = [(0, 205), 438]
+        arm_traj = [
+        [[(1, 5), 251], [(1, 207), 656], [(1, 107), 585], [(0, 204), 424], [(0, 206), 310-2], [(0, 105), 548]],
+        [[(1, 5), 235], [(1, 207), 728], [(1, 107), 730], [(0, 204), 286], [(0, 206), 294], [(0, 105), 542]],
+        [ARM_7_DROP_int],
+        [[(1, 5), 260], [(1, 207), 527], [(1, 107), 525], [(0, 204), 338], [(0, 206), 298], [(0, 105), 556], ARM_7_DROP_int]
+        ]
+        yield ReadArmTraj(arm_traj, delay=500, reverse=True)
+        yield Timer(300)
+        yield None
+        
+class GrabPolyModuleFromDropZone(State):
+    def on_enter(self):
+        
+        yield Trigger(ARM_7_OPEN)
+        yield ArmSpeed(110+40)
+        arm_traj = [
+        [[(1, 5), 284], [(1, 207), 371], [(1, 107), 336], [(0, 204), 476], [(0, 206), 345], [(0, 105), 634]], 
+        [[(1, 5), 356], [(1, 207), 364], [(1, 107), 231], [(0, 204), 476], [(0, 206), 250], [(0, 105), 555+30]], 
+        [[(1, 5), 425], [(1, 207), 411], [(1, 107), 235], [(0, 204), 476], [(0, 206), 203], [(0, 105), 479+30]], 
+        [[(1, 5), 480], [(1, 207), 567], [(1, 107), 329], [(0, 204), 475], [(0, 206), 160], [(0, 105), 422+30]], 
+        [[(1, 5), 525], [(1, 207), 644], [(1, 107), 427], [(0, 204), 476], [(0, 206), 166], [(0, 105), 380+20]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=100, reverse=True)
+        yield Timer(200)
+        arm_traj = [
+        [[(1, 5), 546], [(1, 207), 696], [(1, 107), 529], [(0, 204), 483], [(0, 206), 214], [(0, 105), 369]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=100, reverse=True)
+        yield Trigger(ARM_7_HOLD)
+
+        yield None
+        
+
+class TestTakeModuleFromStorageReturn(State):
+    def on_enter(self):
+        yield ArmSpeed(200)
+                
+        arm_traj = [
+        [[(1, 5), 414], [(1, 207), 444], [(1, 107), 225+20], [(0, 204), 488], [(0, 206), 177], [(0, 105), 512]], 
+        [[(1, 5), 414], [(1, 207), 526], [(1, 107), 299+20], [(0, 204), 488], [(0, 206), 160], [(0, 105), 512]], 
+        [[(1, 5), 413], [(1, 207), 587], [(1, 107), 376+20], [(0, 204), 488], [(0, 206), 176], [(0, 105), 512]],
+        [[(1, 5), 417], [(1, 207), 693], [(1, 107), 545], [(0, 204), 488], [(0, 206), 244], [(0, 105), 502]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=50)
+        yield Timer(100)
+        yield ArmSpeed(110)
+        #yield ReadArmTraj([[[(1, 5), 441], [(1, 207), 626], [(1, 107), 418], [(0, 204), 488], [(0, 206), 176], [(0, 105), 469]]], delay=50)
+        yield ReadArmTraj([[[(1, 5), 427], [(1, 207), 701], [(1, 107), 551], [(0, 204), 488], [(0, 206), 241], [(0, 105), 502]]])
+        yield Timer(100)
+        yield Trigger(ARM_7_HOLD)
+        yield Timer(100)
+        yield ArmSpeed(200)
+        yield ReadArmTraj([
+        [[(1, 5), 423], [(1, 207), 631], [(1, 107), 441], [(0, 204), 498], [(0, 206), 208], [(0, 105), 506]],
+        [[(1, 5), 426], [(1, 207), 498], [(1, 107), 279], [(0, 204), 497], [(0, 206), 160], [(0, 105), 494]]
+        ], 100)
+        yield None
+
 
 class TestStockModuleFromGrabbedModuleRightFront(State):
     def on_enter(self):
         yield Trigger(STORAGE_FINGER_RIGHT_FRONT_OPEN)
         
         # Rotation seule et rapide de la base du bras
-        for servoID in [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]:
-                # Speed control
-                servo_speed = 200
-                yield Trigger(makeServoSetupCommand((servoID, 1000), servo_speed))
-        
-        yield ReadArmTraj([[[(1, 5), 317]]], 100)
+        yield ArmSpeed(200)
+        yield ReadArmTraj([[[ARM_1_ID, 317]]], delay=100)
         
         # Montee du module a vitesse plus lente
-        for servoID in [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]:
-                # Speed control
-                servo_speed = 110
-                yield Trigger(makeServoSetupCommand((servoID, 1000), servo_speed))
+        yield ArmSpeed(110)
         
         arm_traj_up = [
         [[(1, 5), 312], [(1, 207), 500], [(1, 107), 376], [(0, 204), 500], [(0, 206), 240], [(0, 105), 487]], 
-        [[(1, 5), 286], [(1, 207), 442], [(1, 107), 358], [(0, 204), 484], [(0, 206), 297], [(0, 105), 553]], 
+        [[(1, 5), 286], [(1, 207), 442], [(1, 107), 358], [(0, 204), 484], [(0, 206), 297], [(0, 105), 553]]
+        ]
+        yield ReadArmTraj(arm_traj_up, 100)
+        
+        arm_traj_up = [
         [[(1, 5), 280], [(1, 207), 381], [(1, 107), 369], [(0, 204), 484], [(0, 206), 357], [(0, 105), 590]], 
         [[(1, 5), 277], [(1, 207), 356], [(1, 107), 424], [(0, 204), 485], [(0, 206), 434], [(0, 105), 641]], 
         [[(1, 5), 272], [(1, 207), 339], [(1, 107), 469], [(0, 204), 485], [(0, 206), 496], [(0, 105), 668]],
@@ -319,30 +549,26 @@ class TestStockModuleFromGrabbedModuleRightFront(State):
         ]
         yield ReadArmTraj(arm_traj_up, 10)
         
-        yield Trigger(makeServoMoveCommand((ARM_3_ID, 700), arm_traj_up[-1][2][1] + 20))
+        yield Trigger(makeServoMoveCommand((ARM_3_ID, 700), arm_traj_up[-1][2][1] + 35))
         
         yield Timer(200)
         yield Trigger(STORAGE_FINGER_RIGHT_FRONT_HOLD)
         
-        yield Timer(100)
+        yield Timer(300)
         yield Trigger(ARM_7_DROP)
-            
                 
         yield Timer(100)
         arm_traj_down_1 = [
-        [[(1, 5), 236], [(1, 207), 384], [(1, 107), 574], [(0, 204), 486], [(0, 206), 555], [(0, 105), 704]], 
-        [[(1, 5), 223], [(1, 207), 306], [(1, 107), 465], [(0, 204), 486], [(0, 206), 518], [(0, 105), 704]], 
-        [[(1, 5), 226], [(1, 207), 253], [(1, 107), 398], [(0, 204), 487], [(0, 206), 508], [(0, 105), 700]], 
-        [[(1, 5), 261], [(1, 207), 272], [(1, 107), 365], [(0, 204), 487], [(0, 206), 462], [(0, 105), 626]],
-        [[(1, 5), 277], [(1, 207), 298], [(1, 107), 350], [(0, 204), 487], [(0, 206), 415], [(0, 105), 550]]
+        [[(1, 5), 257], [(1, 207), 397], [(1, 107), 585], [(0, 204), 421], [(0, 206), 555], [(0, 105), 703]], 
+        [[(1, 5), 250], [(1, 207), 315], [(1, 107), 460], [(0, 204), 421], [(0, 206), 555], [(0, 105), 703]],
+        [[(1, 5), 250], [(1, 207), 278], [(1, 107), 361-20], [(0, 204), 411], [(0, 206), 555], [(0, 105), 668]]
         ]
         yield ReadArmTraj(arm_traj_down_1, delay = 100, reverse = True)
-        
+        yield Timer(100)
         arm_traj_down_2 = [
-        [[(1, 5), 293], [(1, 207), 342], [(1, 107), 323], [(0, 204), 487], [(0, 206), 350], [(0, 105), 518]], 
-        [[(1, 5), 279], [(1, 207), 370], [(1, 107), 265], [(0, 204), 490], [(0, 206), 254], [(0, 105), 513]], 
-        [[(1, 5), 280], [(1, 207), 354], [(1, 107), 201], [(0, 204), 488], [(0, 206), 180], [(0, 105), 514]], 
-        [[(1, 5), 280], [(1, 207), 371], [(1, 107), 163], [(0, 204), 490], [(0, 206), 145], [(0, 105), 514]],
+        [[(1, 5), 429], [(1, 207), 275], [(1, 107), 364], [(0, 204), 492], [(0, 206), 500], [(0, 105), 512]], 
+        [[(1, 5), 421], [(1, 207), 319], [(1, 107), 334], [(0, 204), 494], [(0, 206), 320], [(0, 105), 525]], 
+        [[(1, 5), 416], [(1, 207), 367], [(1, 107), 227], [(0, 204), 494], [(0, 206), 261], [(0, 105), 523]]
         ]
         yield ReadArmTraj(arm_traj_down_2, delay = 10, reverse = True)
         yield Trigger(ARM_7_OPEN)
@@ -356,32 +582,160 @@ class TestStockModuleFromGrabbedModuleRight(State):
     def on_enter(self):
         yield Trigger(STORAGE_FINGER_RIGHT_OPEN)
         
-        for servoID in [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]:
-                # Speed control
-                servo_speed = 50
-                yield Trigger(makeServoSetupCommand((servoID, 1000), servo_speed))
+        # Rotation seule et rapide de la base du bras
+        yield ArmSpeed(200)
+        yield ReadArmTraj([[[ARM_1_ID, 317]]], delay=100)
         
-        arm_traj = [
-        [[(1, 5), 270], [(1, 207), 542], [(1, 107), 390], [(0, 204), 494], [(0, 206), 205], [(0, 105), 510]], 
-        [[(1, 5), 200], [(1, 207), 406], [(1, 107), 381], [(0, 204), 511], [(0, 206), 328], [(0, 105), 525]], 
-        [[(1, 5), 196], [(1, 207), 323], [(1, 107), 391], [(0, 204), 511], [(0, 206), 412], [(0, 105), 465]], 
-        [[(1, 5), 200], [(1, 207), 384], [(1, 107), 569], [(0, 204), 493], [(0, 206), 546], [(0, 105), 431]]
+        yield ArmSpeed(110)
+        yield Timer(200)
+        
+        arm_traj_up = [
+        [[(1, 5), 302], [(1, 207), 541], [(1, 107), 366], [(0, 204), 488], [(0, 206), 201], [(0, 105), 476]], 
+        [[(1, 5), 261], [(1, 207), 466], [(1, 107), 335], [(0, 204), 486], [(0, 206), 237], [(0, 105), 549]], 
+        [[(1, 5), 216], [(1, 207), 436], [(1, 107), 350], [(0, 204), 493], [(0, 206), 275], [(0, 105), 601]], 
+        [[(1, 5), 175], [(1, 207), 392], [(1, 107), 352], [(0, 204), 520], [(0, 206), 304], [(0, 105), 617]], 
+        [[(1, 5), 174], [(1, 207), 309], [(1, 107), 342], [(0, 204), 511], [(0, 206), 370], [(0, 105), 504]], 
+        [[(1, 5), 197], [(1, 207), 320], [(1, 107), 431], [(0, 204), 511], [(0, 206), 453], [(0, 105), 449]], 
+        #[[(1, 5), 197], [(1, 207), 379], [(1, 107), 560], [(0, 204), 502], [(0, 206), 526], [(0, 105), 435]]
+        [[(1, 5), 210], [(1, 207), 353], [(1, 107), 522], [(0, 204), 497], [(0, 206), 509], [(0, 105), 433]]
         ]
-        yield ReadArmTraj(arm_traj)
+        yield ReadArmTraj(arm_traj_up, delay = 100)
+        yield Timer(100)
+        yield Trigger(makeServoMoveCommand((ARM_3_ID, 700), arm_traj_up[-1][2][1] + 50))
         
-        yield Timer(1000)
-        
-        ARM_3         = (ARM_3_ID, 700)
-        ARM_3_MOVE    = makeServoMoveCommand(ARM_3, arm_traj[-1][2][1] + 25)
-        yield Trigger(ARM_3_MOVE)
-        
-        yield Timer(1000)
+        yield Timer(100)
         yield Trigger(STORAGE_FINGER_RIGHT_HOLD)
         
-        yield Timer(1000)
+        yield Timer(300)
         yield Trigger(ARM_7_DROP)
+
+        yield Timer(100)
+        arm_traj_down_1 = [
+        [[(1, 5), 197], [(1, 207), 303], [(1, 107), 438], [(0, 204), 499], [(0, 206), 479], [(0, 105), 435]], 
+        [[(1, 5), 197], [(1, 207), 255], [(1, 107), 405], [(0, 204), 499], [(0, 206), 483], [(0, 105), 436]]
+        ]
+        yield ReadArmTraj(arm_traj_down_1, delay = 100, reverse = True)
+        yield Timer(500)
+        arm_traj_down_2 = [
+        [[(1, 5), 201], [(1, 207), 310], [(1, 107), 342], [(0, 204), 500], [(0, 206), 422], [(0, 105), 437]],
+        [[(1, 5), 358], [(1, 207), 308], [(1, 107), 343], [(0, 204), 500], [(0, 206), 423], [(0, 105), 461]], 
+        [[(1, 5), 433], [(1, 207), 371], [(1, 107), 275], [(0, 204), 499], [(0, 206), 299], [(0, 105), 491]], 
+        [[(1, 5), 430], [(1, 207), 375], [(1, 107), 215], [(0, 204), 500], [(0, 206), 224], [(0, 105), 491]]
+        ]
+        yield ReadArmTraj(arm_traj_down_2, delay = 10, reverse = True)
+        yield Trigger(ARM_7_OPEN)
+        yield Timer(100)
+        yield Trigger(makeServoMoveCommand((ARM_1_ID, 700), 416))
         
         yield None
+
+class TestStockModuleFromGrabbedModuleLeftFront(State):
+    def on_enter(self):
+        yield Trigger(STORAGE_FINGER_LEFT_FRONT_OPEN)
+        
+        # Rotation seule et rapide de la base du bras
+        yield ArmSpeed(200)
+        yield ReadArmTraj([[[ARM_1_ID, 517]]], delay=100)
+        
+        # Montee du module a vitesse plus lente
+        yield ArmSpeed(110)
+        
+        arm_traj_up = [
+        [[(1, 5), 521], [(1, 207), 339], [(1, 107), 323], [(0, 204), 496], [(0, 206), 342], [(0, 105), 480]], 
+        [[(1, 5), 589], [(1, 207), 327], [(1, 107), 330], [(0, 204), 497], [(0, 206), 357], [(0, 105), 354]]
+        ]
+        yield ReadArmTraj(arm_traj_up, 120)
+        
+        arm_traj_up = [
+        [[(1, 5), 594], [(1, 207), 326], [(1, 107), 402], [(0, 204), 497], [(0, 206), 438], [(0, 105), 354]], 
+        [[(1, 5), 606], [(1, 207), 375], [(1, 107), 515], [(0, 204), 504], [(0, 206), 498], [(0, 105), 348]], 
+        [[(1, 5), 617], [(1, 207), 460], [(1, 107), 650], [(0, 204), 504], [(0, 206), 561], [(0, 105), 315]], 
+        #[[(1, 5), 619], [(1, 207), 460], [(1, 107), 650], [(0, 204), 504], [(0, 206), 561], [(0, 105), 313]]
+        [[(1, 5), 629], [(1, 207), 465], [(1, 107), 645], [(0, 204), 504], [(0, 206), 554], [(0, 105), 289]]
+        ]
+        yield ReadArmTraj(arm_traj_up, 10)
+        yield Timer(100)
+        yield Trigger(makeServoMoveCommand((ARM_3_ID, 700), arm_traj_up[-1][2][1] + 35))
+        
+        yield Timer(1000)
+        yield Trigger(STORAGE_FINGER_LEFT_FRONT_HOLD)
+        
+        yield Timer(300)
+        yield Trigger(ARM_7_DROP)
+
+        yield Timer(100)
+        arm_traj_down_1 = [
+        [[(1, 5), 670], [(1, 207), 379], [(1, 107), 563], [(0, 204), 510], [(0, 206), 559], [(0, 105), 264]], 
+        [[(1, 5), 658], [(1, 207), 348], [(1, 107), 497], [(0, 204), 531], [(0, 206), 656], [(0, 105), 272]],
+        [[(1, 5), 670], [(1, 207), 272], [(1, 107), 398], [(0, 204), 629], [(0, 206), 512], [(0, 105), 265]], 
+        ]
+        yield ReadArmTraj(arm_traj_down_1, delay = 300, reverse = True)
+        
+        yield Timer(300)
+        arm_traj_down_2 = [
+        [[(1, 5), 505], [(1, 207), 278], [(1, 107), 373], [(0, 204), 628], [(0, 206), 493], [(0, 105), 265]], 
+        [[(1, 5), 450], [(1, 207), 291], [(1, 107), 354], [(0, 204), 517], [(0, 206), 478], [(0, 105), 488]], 
+        [[(1, 5), 442], [(1, 207), 371], [(1, 107), 233], [(0, 204), 518], [(0, 206), 266], [(0, 105), 490]]
+        ]
+        yield ReadArmTraj(arm_traj_down_2, delay = 10, reverse = True)
+        yield Trigger(ARM_7_OPEN)
+        yield Timer(100)
+        yield Trigger(makeServoMoveCommand((ARM_1_ID, 700), 416))
+        
+        yield None
+        
+class TestStockModuleFromGrabbedModuleLeft(State):
+    def on_enter(self):
+        yield Trigger(STORAGE_FINGER_LEFT_OPEN)
+        
+        # Rotation seule et rapide de la base du bras
+        yield ArmSpeed(200)
+        yield ReadArmTraj([[[ARM_1_ID, 541]]], delay=100)
+        
+        # Montee du module a vitesse plus lente
+        yield ArmSpeed(110)
+        
+        arm_traj_up = [
+        [[(1, 5), 675], [(1, 207), 475], [(1, 107), 331], [(0, 204), 495], [(0, 206), 233], [(0, 105), 498]], 
+        [[(1, 5), 675], [(1, 207), 336], [(1, 107), 358], [(0, 204), 496], [(0, 206), 376], [(0, 105), 518]]
+        ]
+        yield ReadArmTraj(arm_traj_up, 120)
+        
+        arm_traj_up = [
+        [[(1, 5), 671], [(1, 207), 353], [(1, 107), 457], [(0, 204), 496], [(0, 206), 454], [(0, 105), 558]], 
+        [[(1, 5), 670], [(1, 207), 415], [(1, 107), 582], [(0, 204), 496], [(0, 206), 525], [(0, 105), 576]], 
+        [[(1, 5), 667], [(1, 207), 411], [(1, 107), 587], [(0, 204), 496], [(0, 206), 536], [(0, 105), 581]]
+        ]
+        yield ReadArmTraj(arm_traj_up, 10)
+        yield Timer(100)
+        yield Trigger(makeServoMoveCommand((ARM_3_ID, 700), arm_traj_up[-1][2][1] + 40))
+        
+        yield Timer(1000)
+        yield Trigger(STORAGE_FINGER_LEFT_HOLD)
+        
+        yield Timer(300)
+        yield Trigger(ARM_7_DROP)
+
+        yield Timer(100)
+        arm_traj_down_1 = [
+        [[(1, 5), 664], [(1, 207), 353], [(1, 107), 527], [(0, 204), 495], [(0, 206), 535], [(0, 105), 580]], 
+        [[(1, 5), 664], [(1, 207), 271], [(1, 107), 366], [(0, 204), 503], [(0, 206), 463], [(0, 105), 580]], 
+        [[(1, 5), 664], [(1, 207), 314], [(1, 107), 340], [(0, 204), 502], [(0, 206), 463], [(0, 105), 579]]
+        ]
+        yield ReadArmTraj(arm_traj_down_1, delay = 300, reverse = True)
+        
+        yield Timer(300)
+        arm_traj_down_2 = [
+        [[(1, 5), 436], [(1, 207), 314], [(1, 107), 339], [(0, 204), 501], [(0, 206), 465], [(0, 105), 579]], 
+        [[(1, 5), 435], [(1, 207), 364], [(1, 107), 225], [(0, 204), 512], [(0, 206), 245], [(0, 105), 512]]
+        ]
+        yield ReadArmTraj(arm_traj_down_2, delay = 10, reverse = True)
+        yield Trigger(ARM_7_OPEN)
+        yield Timer(100)
+        yield Trigger(makeServoMoveCommand((ARM_1_ID, 700), 416))
+        
+        yield None
+        
 
 class TestGrabModuleLeftFromInit(State):
     def on_enter(self):
