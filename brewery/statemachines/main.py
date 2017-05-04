@@ -217,19 +217,19 @@ class Main(State):
                 
                 yield GrabPolyModuleFromInit()
                 yield OutputPolyModuleFromRocket()
+                yield DropPolyModule(kick=False)
+                
+                yield GrabPolyModuleFromDropZone()
+                yield OutputPolyModuleFromRocket()
+                yield DropTurnedPolyModule()
+                
+                yield GrabPolyModuleFromDropZone()
+                yield OutputPolyModuleFromRocket()
                 yield DropPolyModule()
                 
-                #~ yield GrabPolyModuleFromDropZone()
-                #~ yield OutputPolyModuleFromRocket()
-                #~ yield DropTurnedPolyModule()
-                
-                #~ yield GrabPolyModuleFromDropZone()
-                #~ yield OutputPolyModuleFromRocket()
-                #~ yield DropPolyModule()
-                #~ 
-                #~ yield GrabPolyModuleFromDropZone()
-                #~ yield OutputPolyModuleFromRocket()
-                #~ yield DropTurnedPolyModule()
+                yield GrabPolyModuleFromDropZone()
+                yield OutputPolyModuleFromRocket()
+                yield DropTurnedPolyModule()
                 
             elif self.cnt_arm_action == 2:
                 #yield TestTakeModuleFromStorageReturn()
@@ -305,10 +305,11 @@ class InitArm(State):
         [[(1, 5), 433], [(1, 207), 400], [(1, 107), 437], [(0, 204), 512], [(0, 206), 702], [(0, 105), 462]], 
         [[(1, 5), 436], [(1, 207), 334], [(1, 107), 401], [(0, 204), 512], [(0, 206), 720], [(0, 105), 462]], 
         [[(1, 5), 436], [(1, 207), 306], [(1, 107), 419], [(0, 204), 512], [(0, 206), 778], [(0, 105), 462]], 
-        [[(1, 5), 436], [(1, 207), 299], [(1, 107), 458], [(0, 204), 512], [(0, 206), 814], [(0, 105), 462]],
+        #[[(1, 5), 436], [(1, 207), 299], [(1, 107), 458], [(0, 204), 512], [(0, 206), 814], [(0, 105), 462]],
         [[(1, 5), 414], [(1, 207), 362], [(1, 107), 480], [(0, 204), 497], [(0, 206), 801], [(0, 105), 541]]
         ]
         yield ReadArmTraj(arm_traj, 700)
+        yield Trigger(makeServoSetupCommand(((0,205), 1000), 1000))
         yield Trigger(ARM_7_INIT)
         yield None
 
@@ -366,18 +367,18 @@ class TestGrabModuleFromInit(State):
         
 class GrabPolyModuleFromInit(State):
     def on_enter(self):
-        yield Trigger(ARM_7_OPEN)
-        yield ArmSpeed(200)
+        yield ArmSpeed(250)
                 
+        yield ReadArmTraj([[[(0, 206), 682]]])
+        yield Trigger(ARM_7_OPEN)
         arm_traj_1 = [
-        [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+20], [(0, 204), 500], [(0, 206), 682], [(0, 105), 529]], 
-        #[[(1, 5), 416], [(1, 207), 331], [(1, 107), 329+20], [(0, 204), 501], [(0, 206), 482], [(0, 105), 536]], 
-        [[(1, 5), 423], [(1, 207), 463], [(1, 107), 227+20], [(0, 204), 500], [(0, 206), 169], [(0, 105), 512]],
+        [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+40], [(0, 204), 500], [(0, 206), 682-50], [(0, 105), 529]],
+        [[(1, 5), 423], [(1, 207), 463], [(1, 107), 227+40], [(0, 204), 500], [(0, 206), 169-20], [(0, 105), 512]],
         ]
         yield ReadArmTraj(arm_traj_1, delay=300, reverse=True)
         
         yield Timer(100)
-        yield ArmSpeed(110)
+        yield ArmSpeed(110+20)
         
         arm_traj_2 = [
         [[(1, 5), 506], [(1, 207), 565], [(1, 107), 344], [(0, 204), 501], [(0, 206), 174], [(0, 105), 427]], 
@@ -389,7 +390,6 @@ class GrabPolyModuleFromInit(State):
         
         yield Timer(50)
         yield Trigger(ARM_7_HOLD)
-        yield Timer(100)
         
         yield None
         
@@ -402,43 +402,43 @@ class OutputPolyModuleFromRocket(State):
         [[(1, 5), 618-10], [(1, 207), 470], [(1, 107), 259], [(0, 204), 509], [(0, 206), 166], [(0, 105), 322]], 
         ]
         yield ReadArmTraj(arm_traj, delay=700, reverse=True)
-        yield Timer(500)
-        yield ArmSpeed(180)
+        yield Timer(550)
+        yield ArmSpeed(400)
         
         yield ReadArmTraj([[[(1, 5), 451+30]]], reverse=True)
         
-        yield Timer(500)
+        yield Timer(200)
         yield None
         
 class DropPolyModule(State):
-    def on_enter(self): 
-        yield ArmSpeed(110+20)
-        arm_traj = [
-        [[(1, 5), 450], [(1, 207), 400], [(1, 107), 222], [(0, 204), 507], [(0, 206), 175], [(0, 105), 404]], 
-        [[(1, 5), 328], [(1, 207), 364], [(1, 107), 303], [(0, 204), 409], [(0, 206), 302-10], [(0, 105), 519]], 
-        [[(1, 5), 260], [(1, 207), 581], [(1, 107), 466], [(0, 204), 347], [(0, 206), 241-5], [(0, 105), 536]]
-        ]
-        yield ReadArmTraj(arm_traj, delay=300, reverse=True)
-        yield Timer(500)
-        arm_traj = [
-        [[(1, 5), 251], [(1, 207), 656], [(1, 107), 585], [(0, 204), 424], [(0, 206), 310-2], [(0, 105), 548]]
-        #[[(1, 5), 313], [(1, 207), 519], [(1, 107), 435], [(0, 204), 507], [(0, 206), 282], [(0, 105), 610]]
-        ]
-        yield ReadArmTraj(arm_traj, delay=700, reverse=True)
-        yield None
-        yield Timer(700)
-               
-        #~ yield ArmSpeed(110)
-        #~ arm_traj = [
-        #~ [[(1, 5), 476], [(1, 207), 394], [(1, 107), 284], [(0, 204), 508], [(0, 206), 243], [(0, 105), 322]], 
-        #~ [[(1, 5), 375], [(1, 207), 407], [(1, 107), 299], [(0, 204), 507], [(0, 206), 245], [(0, 105), 474]], 
-        #~ [[(1, 5), 313], [(1, 207), 519], [(1, 107), 435], [(0, 204), 507], [(0, 206), 282], [(0, 105), 610]]
-        #~ ]
-        #~ yield ReadArmTraj(arm_traj, delay=300, reverse=True)
-        #~ 
-        #~ yield Timer(800)
+    def __init__(self, kick=True):
+        self.kick = kick
         
-        yield ArmSpeed(110-50)
+    def on_enter(self): 
+        yield ArmSpeed(180)
+        arm_traj = [
+            [[(1, 5), 377], [(1, 207), 435], [(1, 107), 313], [(0, 204), 496], [(0, 206), 252-5], [(0, 105), 421]], 
+            [[(1, 5), 280], [(1, 207), 612], [(1, 107), 473], [(0, 204), 494], [(0, 206), 233], [(0, 105), 590]],
+            [[(1, 5), 287-20], [(1, 207), 699], [(1, 107), 617], [(0, 204), 494], [(0, 206), 296], [(0, 105), 478+20+20]]
+            ]
+        if self.kick == True:
+            yield ReadArmTraj(arm_traj, delay=300-100-50)#, reverse=True)
+            yield Timer(500)
+        else:
+            yield ReadArmTraj([arm_traj[0]])#, reverse=True)
+            
+        yield Timer(500-200)
+        yield ArmSpeed(200)
+            
+        # Reach drop position
+        arm_traj = [
+        [[(1, 5), 313], [(1, 207), 519], [(1, 107), 435], [(0, 204), 507], [(0, 206), 282-30], [(0, 105), 610]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=400, reverse=True)
+        
+        yield Timer(400-100  -100)
+        
+        yield ArmSpeed(110-50*0)
         
         ARM_7_DROP_int = [(0, 205), 162+140]
         arm_traj = [
@@ -446,38 +446,40 @@ class DropPolyModule(State):
         [[(1, 5), 306-30], [(1, 207), 470], [(1, 107), 498], [(0, 204), 509], [(0, 206), 395], [(0, 105), 619], ARM_7_DROP_int]
         ]
         yield ReadArmTraj(arm_traj, delay=400, reverse=True)
-        yield Timer(300)
+        yield Timer(200-100)
         yield None
         
 class DropTurnedPolyModule(State):
     def on_enter(self):        
-        yield ArmSpeed(110+20)
+        yield ArmSpeed(110+20+30)
+        # Kick dropped modules
         arm_traj = [
-        [[(1, 5), 450], [(1, 207), 400], [(1, 107), 222], [(0, 204), 507], [(0, 206), 175], [(0, 105), 404]], 
-        [[(1, 5), 328], [(1, 207), 364], [(1, 107), 303], [(0, 204), 409], [(0, 206), 302-10], [(0, 105), 519]], 
-        [[(1, 5), 260], [(1, 207), 581], [(1, 107), 466], [(0, 204), 347], [(0, 206), 241-5], [(0, 105), 536]]
+        [[(1, 5), 377], [(1, 207), 435], [(1, 107), 313], [(0, 204), 496], [(0, 206), 252-5], [(0, 105), 421]], 
+        [[(1, 5), 280], [(1, 207), 612], [(1, 107), 473], [(0, 204), 494], [(0, 206), 233], [(0, 105), 590]],
+        [[(1, 5), 287], [(1, 207), 699], [(1, 107), 617], [(0, 204), 494], [(0, 206), 296], [(0, 105), 478]]
         ]
-        yield ReadArmTraj(arm_traj, delay=300, reverse=True)
+        yield ReadArmTraj(arm_traj, delay=300-100-50)#, reverse=True)
         
-        yield Timer(500)
+        yield Timer(500-100)
         
-        yield ArmSpeed(110)
+        yield ArmSpeed(110+40)
         ARM_7_DROP_int = [(0, 205), 438]
         arm_traj = [
         [[(1, 5), 251], [(1, 207), 656], [(1, 107), 585], [(0, 204), 424], [(0, 206), 310-2], [(0, 105), 548]],
-        [[(1, 5), 235], [(1, 207), 728], [(1, 107), 730], [(0, 204), 286], [(0, 206), 294], [(0, 105), 542]],
+        [[(1, 5), 235-10], [(1, 207), 728], [(1, 107), 730], [(0, 204), 286], [(0, 206), 294], [(0, 105), 542]],
         [ARM_7_DROP_int],
-        [[(1, 5), 260], [(1, 207), 527], [(1, 107), 525], [(0, 204), 338], [(0, 206), 298], [(0, 105), 556], ARM_7_DROP_int]
+        [[(1, 5), 260], [(1, 207), 527], [(1, 107), 525], [(0, 204), 338], [(0, 206), 298], [(0, 105), 556], ARM_7_DROP_int],
+        [[(1, 5), 260-40]]
         ]
-        yield ReadArmTraj(arm_traj, delay=500, reverse=True)
-        yield Timer(300)
+        yield ReadArmTraj(arm_traj, delay=500-200, reverse=True)
+        yield Timer(300-200)
         yield None
         
 class GrabPolyModuleFromDropZone(State):
     def on_enter(self):
         
         yield Trigger(ARM_7_OPEN)
-        yield ArmSpeed(110+40)
+        yield ArmSpeed(110+40+10)
         arm_traj = [
         [[(1, 5), 284], [(1, 207), 371], [(1, 107), 336], [(0, 204), 476], [(0, 206), 345], [(0, 105), 634]], 
         [[(1, 5), 356], [(1, 207), 364], [(1, 107), 231], [(0, 204), 476], [(0, 206), 250], [(0, 105), 555+30]], 
