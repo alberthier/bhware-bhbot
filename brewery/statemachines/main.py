@@ -20,6 +20,8 @@ from tools import *
 import statemachines.testscommon as testscommon
 import statemachines.testsmain as testsmain
 
+TEAM_BLUE = TEAM_LEFT
+TEAM_YELLOW = TEAM_RIGHT
 
 class ReadArmTrajTxt(State):
     def on_enter(self):
@@ -215,21 +217,23 @@ class Main(State):
                 #~ yield TestTakeModuleFromStorageReturn()
                 #~ yield TestStockModuleFromGrabbedModuleLeft()
                 
-                yield GrabPolyModuleFromInit()
-                yield OutputPolyModuleFromRocket()
-                yield DropPolyModule(kick=False)
+                team = TEAM_YELLOW
                 
-                yield GrabPolyModuleFromDropZone()
-                yield OutputPolyModuleFromRocket()
-                yield DropTurnedPolyModule()
+                yield GrabPolyModuleFromInit(team)
+                yield OutputPolyModuleFromRocket(team)
+                yield DropPolyModule(team, kick=False)
                 
-                yield GrabPolyModuleFromDropZone()
-                yield OutputPolyModuleFromRocket()
-                yield DropPolyModule()
+                yield GrabPolyModuleFromDropZone(team, previousModuleTurned=False)
+                yield OutputPolyModuleFromRocket(team)
+                yield DropTurnedPolyModule(team, finalKick=False)
                 
-                yield GrabPolyModuleFromDropZone()
-                yield OutputPolyModuleFromRocket()
-                yield DropTurnedPolyModule()
+                yield GrabPolyModuleFromDropZone(team, previousModuleTurned=True)
+                yield OutputPolyModuleFromRocket(team)
+                yield DropPolyModule(team, kick=True)
+                
+                yield GrabPolyModuleFromDropZone(team, previousModuleTurned=False)
+                yield OutputPolyModuleFromRocket(team)
+                yield DropTurnedPolyModule(team, finalKick=True)
                 
             elif self.cnt_arm_action == 2:
                 #yield TestTakeModuleFromStorageReturn()
@@ -366,134 +370,355 @@ class TestGrabModuleFromInit(State):
         yield None
         
 class GrabPolyModuleFromInit(State):
+    def __init__(self, team):
+        self.team = team
+        
     def on_enter(self):
-        yield ArmSpeed(250)
-                
-        yield ReadArmTraj([[[(0, 206), 682]]])
-        yield Trigger(ARM_7_OPEN)
-        arm_traj_1 = [
-        [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+40], [(0, 204), 500], [(0, 206), 682-50], [(0, 105), 529]],
-        [[(1, 5), 423], [(1, 207), 463], [(1, 107), 227+40], [(0, 204), 500], [(0, 206), 169-20], [(0, 105), 512]],
-        ]
-        yield ReadArmTraj(arm_traj_1, delay=300, reverse=True)
-        
-        yield Timer(100)
-        yield ArmSpeed(110+20)
-        
-        arm_traj_2 = [
-        [[(1, 5), 506], [(1, 207), 565], [(1, 107), 344], [(0, 204), 501], [(0, 206), 174], [(0, 105), 427]], 
-        [[(1, 5), 529], [(1, 207), 612], [(1, 107), 402], [(0, 204), 511], [(0, 206), 175], [(0, 105), 410]], 
-        [[(1, 5), 537], [(1, 207), 656], [(1, 107), 472], [(0, 204), 511], [(0, 206), 204], [(0, 105), 410]], 
-        [[(1, 5), 559], [(1, 207), 668], [(1, 107), 498], [(0, 204), 511], [(0, 206), 222], [(0, 105), 403]]
-        ]
-        yield ReadArmTraj(arm_traj_2, delay=200, reverse=True)
-        
-        yield Timer(50)
-        yield Trigger(ARM_7_HOLD)
-        
+        if self.team == TEAM_BLUE:
+            yield ArmSpeed(250)
+                    
+            yield ReadArmTraj([[[(0, 206), 682]]])
+            yield Trigger(ARM_7_OPEN)
+            arm_traj_1 = [
+            [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+40], [(0, 204), 500], [(0, 206), 682-50], [(0, 105), 529]],
+            [[(1, 5), 423], [(1, 207), 463], [(1, 107), 227+40], [(0, 204), 500], [(0, 206), 169-20], [(0, 105), 512]],
+            ]
+            yield ReadArmTraj(arm_traj_1, delay=300, reverse=True)
+            
+            yield Timer(100)
+            yield ArmSpeed(110+20)
+            
+            arm_traj_2 = [
+            [[(1, 5), 506], [(1, 207), 565], [(1, 107), 344], [(0, 204), 501], [(0, 206), 174], [(0, 105), 427]], 
+            [[(1, 5), 529], [(1, 207), 612], [(1, 107), 402], [(0, 204), 511], [(0, 206), 175], [(0, 105), 410]], 
+            [[(1, 5), 537], [(1, 207), 656], [(1, 107), 472], [(0, 204), 511], [(0, 206), 204], [(0, 105), 410]], 
+            [[(1, 5), 559], [(1, 207), 668], [(1, 107), 498], [(0, 204), 511], [(0, 206), 222], [(0, 105), 403]]
+            ]
+            yield ReadArmTraj(arm_traj_2, delay=200, reverse=True)
+            
+            yield Timer(50)
+            yield Trigger(ARM_7_HOLD)
+          
+        if self.team == TEAM_YELLOW:
+            yield ArmSpeed(250+50)
+                    
+            yield ReadArmTraj([[[(0, 206), 682]]])
+            yield Trigger(ARM_7_OPEN)
+            arm_traj = [
+            [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+40+20], [(0, 204), 500], [(0, 206), 169-20], [(0, 105), 512]],
+            [[(1, 5), 423], [(1, 207), 386], [(1, 107), 183], [(0, 204), 499], [(0, 206), 161], [(0, 105), 512]],
+            [[(1, 5), 320]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=300, reverse=True)
+            
+            yield Timer(100)
+            
+            arm_traj = [
+            [[(1, 5), 326], [(1, 207), 557], [(1, 107), 338], [(0, 204), 496], [(0, 206), 163], [(0, 105), 512]], 
+            [[(1, 5), 333], [(1, 207), 638], [(1, 107), 460], [(0, 204), 496], [(0, 206), 210], [(0, 105), 512]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=50, reverse=True)
+            yield Timer(50)
+            arm_traj = [
+            [[(1, 5), 304], [(1, 207), 678], [(1, 107), 504], [(0, 204), 495], [(0, 206), 207], [(0, 105), 617]],
+            [[(1, 5), 311], [(1, 207), 663], [(1, 107), 476], [(0, 204), 492], [(0, 206), 203], [(0, 105), 614]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=200, reverse=True)
+            
+            yield Timer(100)
+            yield ArmSpeed(110)
+            
+            yield Trigger(ARM_7_HOLD)
+            
         yield None
         
         
 class OutputPolyModuleFromRocket(State):
+    def __init__(self, team):
+        self.team = team
+        
     def on_enter(self):
-        yield ArmSpeed(110)
-        arm_traj = [
-        [[(1, 5), 574], [(1, 207), 581], [(1, 107), 378], [(0, 204), 511], [(0, 206), 195], [(0, 105), 383]], 
-        [[(1, 5), 618-10], [(1, 207), 470], [(1, 107), 259], [(0, 204), 509], [(0, 206), 166], [(0, 105), 322]], 
-        ]
-        yield ReadArmTraj(arm_traj, delay=700, reverse=True)
-        yield Timer(550)
-        yield ArmSpeed(400)
-        
-        yield ReadArmTraj([[[(1, 5), 451+30]]], reverse=True)
-        
-        yield Timer(200)
+        if self.team == TEAM_BLUE:
+            yield ArmSpeed(110)
+            arm_traj = [
+            [[(1, 5), 574], [(1, 207), 581], [(1, 107), 378], [(0, 204), 511], [(0, 206), 195], [(0, 105), 383]], 
+            [[(1, 5), 618-10], [(1, 207), 470], [(1, 107), 259], [(0, 204), 509], [(0, 206), 166], [(0, 105), 322]], 
+            ]
+            yield ReadArmTraj(arm_traj, delay=700, reverse=True)
+            yield Timer(550)
+            yield ArmSpeed(400)
+            
+            yield ReadArmTraj([[[(1, 5), 451+30]]], reverse=True)
+            
+            yield Timer(200)
+            
+        if self.team == TEAM_YELLOW:
+            #~ yield ArmSpeed(110)
+            arm_traj = [
+            #[[(1, 5), 301], [(1, 207), 537], [(1, 107), 319], [(0, 204), 495], [(0, 206), 160], [(0, 105), 597]]
+            [[(1, 5), 301], [(1, 207), 594], [(1, 107), 365], [(0, 204), 511], [(0, 206), 160], [(0, 105), 647]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=700, reverse=True)
+            
+            yield Timer(400)
+            yield ArmSpeed(400)
+            
+            arm_traj = [
+            [[(1, 5), 380]]
+            ]
+            yield ReadArmTraj(arm_traj)
+            
+            yield Timer(200)
+            
         yield None
         
 class DropPolyModule(State):
-    def __init__(self, kick=True):
+    def __init__(self, team, kick=True):
+        self.team = team
         self.kick = kick
         
     def on_enter(self): 
-        yield ArmSpeed(180)
-        arm_traj = [
-            [[(1, 5), 377], [(1, 207), 435], [(1, 107), 313], [(0, 204), 496], [(0, 206), 252-5], [(0, 105), 421]], 
-            [[(1, 5), 280], [(1, 207), 612], [(1, 107), 473], [(0, 204), 494], [(0, 206), 233], [(0, 105), 590]],
-            [[(1, 5), 287-20], [(1, 207), 699], [(1, 107), 617], [(0, 204), 494], [(0, 206), 296], [(0, 105), 478+20+20]]
+        if self.team == TEAM_BLUE:
+            yield ArmSpeed(180)
+            arm_traj = [
+                [[(1, 5), 377], [(1, 207), 435], [(1, 107), 313], [(0, 204), 496], [(0, 206), 252-5], [(0, 105), 421]], 
+                [[(1, 5), 280], [(1, 207), 612], [(1, 107), 473], [(0, 204), 494], [(0, 206), 233], [(0, 105), 590]],
+                [[(1, 5), 287-20], [(1, 207), 699], [(1, 107), 617], [(0, 204), 494], [(0, 206), 296], [(0, 105), 478+20+20]]
+                ]
+            if self.kick == True:
+                yield ReadArmTraj(arm_traj, delay=300-100-50)#, reverse=True)
+                yield Timer(500)
+            else:
+                yield ReadArmTraj([arm_traj[0]])#, reverse=True)
+                
+            yield Timer(500-200)
+            yield ArmSpeed(200)
+                
+            # Reach drop position
+            arm_traj = [
+            [[(1, 5), 313], [(1, 207), 519], [(1, 107), 435], [(0, 204), 507], [(0, 206), 282-30], [(0, 105), 610]]
             ]
-        if self.kick == True:
-            yield ReadArmTraj(arm_traj, delay=300-100-50)#, reverse=True)
+            yield ReadArmTraj(arm_traj, delay=400, reverse=True)
+            
+            yield Timer(400-100  -100)
+            
+            yield ArmSpeed(110-50*0)
+            
+            ARM_7_DROP_int = [(0, 205), 162+140]
+            arm_traj = [
+            [ARM_7_DROP_int],
+            [[(1, 5), 306-30], [(1, 207), 470], [(1, 107), 498], [(0, 204), 509], [(0, 206), 395], [(0, 105), 619], ARM_7_DROP_int]
+            ]
+            yield ReadArmTraj(arm_traj, delay=400, reverse=True)
+            yield Timer(200-100)
+            
+        if self.team == TEAM_YELLOW:
+            yield ArmSpeed(110+40)
+            arm_traj_1 = [
+            [[(1, 207), 441], [(1, 107), 323+20+20], [(0, 204), 484], [(0, 206), 240], [(0, 105), 560]]
+            ]
+            yield ReadArmTraj(arm_traj_1, delay=100)
+            yield Timer(300)
+            arm_traj_1 = [
+            [[(1, 5), 412], [(0, 105), 450]], 
+            [[(1, 5), 529], [(1, 207), 474], [(1, 107), 342+25+10 -5], [(0, 204), 494], [(0, 206), 231], [(0, 105), 397-24]], 
+            #[[(1, 5), 551-10], [(1, 207), 612], [(1, 107), 481+30], [(0, 204), 494], [(0, 206), 233], [(0, 105), 376]]
+            [[(1, 5), 546], [(1, 207), 590], [(1, 107), 455+30 -20], [(0, 204), 494], [(0, 206), 245], [(0, 105), 373]] 
+            ]
+            yield ReadArmTraj(arm_traj_1, delay=100)
+            if self.kick == True:
+                arm_traj_2 = [
+                [[(1, 5), 596], [(1, 207), 740], [(1, 107), 678], [(0, 204), 491], [(0, 206), 327], [(0, 105), 372]], 
+                [[(1, 5), 581], [(1, 207), 616], [(1, 107), 511], [(0, 204), 499], [(0, 206), 275], [(0, 105), 380]], 
+                #[[(1, 5), 546], [(1, 207), 577], [(1, 107), 454], [(0, 204), 498], [(0, 206), 245], [(0, 105), 402]]
+                arm_traj_1[-1]
+                ]
+                yield ReadArmTraj(arm_traj_2, delay=1000)#, reverse=True)
+                yield Timer(1000)
+                
+                
             yield Timer(500)
-        else:
-            yield ReadArmTraj([arm_traj[0]])#, reverse=True)
+            yield Trigger(ARM_7_OPEN)
+            #~ ARM_7_OPEN_int = [(0, 205), 162]
+            arm_traj = [
+            #~ [ARM_7_OPEN_int],
+            [[(0, 105), 376+50]]
+            ]
+            #~ yield ReadArmTraj(arm_traj, delay=200, reverse=True)
             
-        yield Timer(500-200)
-        yield ArmSpeed(200)
-            
-        # Reach drop position
-        arm_traj = [
-        [[(1, 5), 313], [(1, 207), 519], [(1, 107), 435], [(0, 204), 507], [(0, 206), 282-30], [(0, 105), 610]]
-        ]
-        yield ReadArmTraj(arm_traj, delay=400, reverse=True)
-        
-        yield Timer(400-100  -100)
-        
-        yield ArmSpeed(110-50*0)
-        
-        ARM_7_DROP_int = [(0, 205), 162+140]
-        arm_traj = [
-        [ARM_7_DROP_int],
-        [[(1, 5), 306-30], [(1, 207), 470], [(1, 107), 498], [(0, 204), 509], [(0, 206), 395], [(0, 105), 619], ARM_7_DROP_int]
-        ]
-        yield ReadArmTraj(arm_traj, delay=400, reverse=True)
-        yield Timer(200-100)
         yield None
         
 class DropTurnedPolyModule(State):
+    def __init__(self, team, finalKick=False):
+        self.team = team
+        self.finalKick = finalKick
+        
     def on_enter(self):        
-        yield ArmSpeed(110+20+30)
-        # Kick dropped modules
-        arm_traj = [
-        [[(1, 5), 377], [(1, 207), 435], [(1, 107), 313], [(0, 204), 496], [(0, 206), 252-5], [(0, 105), 421]], 
-        [[(1, 5), 280], [(1, 207), 612], [(1, 107), 473], [(0, 204), 494], [(0, 206), 233], [(0, 105), 590]],
-        [[(1, 5), 287], [(1, 207), 699], [(1, 107), 617], [(0, 204), 494], [(0, 206), 296], [(0, 105), 478]]
-        ]
-        yield ReadArmTraj(arm_traj, delay=300-100-50)#, reverse=True)
-        
-        yield Timer(500-100)
-        
-        yield ArmSpeed(110+40)
-        ARM_7_DROP_int = [(0, 205), 438]
-        arm_traj = [
-        [[(1, 5), 251], [(1, 207), 656], [(1, 107), 585], [(0, 204), 424], [(0, 206), 310-2], [(0, 105), 548]],
-        [[(1, 5), 235-10], [(1, 207), 728], [(1, 107), 730], [(0, 204), 286], [(0, 206), 294], [(0, 105), 542]],
-        [ARM_7_DROP_int],
-        [[(1, 5), 260], [(1, 207), 527], [(1, 107), 525], [(0, 204), 338], [(0, 206), 298], [(0, 105), 556], ARM_7_DROP_int],
-        [[(1, 5), 260-40]]
-        ]
-        yield ReadArmTraj(arm_traj, delay=500-200, reverse=True)
-        yield Timer(300-200)
+        if self.team == TEAM_BLUE:
+            yield ArmSpeed(110+20+30)
+            # Kick dropped modules
+            arm_traj = [
+            [[(1, 5), 377], [(1, 207), 435], [(1, 107), 313], [(0, 204), 496], [(0, 206), 252-5], [(0, 105), 421]], 
+            [[(1, 5), 280], [(1, 207), 612], [(1, 107), 473], [(0, 204), 494], [(0, 206), 233], [(0, 105), 590]],
+            [[(1, 5), 287], [(1, 207), 699], [(1, 107), 617], [(0, 204), 494], [(0, 206), 296], [(0, 105), 478]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=300-100-50)#, reverse=True)
+            
+            yield Timer(500-100)
+            
+            yield ArmSpeed(110+40)
+            ARM_7_DROP_int = [(0, 205), 438]
+            arm_traj = [
+            [[(1, 5), 251], [(1, 207), 656], [(1, 107), 585], [(0, 204), 424], [(0, 206), 310-2], [(0, 105), 548]],
+            [[(1, 5), 235-10], [(1, 207), 728], [(1, 107), 730], [(0, 204), 286], [(0, 206), 294], [(0, 105), 542]],
+            [ARM_7_DROP_int],
+            [[(1, 5), 260], [(1, 207), 527], [(1, 107), 525], [(0, 204), 338], [(0, 206), 298], [(0, 105), 556], ARM_7_DROP_int],
+            [[(1, 5), 260-40]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=500-200, reverse=True)
+            yield Timer(300-200)
+            
+        if self.team == TEAM_YELLOW:
+            yield ArmSpeed(150)
+            # Kick dropped modules and then drop
+            #~ ARM_7_DROP_int = [(0, 205), 438]
+            #~ arm_traj = [
+            #~ [[(1, 5), 391], [(1, 207), 411], [(1, 107), 340+20], [(0, 204), 511], [(0, 206), 298], [(0, 105), 619]],
+            #~ [[(1, 5), 586], [(1, 207), 656], [(1, 107), 575], [(0, 204), 491], [(0, 206), 306], [(0, 105), 396]], 
+            #~ [[(1, 5), 587], [(1, 207), 693], [(1, 107), 635], [(0, 204), 491], [(0, 206), 324], [(0, 105), 511]], 
+            #~ [[(1, 5), 605], [(1, 207), 694], [(1, 107), 642], [(0, 204), 530], [(0, 206), 336], [(0, 105), 372]], 
+            #~ [[(1, 5), 636], [(1, 207), 646], [(1, 107), 620], [(0, 204), 772], [(0, 206), 294], [(0, 105), 547]], 
+            #~ [[(1, 5), 597], [(1, 207), 740], [(1, 107), 723], [(0, 204), 836], [(0, 206), 312], [(0, 105), 722]], 
+            #~ [ARM_7_DROP_int],
+            #~ [[(1, 5), 586], [(1, 207), 679], [(1, 107), 595], [(0, 204), 797], [(0, 206), 211], [(0, 105), 720]]
+            #~ ]
+            arm_traj_1 = [
+            [[(1, 207), 441], [(1, 107), 323+20+7], [(0, 204), 484], [(0, 206), 240], [(0, 105), 560]],
+            [[(1, 5), 412], [(0, 105), 450]], 
+            [[(1, 5), 529], [(1, 207), 474], [(1, 107), 342+25+1], [(0, 204), 494], [(0, 206), 231], [(0, 105), 397-24]], 
+            #[[(1, 5), 551-10], [(1, 207), 612], [(1, 107), 481+30], [(0, 204), 494], [(0, 206), 233], [(0, 105), 376]]
+            [[(1, 5), 546], [(1, 207), 590], [(1, 107), 455+30], [(0, 204), 494], [(0, 206), 245], [(0, 105), 373]] 
+            ]
+            yield ReadArmTraj(arm_traj_1, delay=100)#, reverse=True)
+            
+            #~ if self.kick == True:
+                #~ arm_traj_2 = [
+                #~ [[(1, 5), 598], [(1, 207), 698], [(1, 107), 636], [(0, 204), 511], [(0, 206), 340], [(0, 105), 348]], 
+                #~ #[[(1, 5), 546], [(1, 207), 565], [(1, 107), 444], [(0, 204), 510], [(0, 206), 264], [(0, 105), 412]]
+                #~ arm_traj_1[-1]
+                #~ ]
+                #~ yield ReadArmTraj(arm_traj_2, delay=1000)#, reverse=True)
+                
+            yield Timer(1000)
+            shift_up = 30
+            arm_traj_2 = [
+            [[(0, 105), 360-5]],
+            [[(1, 5), 579], [(1, 207), 662], [(1, 107), 560+shift_up], [(0, 204), 494], [(0, 206), 285]],# [(0, 105), 360]]
+            #~ [[(1, 5), 587], [(1, 207), 637], [(1, 107), 544+shift_up], [(0, 204), 541], [(0, 206), 296], [(0, 105), 383]]
+            ]
+            yield ReadArmTraj(arm_traj_2, delay=1000, reverse=True)
+            
+            yield Timer(1000)
+            yield Trigger(ARM_7_DROP)
+            
+            yield Timer(1000)
+            yield ArmSpeed(100)
+            arm_traj_2 = [
+            [[(1, 5), 576], [(1, 207), 592], [(1, 107), 544+shift_up], [(0, 204), 504], [(0, 206), 330], [(0, 105), 362]],
+            #[[(1, 5), 529], [(1, 207), 466], [(1, 107), 422+shift_up], [(0, 204), 518], [(0, 206), 317], [(0, 105), 431]],
+            [[(1, 5), 535], [(1, 207), 469], [(1, 107), 426], [(0, 204), 504], [(0, 206), 329], [(0, 105), 387]],
+            [[(1, 107), 426+shift_up+20]]
+            ]
+            yield ReadArmTraj(arm_traj_2, delay=100, reverse=True)
+            
+            yield Timer(200)
+            # yield Trigger(ARM_7_OPEN)
+            # yield Timer(500)
+            arm_traj_2 = [
+            #[[(1, 5), 443], [(1, 207), 387], [(1, 107), 400+shift_up+40+20], [(0, 204), 512], [(0, 206), 367], [(0, 105), 497]]
+            [[(1, 207), 387], [(1, 107), 400+shift_up+40], [(0, 204), 512], [(0, 206), 367], [(0, 105), 497]]
+            ]
+            yield ReadArmTraj(arm_traj_2, delay=100, reverse=True)
+            
+            if self.finalKick == True:
+                yield Timer(1000)
+                yield Trigger(ARM_7_INIT)
+                #~ yield Timer(500)
+                arm_traj = [
+                [[(1, 5), 433]],#[(1, 207), 366], [(1, 107), 425], [(0, 204), 511], [(0, 206), 386], [(0, 105), 504]
+                [[(1, 207), 437], [(1, 107), 366+40], [(0, 204), 512], [(0, 206), 363], [(0, 105), 503]], #[(1, 5), 433],
+                #[[(1, 5), 496+20]], #[(1, 207), 496], [(1, 107), 419], [(0, 204), 512], [(0, 206), 363], [(0, 105), 502]], 
+                [[(1, 5), 551], [(1, 207), 546], [(1, 107), 542], [(0, 204), 571], [(0, 206), 450], [(0, 105), 412]],
+                [[(1, 5), 434]] #[(1, 207), 434], [(1, 107), 369], [(0, 204), 511], [(0, 206), 363], [(0, 105), 502]]
+                ]
+                yield ReadArmTraj(arm_traj, delay=1000)
+            
         yield None
         
 class GrabPolyModuleFromDropZone(State):
-    def on_enter(self):
+    def __init__(self, team, previousModuleTurned=False):
+        self.team = team
+        self.previousModuleTurned = previousModuleTurned
         
-        yield Trigger(ARM_7_OPEN)
-        yield ArmSpeed(110+40+10)
-        arm_traj = [
-        [[(1, 5), 284], [(1, 207), 371], [(1, 107), 336], [(0, 204), 476], [(0, 206), 345], [(0, 105), 634]], 
-        [[(1, 5), 356], [(1, 207), 364], [(1, 107), 231], [(0, 204), 476], [(0, 206), 250], [(0, 105), 555+30]], 
-        [[(1, 5), 425], [(1, 207), 411], [(1, 107), 235], [(0, 204), 476], [(0, 206), 203], [(0, 105), 479+30]], 
-        [[(1, 5), 480], [(1, 207), 567], [(1, 107), 329], [(0, 204), 475], [(0, 206), 160], [(0, 105), 422+30]], 
-        [[(1, 5), 525], [(1, 207), 644], [(1, 107), 427], [(0, 204), 476], [(0, 206), 166], [(0, 105), 380+20]]
-        ]
-        yield ReadArmTraj(arm_traj, delay=100, reverse=True)
-        yield Timer(200)
-        arm_traj = [
-        [[(1, 5), 546], [(1, 207), 696], [(1, 107), 529], [(0, 204), 483], [(0, 206), 214], [(0, 105), 369]]
-        ]
-        yield ReadArmTraj(arm_traj, delay=100, reverse=True)
-        yield Trigger(ARM_7_HOLD)
+    def on_enter(self):
+        if self.team == TEAM_BLUE:
+            yield Trigger(ARM_7_OPEN)
+            yield ArmSpeed(110+40+10)
+            arm_traj = [
+            [[(1, 5), 284], [(1, 207), 371], [(1, 107), 336], [(0, 204), 476], [(0, 206), 345], [(0, 105), 634]], 
+            [[(1, 5), 356], [(1, 207), 364], [(1, 107), 231], [(0, 204), 476], [(0, 206), 250], [(0, 105), 555+30]], 
+            [[(1, 5), 425], [(1, 207), 411], [(1, 107), 235], [(0, 204), 476], [(0, 206), 203], [(0, 105), 479+30]], 
+            [[(1, 5), 480], [(1, 207), 567], [(1, 107), 329], [(0, 204), 475], [(0, 206), 160], [(0, 105), 422+30]], 
+            [[(1, 5), 525], [(1, 207), 644], [(1, 107), 427], [(0, 204), 476], [(0, 206), 166], [(0, 105), 380+20]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=100, reverse=True)
+            yield Timer(200)
+            arm_traj = [
+            [[(1, 5), 546], [(1, 207), 696], [(1, 107), 529], [(0, 204), 483], [(0, 206), 214], [(0, 105), 369]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=100, reverse=True)
+            yield Trigger(ARM_7_HOLD)
+            
+        if self.team == TEAM_YELLOW:
+            yield Trigger(ARM_7_OPEN)
+            if self.previousModuleTurned == False:
+                yield ArmSpeed(300)
+                arm_traj_1 = [
+                [[(1, 5), 561], [(1, 207), 519], [(1, 107), 386], [(0, 204), 493], [(0, 206), 257], [(0, 105), 397-20]], 
+                [[(1, 5), 546], [(1, 207), 353], [(1, 107), 201], [(0, 204), 473], [(0, 206), 159], [(0, 105), 426]], 
+                [[(1, 5), 284]],# [(1, 207), 354], [(1, 107), 205], [(0, 204), 473], [(0, 206), 159], [(0, 105), 518]], 
+                ]
+                yield ReadArmTraj(arm_traj_1, delay=100, reverse=True)
+                yield Timer(500)
+                arm_traj_1 = [
+                [[(1, 5), 286], [(1, 207), 609], [(1, 107), 382], [(0, 204), 494], [(0, 206), 159], [(0, 105), 571]], 
+                [[(1, 5), 296], [(1, 207), 644], [(1, 107), 446], [(0, 204), 494], [(0, 206), 191], [(0, 105), 629]]
+                ]
+                yield ReadArmTraj(arm_traj_1, delay=100, reverse=True)
+                yield Timer(50)
+                
+            if self.previousModuleTurned == True:
+                yield ArmSpeed(150)
+                arm_traj_1 = [
+                [[(1, 5), 550], [(1, 207), 272], [(1, 107), 380], [(0, 204), 511], [(0, 206), 481], [(0, 105), 418]], 
+                [[(1, 5), 416], [(1, 207), 255], [(1, 107), 375], [(0, 204), 510], [(0, 206), 497], [(0, 105), 440]], 
+                [[(1, 5), 232], [(1, 207), 257], [(1, 107), 373], [(0, 204), 495], [(0, 206), 499], [(0, 105), 640]], 
+                [[(1, 5), 241], [(1, 207), 345], [(1, 107), 320], [(0, 204), 484], [(0, 206), 361], [(0, 105), 656]], 
+                [[(1, 5), 241], [(1, 207), 507], [(1, 107), 308], [(0, 204), 483], [(0, 206), 201], [(0, 105), 656]]
+                ]
+                yield ReadArmTraj(arm_traj_1, delay=1000, reverse=True)
+                yield Timer(1000)
+                
+            arm_traj = [
+            [[(1, 5), 304], [(1, 207), 678], [(1, 107), 504], [(0, 204), 495], [(0, 206), 207], [(0, 105), 617]],
+            [[(1, 5), 311], [(1, 207), 663], [(1, 107), 476], [(0, 204), 492], [(0, 206), 203], [(0, 105), 614]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=200, reverse=True)
+            
+            yield Timer(100)
+            yield ArmSpeed(110)
+            
+            yield Trigger(ARM_7_HOLD)
 
         yield None
         
