@@ -19,46 +19,22 @@ from tools import *
 
 import statemachines.testscommon as testscommon
 import statemachines.testsmain as testsmain
-
-TEAM_BLUE = TEAM_LEFT
-TEAM_YELLOW = TEAM_RIGHT
-
-class ReadArmTrajTxt(State):
-    def on_enter(self):
-        rt = yield GetInputStatus(MAIN_INPUT_TEAM)
-        rec = rt.value
-
-        if rec == 1:
-            l_armServoID = [ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID]
-            for servoID in l_armServoID:
-                # Speed control
-                yield Trigger(makeServoSetupCommand((servoID, 1000), 200))
-            #yield Trigger(STONE_GUIDE_HOLD)
             
-            f_listArmPosition = open("/tmp/traj.txt", "r")
-            trajArm_fromFile = eval(f_listArmPosition.read())
-            f_listArmPosition.close()
-            
-            #yield Trigger(STORAGE_FINGER_LEFT_HOLD)
-            for l_servoPosition in trajArm_fromFile:
-                yield MoveArmServoPosition(l_servoPosition)
-                yield Timer(1000)
-            #yield Trigger(STORAGE_FINGER_LEFT_INIT)
-        yield None
-                
+ARM_LEARNING = 0
 
 class Main(State):
 
     def on_enter(self):
-        #StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
-        #StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
-        #self.l_armPosition = []
-        if os.path.isfile("/tmp/traj.txt"):
-            f_listArmPosition = open("/tmp/traj.txt", "r")
-            self.l_armPosition = eval(f_listArmPosition.read())
-            f_listArmPosition.close()
-        else:
-            self.l_armPosition = []
+        StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_MAIN)
+        StateMachine(self.event_loop, "opponentdetector", opponent_type = OPPONENT_ROBOT_SECONDARY)
+        
+        if ARM_LEARNING == 1:
+            if os.path.isfile("/tmp/traj.txt"):
+                f_listArmPosition = open("/tmp/traj.txt", "r")
+                self.l_armPosition = eval(f_listArmPosition.read())
+                f_listArmPosition.close()
+            else:
+                self.l_armPosition = []
             
         # Arm tests
         self.cnt_arm_action = 0
@@ -124,25 +100,11 @@ class Main(State):
     def on_input_status(self, packet):
         if packet.id == MAIN_INPUT_TEAM: # and packet.kind == KIND_READ:
             self.rec = packet.value
-            #if packet.rec == 0:
-            #    print("No recording")
 
-            #if packet.value == 0:
-            #    yield Trigger(STORAGE_FINGER_RIGHT_HOLD)
-            #else:
-            #    yield Trigger(STORAGE_FINGER_RIGHT_INIT)
-
-
-
-            if packet.value == 0:
+            if packet.value == 0 and ARM_LEARNING == 1:
                 print("Recording")
-                #yield Trigger(STORAGE_FINGER_RIGHT_HOLD)
-                #self.l_armPosition = []
-                #for i_rec in range(40):
                 ArmPosition = yield ReadArmServoPosition(self.l_servoID)
                 self.l_armPosition.append(ArmPosition.l_servoPosition)
-                    #yield Timer(100)
-                #yield Trigger(STORAGE_FINGER_RIGHT_INIT)
 
                 f_listArmPosition = open("/tmp/traj.txt", "w")
                 f_listArmPosition.write(str(self.l_armPosition))
@@ -152,55 +114,6 @@ class Main(State):
     def on_start(self, packet):
         if packet.value == 0:
             #self.yield_at(89500, EndOfMatch())
-            #yield MoveLineTo(1.0, 1.5)
-
-            #yield Trigger(RIGHT_BUILDER_PLIERS_RIGHT_INIT, RIGHT_BUILDER_GRIPPER_LEFT_INIT)
-            #yield Trigger(makeServoMoveCommand(LEFT_BUILDER_PLIERS_LEFT, 500))
-
-            ## Position reading
-            ###################
-            #print("STORAGE_FINGER_LEFT")
-            #rp = yield ReadServoPosition(STORAGE_FINGER_LEFT_ID)
-            #print(rp.value)
-            #print("STORAGE_FINGER_LEFT_FRONT")
-            #rp = yield ReadServoPosition(STORAGE_FINGER_LEFT_FRONT_ID)
-            #print(rp.value)
-            #print("STORAGE_FINGER_RIGHT_FRONT")
-            #rp = yield ReadServoPosition(STORAGE_FINGER_RIGHT_FRONT_ID)
-            #print(rp.value)
-            #print("STORAGE_FINGER_RIGHT")
-            #rp = yield ReadServoPosition(STORAGE_FINGER_RIGHT_ID)
-            #print(rp.value)
-
-            #print("ARM_3")
-            #rp = yield ReadServoPosition(ARM_3_ID)
-            #print(rp.value)
-            #print("STONE_GUIDE")
-            #rp = yield ReadServoPosition(STONE_GUIDE_ID)
-            #print(rp.value)
-
-            ## Moves
-            #######
-            #yield Trigger(STORAGE_FINGER_RIGHT_HOLD)
-            #yield Trigger(makeServoMoveCommand((ARM_3_ID, 700), 800))
-            #yield Trigger(STONE_GUIDE_HOLD)
-            #yield Trigger(STORAGE_FINGER_LEFT_INIT, STORAGE_FINGER_LEFT_FRONT_INIT, STORAGE_FINGER_RIGHT_FRONT_INIT, STORAGE_FINGER_RIGHT_INIT)
-            #yield Trigger(STORAGE_FINGER_LEFT_OPEN, STORAGE_FINGER_LEFT_FRONT_OPEN, STORAGE_FINGER_RIGHT_FRONT_OPEN, STORAGE_FINGER_RIGHT_OPEN)
-
-            #l_servoID = [LEFT_BUILDER_PLIERS_LEFT_ID, LEFT_BUILDER_PLIERS_RIGHT_ID, LEFT_BUILDER_GRIPPER_LEFT_ID, LEFT_BUILDER_GRIPPER_RIGHT_ID, LEFT_BUILDER_LIGHTER_ID]
-
-            #yield ServoTorqueControl(l_servoID, False)
-
-            #ArmPosition = yield ReadArmServoPosition(l_servoID)
-            
-            #yield MoveArmServoPosition(ArmPosition.l_servoPosition)
-
-            #readArmTrajTxt()
-            
-            # Test of arm traj sequence start by start
-            
-            #~ yield Trigger(ARM_7_HOLD)
-            #~ self.cnt_arm_action = 10
             
             if 1:
                 if self.cnt_arm_action == 0:
@@ -219,7 +132,6 @@ class Main(State):
                     yield PolyRocket(False)
                     #~ yield MonoRocket(False)
                     
-                    #~ yield TestStockModuleByHand(4)
                     #~ yield Trigger(ARM_7_HOLD)
                     #~ yield Trigger(STORAGE_FINGER_LEFT_HOLD)
                     
@@ -236,21 +148,21 @@ class Main(State):
                     
                     #~ team = TEAM_YELLOW
                     #~ 
-                    #~ yield GrabPolyModuleFromInit(team)
-                    #~ yield OutputPolyModuleFromRocket(team)
-                    #~ yield DropPolyModule(team, kick=False)
+                    #~ yield GrabPolyModuleFromInit()
+                    #~ yield OutputPolyModuleFromRocket()
+                    #~ yield DropPolyModule(kick=False)
                     #~ 
-                    #~ yield GrabPolyModuleFromDropZone(team, previousModuleTurned=False)
-                    #~ yield OutputPolyModuleFromRocket(team)
-                    #~ yield DropTurnedPolyModule(team, finalKick=False)
+                    #~ yield GrabPolyModuleFromDropZone(previousModuleTurned=False)
+                    #~ yield OutputPolyModuleFromRocket()
+                    #~ yield DropTurnedPolyModule(finalKick=False)
                     #~ 
-                    #~ yield GrabPolyModuleFromDropZone(team, previousModuleTurned=True)
-                    #~ yield OutputPolyModuleFromRocket(team)
-                    #~ yield DropPolyModule(team, kick=True)
+                    #~ yield GrabPolyModuleFromDropZone(previousModuleTurned=True)
+                    #~ yield OutputPolyModuleFromRocket()
+                    #~ yield DropPolyModule(kick=True)
                     #~ 
-                    #~ yield GrabPolyModuleFromDropZone(team, previousModuleTurned=False)
-                    #~ yield OutputPolyModuleFromRocket(team)
-                    #~ yield DropTurnedPolyModule(team, finalKick=True)
+                    #~ yield GrabPolyModuleFromDropZone(previousModuleTurned=False)
+                    #~ yield OutputPolyModuleFromRocket()
+                    #~ yield DropTurnedPolyModule(finalKick=True)
                     
                 elif self.cnt_arm_action == 2:
                     #yield TestTakeModuleFromStorageReturn()
@@ -268,18 +180,18 @@ class Main(State):
                     #~ yield Trigger(STORAGE_FINGER_LEFT_FRONT_HOLD)
                     
                     #~ team = TEAM_YELLOW
-                    #~ yield DropModuleFromStorage(team)
+                    #~ yield DropModuleFromStorage()
                     #~ yield InitForMonoColorModuleToDrop()
                     
                     team = TEAM_YELLOW
-                    yield CentralMoonBaseLatBranch(team, depl=False)
+                    yield CentralMoonBaseLatBranch(depl=False)
                     #~ None
                     
                 elif self.cnt_arm_action == 3:
                     #~ yield Trigger(STORAGE_FINGER_RIGHT_FRONT_HOLD)
                     
                     #~ team = TEAM_YELLOW
-                    #~ yield CentralMoonBaseLatBranch(team, depl=False)
+                    #~ yield CentralMoonBaseLatBranch(depl=False)
                     None
                     
                 elif self.cnt_arm_action == 4:
@@ -288,7 +200,7 @@ class Main(State):
                     
                 elif self.cnt_arm_action == 5:
                     #~ team = TEAM_YELLOW
-                    #~ yield CentralMoonBaseLatBranch(team, depl=False)
+                    #~ yield CentralMoonBaseLatBranch(depl=False)
                     None
                     
                 self.cnt_arm_action = self.cnt_arm_action + 1
@@ -327,36 +239,6 @@ class ArmSpeed(State):
             yield Trigger(makeServoSetupCommand((servoID, 1000), self.speed))
         yield None
 
-
-class TestStockModuleByHand(State):
-    def __init__(self, nb_storage = 1):
-        self.nb_storage = nb_storage
-        self.cnt_storage = 0
-        
-    def on_enter(self):
-        #~ yield Trigger(STORAGE_FINGER_RIGHT_FRONT_HOLD)
-        yield Trigger(STORAGE_FINGER_LEFT_HOLD)
-        #~ yield Trigger(STORAGE_FINGER_RIGHT_HOLD)
-        #~ yield Trigger(STORAGE_FINGER_LEFT_FRONT_HOLD)
-        #~ yield Trigger(ARM_7_HOLD)
-        self.cnt_storage = self.cnt_storage + 1
-        
-        if self.cnt_storage == self.nb_storage:
-            yield None
-            
-    def on_start(self):
-        if self.cnt_storage == 1:
-            yield Trigger(STORAGE_FINGER_LEFT_FRONT_HOLD)
-        elif self.cnt_storage == 2:
-            yield Trigger(STORAGE_FINGER_RIGHT_FRONT_HOLD)
-        elif self.cnt_storage == 3:
-            yield Trigger(STORAGE_FINGER_RIGHT_HOLD)
-            
-        self.cnt_storage = self.cnt_storage + 1
-        
-        if self.cnt_storage == self.nb_storage:
-            yield None
-            
         
 class GrabBackModuleRightFront(State):
     def on_enter(self):
@@ -498,11 +380,8 @@ class GrabBackModuleLeftFront(State):
         
 
 class DropModuleFromStorage(State):
-    def __init__(self, team):
-        self.team = team
-        
     def on_enter(self):
-        if self.team == TEAM_BLUE:
+        if self.robot.team == TEAM_LEFT:
             yield ArmSpeed(150)
             arm_traj = [
             [[(1, 5), 318], [(1, 207), 491], [(1, 107), 579], [(0, 204), 770], [(0, 206), 592], [(0, 105), 450]], 
@@ -534,7 +413,7 @@ class DropModuleFromStorage(State):
             yield Timer(150)
             yield ArmSpeed(200)
             
-        if self.team == TEAM_YELLOW:
+        if self.robot.team == TEAM_RIGHT:
             yield ArmSpeed(250)
             
             arm_traj = [
@@ -595,17 +474,6 @@ class InitArm(State):
     def on_enter(self):
         yield ArmSpeed(110)
         
-        #~ arm_traj_r1 = [
-        #~ [[(1, 5), 408], [(1, 207), 642], [(1, 107), 494], [(0, 204), 511], [(0, 206), 257], [(0, 105), 547]], 
-        #~ [[(1, 5), 409], [(1, 207), 558-50], [(1, 107), 422], [(0, 204), 511], [(0, 206), 260], [(0, 105), 547]], 
-        #~ [[(1, 5), 412], [(1, 207), 466-50], [(1, 107), 350], [(0, 204), 511], [(0, 206), 309], [(0, 105), 547]], 
-        #~ [[(1, 5), 412], [(1, 207), 369-30], [(1, 107), 293], [(0, 204), 510], [(0, 206), 309], [(0, 105), 547]], 
-        #~ [[(1, 5), 412], [(1, 207), 359], [(1, 107), 308], [(0, 204), 510], [(0, 206), 396], [(0, 105), 546]], 
-        #~ [[(1, 5), 412], [(1, 207), 342], [(1, 107), 412], [(0, 204), 511], [(0, 206), 519], [(0, 105), 546]], 
-        #~ [[(1, 5), 412], [(1, 207), 351], [(1, 107), 479], [(0, 204), 510], [(0, 206), 518], [(0, 105), 546]], 
-        #~ [[(1, 5), 414], [(1, 207), 362], [(1, 107), 480], [(0, 204), 497], [(0, 206), 801], [(0, 105), 541]]
-        #~ ]
-        
         arm_traj = [
         [[(1, 5), 433], [(1, 207), 400], [(1, 107), 437], [(0, 204), 512], [(0, 206), 702], [(0, 105), 462]], 
         [[(1, 5), 436], [(1, 207), 334], [(1, 107), 401], [(0, 204), 512], [(0, 206), 720], [(0, 105), 462]], 
@@ -619,8 +487,6 @@ class InitArm(State):
         yield Trigger(makeServoSetupCommand(((0,205), 1000), 1000))
         yield Trigger(ARM_7_INIT)
         
-        #~ yield Trigger(ARM_7_OPEN)
-        #~ yield Trigger(makeServoMoveCommand(ARM_7, 347))
         yield None
 
 class GrabModuleFromInit(State):
@@ -663,11 +529,8 @@ class GrabModuleFromInit(State):
         yield None
         
 class GrabPolyModuleFromInit(State):
-    def __init__(self, team):
-        self.team = team
-        
     def on_enter(self):
-        if self.team == TEAM_BLUE:
+        if self.robot.team == TEAM_LEFT:
             yield ArmSpeed(350)
                     
             yield ReadArmTraj([[[(0, 206), 682]]])
@@ -700,7 +563,7 @@ class GrabPolyModuleFromInit(State):
             yield Timer(50)
             yield Trigger(ARM_7_HOLD)
           
-        if self.team == TEAM_YELLOW:
+        if self.robot.team == TEAM_RIGHT:
             yield ArmSpeed(350)
                     
             yield ReadArmTraj([[[(0, 206), 682]]])
@@ -735,11 +598,8 @@ class GrabPolyModuleFromInit(State):
         
         
 class OutputPolyModuleFromRocket(State):
-    def __init__(self, team):
-        self.team = team
-        
     def on_enter(self):
-        if self.team == TEAM_BLUE:
+        if self.robot.team == TEAM_LEFT:
             yield ArmSpeed(110)
             arm_traj = [
             [[(1, 5), 574], [(1, 207), 581], [(1, 107), 378], [(0, 204), 511], [(0, 206), 195], [(0, 105), 383]], 
@@ -753,10 +613,9 @@ class OutputPolyModuleFromRocket(State):
             
             yield Timer(200)
             
-        if self.team == TEAM_YELLOW:
+        if self.robot.team == TEAM_RIGHT:
             yield ArmSpeed(110)
             arm_traj = [
-            #[[(1, 5), 301], [(1, 207), 537], [(1, 107), 319], [(0, 204), 495], [(0, 206), 160], [(0, 105), 597]]
             [[(1, 5), 301], [(1, 207), 594], [(1, 107), 365], [(0, 204), 511], [(0, 206), 160], [(0, 105), 647]]
             ]
             yield ReadArmTraj(arm_traj, delay=700, reverse=True)
@@ -774,12 +633,11 @@ class OutputPolyModuleFromRocket(State):
         yield None
         
 class DropPolyModule(State):
-    def __init__(self, team, kick=True):
-        self.team = team
+    def __init__(self, kick=True):
         self.kick = kick
         
     def on_enter(self): 
-        if self.team == TEAM_BLUE:
+        if self.robot.team == TEAM_LEFT:
             yield ArmSpeed(180)
             arm_traj = [
                 [[(1, 5), 377], [(1, 207), 435], [(1, 107), 313], [(0, 204), 496], [(0, 206), 247], [(0, 105), 421]], 
@@ -813,7 +671,7 @@ class DropPolyModule(State):
             yield ReadArmTraj(arm_traj, delay=400, reverse=True)
             yield Timer(100)
             
-        if self.team == TEAM_YELLOW:
+        if self.robot.team == TEAM_RIGHT:
             yield ArmSpeed(150)
             arm_traj_1 = [
             [[(1, 207), 441], [(1, 107), 323+40], [(0, 204), 484], [(0, 206), 240], [(0, 105), 560]]
@@ -845,12 +703,11 @@ class DropPolyModule(State):
         yield None
         
 class DropTurnedPolyModule(State):
-    def __init__(self, team, finalKick=False):
-        self.team = team
+    def __init__(self, finalKick=False):
         self.finalKick = finalKick
         
     def on_enter(self):        
-        if self.team == TEAM_BLUE:
+        if self.robot.team == TEAM_LEFT:
             yield ArmSpeed(150)
             # Kick dropped modules
             arm_traj = [
@@ -874,7 +731,7 @@ class DropTurnedPolyModule(State):
             yield ReadArmTraj(arm_traj, delay=300, reverse=True)
             yield Timer(100)
             
-        if self.team == TEAM_YELLOW:
+        if self.robot.team == TEAM_RIGHT:
             yield ArmSpeed(200)
             
             arm_traj_1 = [
@@ -941,12 +798,11 @@ class DropTurnedPolyModule(State):
         yield None
         
 class GrabPolyModuleFromDropZone(State):
-    def __init__(self, team, previousModuleTurned=False):
-        self.team = team
+    def __init__(self, previousModuleTurned=False):
         self.previousModuleTurned = previousModuleTurned
         
     def on_enter(self):
-        if self.team == TEAM_BLUE:
+        if self.robot.team == TEAM_LEFT:
             yield Trigger(ARM_7_OPEN)
             yield ArmSpeed(300)
             arm_traj = [
@@ -964,7 +820,7 @@ class GrabPolyModuleFromDropZone(State):
             yield ReadArmTraj(arm_traj, delay=100, reverse=True)
             yield Trigger(ARM_7_HOLD)
             
-        if self.team == TEAM_YELLOW:
+        if self.robot.team == TEAM_RIGHT:
             yield Trigger(ARM_7_OPEN)
             if self.previousModuleTurned == False:
                 yield ArmSpeed(300)
@@ -1271,26 +1127,24 @@ class PolyRocket(State):
             yield RotateTo(-math.pi/2.0)
             yield MoveLineTo(1.25, 0.3)
         #---
-        team = TEAM_BLUE
-                
-        yield GrabPolyModuleFromInit(team)
+        yield GrabPolyModuleFromInit()
         
-        yield OutputPolyModuleFromRocket(team)
-        yield DropPolyModule(team, kick=False)
+        yield OutputPolyModuleFromRocket()
+        yield DropPolyModule(kick=False)
         
-        yield GrabPolyModuleFromDropZone(team, previousModuleTurned=False)
-        yield OutputPolyModuleFromRocket(team)
-        yield DropTurnedPolyModule(team, finalKick=False)
+        yield GrabPolyModuleFromDropZone(previousModuleTurned=False)
+        yield OutputPolyModuleFromRocket()
+        yield DropTurnedPolyModule(finalKick=False)
         
-        yield GrabPolyModuleFromDropZone(team, previousModuleTurned=True)
-        yield OutputPolyModuleFromRocket(team)
-        yield DropPolyModule(team, kick=True)
+        yield GrabPolyModuleFromDropZone(previousModuleTurned=True)
+        yield OutputPolyModuleFromRocket()
+        yield DropPolyModule(kick=True)
         
-        yield GrabPolyModuleFromDropZone(team, previousModuleTurned=False)
-        yield OutputPolyModuleFromRocket(team)
-        yield DropTurnedPolyModule(team, finalKick=True)
+        yield GrabPolyModuleFromDropZone(previousModuleTurned=False)
+        yield OutputPolyModuleFromRocket()
+        yield DropTurnedPolyModule(finalKick=True)
         
-        #~ yield InitArm()
+        yield InitArm()
         #---
         if self.depl == True:
             yield MoveLineRelative(-0.05)
@@ -1323,8 +1177,7 @@ class MonoRocket(State):
         yield None
 
 class CentralMoonBaseLatBranch(State):
-    def __init__(self, team, depl = True):
-        self.team = team
+    def __init__(self, depl = True):
         self.depl = depl
         
     def on_enter(self):
@@ -1332,31 +1185,31 @@ class CentralMoonBaseLatBranch(State):
             yield RotateTo(-math.pi/4.0)
             yield MoveLineTo(1.238, 1.101)
         #---    
-        if self.team == TEAM_BLUE:
+        if self.robot.team == TEAM_LEFT:
             yield GrabBackModuleRightFront()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
             
             yield GrabBackModuleLeftFront()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
             
             yield GrabBackModuleLeft()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
             
             yield GrabBackModuleRight()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
             
-        if self.team == TEAM_YELLOW:
+        if self.robot.team == TEAM_RIGHT:
             yield GrabBackModuleLeftFront()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
             
             yield GrabBackModuleRightFront()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
             
             yield GrabBackModuleLeft()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
             
             yield GrabBackModuleRight()
-            yield DropModuleFromStorage(self.team)
+            yield DropModuleFromStorage()
         #---
         if self.depl == True:
             yield MoveLineRelative(-0.05)
