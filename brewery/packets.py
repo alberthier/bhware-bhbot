@@ -871,87 +871,24 @@ class OpponentDisappeared(BasePacket):
 
 
 
-class StandStored(BasePacket):
+class ArmSequenceStart(BasePacket):
 
     TYPE = 262
 
     DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
+        ('id', String(200)),
     )
 
 
 
 
-class StandGrabbed(BasePacket):
+class ArmSequenceEnd(BasePacket):
 
     TYPE = 263
 
     DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
+        ('id', String(200)),
     )
-
-
-
-
-class BuildSpotlight(BasePacket):
-
-    TYPE = 264
-
-    DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
-        ('platform_mode', Bool(False)),
-        ('finished', Bool(False))
-    )
-
-
-
-
-class CupGrabbed(BasePacket):
-
-    TYPE = 265
-
-
-
-
-class BulbGrabbed(BasePacket):
-
-    TYPE = 266
-
-
-
-
-class StandbuilderIdle(BasePacket):
-
-    TYPE = 267
-
-    DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
-    )
-
-
-
-
-class EnsureBuild(BasePacket):
-
-    TYPE = 268
-
-    DEFINITION = (
-        ('side', UEnum8(SIDE, SIDE_LEFT)),
-    )
-
-
-
-
-class LiftBulb(BasePacket):
-
-    TYPE = 269
-
-
-
-
-class EnsureGrab(BasePacket):
-
-    TYPE = 270
 
 
 ################################################################################

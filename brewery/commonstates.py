@@ -1112,3 +1112,21 @@ class EscapeToAnywhere(statemachine.Timer):
             move = yield MoveLineRelative(0.1, DIRECTION_BACKWARDS)
             exit_reason = move.exit_reason
         yield None
+
+
+
+
+class MoveArmServoPosition(statemachine.State):
+
+    def __init__(self, l_servoPosition):
+        self.l_servoPosition = l_servoPosition
+
+    def on_enter(self):
+        l_ServoCommand =[]
+        for servoPosition in self.l_servoPosition :
+            servoID = servoPosition[0]
+            position = servoPosition[1]
+            l_ServoCommand.append(makeServoMoveCommand((servoID, ARM_SERVO_TIMEOUT), position))
+
+        yield Trigger(l_ServoCommand)
+        yield None
