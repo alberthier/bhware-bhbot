@@ -81,7 +81,8 @@ class Main(State):
 
     def on_controller_status(self, packet):
         if packet.status == CONTROLLER_STATUS_READY:
-            #~ yield Initialize()
+            yield Initialize()
+            
             #yield AntiBlocking(True)
             rt = yield GetInputStatus(MAIN_INPUT_TEAM)
             self.rec = rt.value
@@ -114,22 +115,26 @@ class Main(State):
     def on_start(self, packet):
         if packet.value == 0:
             #self.yield_at(89500, EndOfMatch())
+            yield SpeedControl(88)
             
             if 1:
                 if self.cnt_arm_action == 0:
-                    yield InitArm()
+                    #~ yield InitArm()
                     #~ yield InitForMonoColorModuleToDrop()
                     #~ yield Initialize()
                     
                     #~ yield DefinePosition(0.0, 0.0, 0.0)
                     #~ yield MoveLineTo(1.0, 0.0)
                     #~ yield RotateTo(-math.pi/2.0)
-               
-                    #~ yield SpeedControl(88)
-                    #~ yield StaticStrategy()
+                    
+                    yield StaticStrategy()
+                    
                     
                 elif self.cnt_arm_action == 1:
                     yield PolyRocket(False)
+                    None
+                    
+                    #~ yield PolyRocket(False)
                     #~ yield MonoRocket(False)
                     
                     #~ yield Trigger(ARM_7_HOLD)
@@ -1127,21 +1132,57 @@ class PolyRocket(State):
             yield RotateTo(-math.pi/2.0)
             yield MoveLineTo(1.25, 0.3)
         #---
+        shift_1 = -0.005
         yield GrabPolyModuleFromInit()
         
         yield OutputPolyModuleFromRocket()
+        
+        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield MoveLineTo(1.25, 0.3 + shift_1)
+        yield RotateTo(-math.pi/2.0)
+        
         yield DropPolyModule(kick=False)
         
+        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield MoveLineTo(1.25, 0.3 + shift_1)
+        yield RotateTo(-math.pi/2.0)
+        
         yield GrabPolyModuleFromDropZone(previousModuleTurned=False)
+        
         yield OutputPolyModuleFromRocket()
+        
+        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield MoveLineTo(1.25, 0.3 + shift_1)
+        yield RotateTo(-math.pi/2.0)
+        
         yield DropTurnedPolyModule(finalKick=False)
         
+        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield MoveLineTo(1.25, 0.3 + shift_1)
+        yield RotateTo(-math.pi/2.0)
+        
         yield GrabPolyModuleFromDropZone(previousModuleTurned=True)
+        
         yield OutputPolyModuleFromRocket()
+        
+        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield MoveLineTo(1.25, 0.3 + shift_1)
+        yield RotateTo(-math.pi/2.0)
+        
         yield DropPolyModule(kick=True)
         
+        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield MoveLineTo(1.25, 0.3 + shift_1)
+        yield RotateTo(-math.pi/2.0)
+        
         yield GrabPolyModuleFromDropZone(previousModuleTurned=False)
+        
         yield OutputPolyModuleFromRocket()
+        
+        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield MoveLineTo(1.25, 0.3 + shift_1)
+        yield RotateTo(-math.pi/2.0)
+        
         yield DropTurnedPolyModule(finalKick=True)
         
         yield InitArm()
@@ -1189,11 +1230,23 @@ class CentralMoonBaseLatBranch(State):
             yield GrabBackModuleRightFront()
             yield DropModuleFromStorage()
             
+            yield MoveLineRelative(-0.02)
+            yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
+            yield RotateTo(-math.pi/4.0)
+            
             yield GrabBackModuleLeftFront()
             yield DropModuleFromStorage()
             
+            yield MoveLineRelative(-0.02)
+            yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
+            yield RotateTo(-math.pi/4.0)
+            
             yield GrabBackModuleLeft()
             yield DropModuleFromStorage()
+            
+            yield MoveLineRelative(-0.02)
+            yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
+            yield RotateTo(-math.pi/4.0)
             
             yield GrabBackModuleRight()
             yield DropModuleFromStorage()
@@ -1313,28 +1366,38 @@ class StaticStrategy(State):
         yield RotateTo(-math.pi/4.0)
         yield MoveLineTo(1.25, 0.6)
         yield RotateTo(-math.pi/2.0)
-        yield MoveLineTo(1.25, 0.3)
+        if self.robot.team == TEAM_LEFT:
+            yield MoveLineTo(1.25, 0.3 -0.005)
+        else: #TEAM_RIGHT
+            yield MoveLineTo(1.25, 0.3 -0.005)
+        yield RotateTo(-math.pi/2.0)
         
         # Travail sur fusee polychrome bleu pour dépose 4 elements
-        yield PolyRocket(False)
+        #~ yield PolyRocket(False)
         
         # Deplacement vers fusee bleu
         yield MoveLineTo(1.250, 0.600)
         yield RotateTo(-math.pi/4.0)
         yield MoveLineTo(0.700, 1.150)
         yield RotateTo(math.pi)
-        yield MoveLineTo(0.350, 1.150)
+        yield MoveLineTo(0.350 - 0.005, 1.150)
+        yield RotateTo(math.pi)
         
         # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
         yield MonoRocket(False)
         
+        
+        
         # Deplacement vers base lunaire centrale
-        yield MoveLineTo(1.210, 1.130)
+        yield MoveLineTo(1.210 + 0.02, 1.130 + 0.02)
         yield RotateTo(-math.pi/4.0)
-        yield MoveLineTo(1.238, 1.101)
+        yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
+        yield RotateTo(-math.pi/4.0)
         
         # Depose des elements dans branche bleu base lunaire centrale
         yield CentralMoonBaseLatBranch(False)
+        
+        yield None
         
         # Deplacement vers cratere bleu
         yield MoveLineTo(1.210, 1.130)
@@ -1342,7 +1405,7 @@ class StaticStrategy(State):
         yield MoveLineTo(0.765, 0.811)
         
         # Prise des roches dans cratere
-        yield Crater(False)
+        #~ yield Crater(False)
         
         # Deplacement vers zone de depart bleu
         yield MoveLineTo(0.959, 0.950)
@@ -1350,7 +1413,7 @@ class StaticStrategy(State):
         yield MoveLineTo(0.450, 0.944)
         
         # Depose roche dans zone de depart bleu
-        yield StoneDrop(False)
+        #~ yield StoneDrop(False)
         
         # Fin du match
         
