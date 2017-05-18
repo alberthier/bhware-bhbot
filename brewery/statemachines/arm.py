@@ -20,15 +20,13 @@ import statemachines.testscommon as testscommon
 import statemachines.testsmain as testsmain
 
 
-TEAM_BLUE = TEAM_LEFT
-TEAM_YELLOW = TEAM_RIGHT
-
-
-
 class Main(State):
 
     def on_enter(self):
         self.fsm.is_moving = False
+
+    def on_start(self, packet):
+        self.yield_at(89500, EndOfMatch())
 
     def on_arm_sequence_start(self, packet):
         state = getattr(sys.modules[__name__], packet.id)
@@ -39,6 +37,14 @@ class Main(State):
             yield state(*packet.args, **packet.kwargs)
             self.fsm.is_moving = False
         self.send_packet(packets.ArmSequenceEnd(packet.id))
+
+
+
+
+class EndOfMatch(State):
+
+    def on_enter(self):
+        yield ServoTorqueControl([ARM_1_ID, ARM_2_ID, ARM_3_ID, ARM_4_ID, ARM_5_ID, ARM_6_ID, ARM_7_ID], False)
 
 
 
