@@ -387,7 +387,6 @@ class CentralMoonBaseLatBranch(State):
             yield MoveLineTo(1.238, 1.101)
         #---
         if self.robot.team == TEAM_LEFT:
-            yield ArmSequence('GrabBackModuleRightFront')
             yield ArmSequence('DropModuleFromStorage')
 
             yield StartArmSequence('GrabBackModuleLeftFront')
@@ -543,11 +542,10 @@ class StaticStrategy(State):
         yield RotateTo(-math.pi/4.0)
         yield MoveLineTo(1.25, 0.6)
         yield RotateTo(-math.pi/2.0)
-        if self.robot.team == TEAM_LEFT:
-            yield MoveLineTo(1.25, 0.3 -0.005)
-        else: #TEAM_RIGHT
-            yield MoveLineTo(1.25, 0.3 -0.005)
+        yield StartArmSequence('InitGrabPolyModuleFromInit')
+        yield MoveLineTo(1.25, 0.3 -0.005)
         yield RotateTo(-math.pi/2.0)
+        yield WaitForArmSequence()
 
         # Travail sur fusee polychrome bleu pour dépose 4 elements
         yield PolyRocket(False)
@@ -557,8 +555,10 @@ class StaticStrategy(State):
         yield RotateTo(-math.pi/4.0)
         yield MoveLineTo(0.700, 1.150)
         yield RotateTo(math.pi)
+        yield StartArmSequence('InitGrabModuleFromInit')
         yield MoveLineTo(0.350 - 0.005, 1.150)
         yield RotateTo(math.pi)
+        yield WaitForArmSequence()
 
         # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
         yield MonoRocket(False)
@@ -566,15 +566,18 @@ class StaticStrategy(State):
         # Deplacement vers base lunaire centrale
         yield MoveLineTo(1.260, 1.180)
         yield RotateTo(-math.pi/4.0)
+        yield StartArmSequence('GrabBackModuleRightFront')
         yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
         yield RotateTo(CENTRAL_BASE_ANGLE)
+        yield WaitForArmSequence()
 
         # Depose des elements dans branche bleu base lunaire centrale
         yield CentralMoonBaseLatBranch(False)
 
         # Deplacement vers cratere bleu
-        yield MoveLineTo(1.210, 1.130)
-        yield RotateTo(math.radians(37.0))
+        yield MoveLineTo(1.260, 1.180)
+        #yield RotateTo(math.radians(37.0))
+        yield LookAtOpposite(0.765, 0.811)
         yield MoveLineTo(0.765, 0.811)
 
         # Prise des roches dans cratere

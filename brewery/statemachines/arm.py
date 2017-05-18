@@ -332,7 +332,8 @@ class InitArm(State):
 
         yield None
 
-class GrabModuleFromInit(State):
+
+class InitGrabModuleFromInit(State):
     def on_enter(self):
         yield ArmSpeed(350)
 
@@ -343,9 +344,12 @@ class GrabModuleFromInit(State):
         [[(1, 5), 413], [(1, 207), 386], [(1, 107), 183], [(0, 204), 499], [(0, 206), 161], [(0, 105), 512-10]]
         ]
         yield ReadArmTraj(arm_traj, delay=150, reverse=True)
-
         yield Timer(100)
+        yield None
 
+
+class GrabModuleFromInit(State):
+    def on_enter(self):
         arm_traj = [
         [[(1, 5), 414], [(1, 207), 551], [(1, 107), 340], [(0, 204), 500], [(0, 206), 192], [(0, 105), 502]]
         ]
@@ -371,23 +375,27 @@ class GrabModuleFromInit(State):
 
         yield None
 
+
+class InitGrabPolyModuleFromInit(State):
+
+    def on_enter(self):
+        yield ArmSpeed(350)
+        yield ReadArmTraj([[[(0, 206), 682]]])
+        arm_traj = [
+        [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+60], [(0, 204), 500], [(0, 206), 149], [(0, 105), 512]],
+        [[(1, 5), 423], [(1, 207), 386], [(1, 107), 183], [(0, 204), 499], [(0, 206), 161], [(0, 105), 512]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=150, reverse=True)
+        yield ArmSpeed(500)
+        yield Trigger(ARM_7_OPEN)
+        yield None
+
+
+
+
 class GrabPolyModuleFromInit(State):
     def on_enter(self):
         if self.robot.team == TEAM_LEFT:
-            yield ArmSpeed(350)
-
-            yield ReadArmTraj([[[(0, 206), 682]]])
-
-            arm_traj = [
-            [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+60], [(0, 204), 500], [(0, 206), 149], [(0, 105), 512]],
-            [[(1, 5), 423], [(1, 207), 386], [(1, 107), 183], [(0, 204), 499], [(0, 206), 161], [(0, 105), 512]]
-            ]
-            yield ReadArmTraj(arm_traj, delay=150, reverse=True)
-
-            yield ArmSpeed(500)
-            yield Trigger(ARM_7_OPEN)
-            # Init jusque la, en la realisant en fin de déplacement
-
             arm_traj = [
             [[(1, 5), 530]]
             ]
@@ -407,13 +415,7 @@ class GrabPolyModuleFromInit(State):
             yield Trigger(ARM_7_HOLD)
 
         if self.robot.team == TEAM_RIGHT:
-            yield ArmSpeed(350)
-
-            yield ReadArmTraj([[[(0, 206), 682]]])
-            yield Trigger(ARM_7_OPEN)
             arm_traj = [
-            [[(1, 5), 419], [(1, 207), 290], [(1, 107), 381+60], [(0, 204), 500], [(0, 206), 149], [(0, 105), 512]],
-            [[(1, 5), 423], [(1, 207), 386], [(1, 107), 183], [(0, 204), 499], [(0, 206), 161], [(0, 105), 512]],
             [[(1, 5), 320]]
             ]
             yield ReadArmTraj(arm_traj, delay=150, reverse=True)
