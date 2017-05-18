@@ -958,3 +958,8 @@ class TestGrabModuleLeftFromInit(State):
         ]
         yield ReadArmTraj(arm_traj)
         yield None
+
+
+class ClearFirstModule(State):
+    def on_enter(self):
+        yield None
