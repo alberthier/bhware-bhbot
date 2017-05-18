@@ -9,3 +9,4 @@ remote_logs
 brewery/web/cgi-bin/index.cgi
 venv
 brewery/web/nginx.conf
+.DS_Store
