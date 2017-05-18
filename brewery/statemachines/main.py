@@ -21,6 +21,9 @@ import statemachines.testscommon as testscommon
 import statemachines.testsmain as testsmain
 
 ARM_LEARNING = 0
+CENTRAL_BASE_X = 1.288
+CENTRAL_BASE_Y = 1.151
+CENTRAL_BASE_ANGLE = -math.pi / 4.0
 
 
 
@@ -282,60 +285,62 @@ class PolyRocket(State):
             yield RotateTo(-math.pi/2.0)
             yield MoveLineTo(1.25, 0.3)
         #---
+        recalibrate_dist = 0.03
+
         shift_1 = -0.005
         yield ArmSequence('GrabPolyModuleFromInit')
 
         yield ArmSequence('OutputPolyModuleFromRocket')
 
-        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield StartArmSequence('DropPolyModule', kick=False)
+        yield MoveLineTo(1.25, 0.3 + recalibrate_dist)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
+        yield WaitForArmSequence()
 
-        yield ArmSequence('DropPolyModule', kick=False)
-
-        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield StartArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=False)
+        yield MoveLineTo(1.25, 0.3 + recalibrate_dist)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
-
-        yield ArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=False)
+        yield WaitForArmSequence()
 
         yield ArmSequence('OutputPolyModuleFromRocket')
 
-        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield StartArmSequence('DropTurnedPolyModule', finalKick=False)
+        yield MoveLineTo(1.25, 0.3 + recalibrate_dist)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
+        yield WaitForArmSequence()
 
-        yield ArmSequence('DropTurnedPolyModule', finalKick=False)
-
-        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield StartArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=True)
+        yield MoveLineTo(1.25, 0.3 + recalibrate_dist)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
-
-        yield ArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=True)
+        yield WaitForArmSequence()
 
         yield ArmSequence('OutputPolyModuleFromRocket')
 
-        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield StartArmSequence('DropPolyModule', kick=True)
+        yield MoveLineTo(1.25, 0.3 + recalibrate_dist)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
+        yield WaitForArmSequence()
 
-        yield ArmSequence('DropPolyModule', kick=True)
-
-        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield StartArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=False)
+        yield MoveLineTo(1.25, 0.3 + recalibrate_dist)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
-
-        yield ArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=False)
+        yield WaitForArmSequence()
 
         yield ArmSequence('OutputPolyModuleFromRocket')
 
-        yield MoveLineTo(1.25, 0.3 + 0.03)
+        yield StartArmSequence('DropTurnedPolyModule', finalKick=True)
+        yield MoveLineTo(1.25, 0.3 + recalibrate_dist)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
+        yield WaitForArmSequence()
 
-        yield ArmSequence('DropTurnedPolyModule', finalKick=True)
-
-        yield ArmSequence('InitArm')
+        yield StartArmSequence('InitArm')
         #---
         if self.depl == True:
             yield MoveLineRelative(-0.05)
@@ -381,43 +386,64 @@ class CentralMoonBaseLatBranch(State):
             yield RotateTo(-math.pi/4.0)
             yield MoveLineTo(1.238, 1.101)
         #---
+        recalibrate_dist = 0.02
         if self.robot.team == TEAM_LEFT:
             yield ArmSequence('GrabBackModuleRightFront')
             yield ArmSequence('DropModuleFromStorage')
 
-            yield MoveLineRelative(-0.02)
-            yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
-            yield RotateTo(-math.pi/4.0)
+            yield StartArmSequence('GrabBackModuleLeftFront')
+            yield MoveLineRelative(-recalibrate_dist)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
 
-            yield ArmSequence('GrabBackModuleLeftFront')
             yield ArmSequence('DropModuleFromStorage')
 
-            yield MoveLineRelative(-0.02)
-            yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
-            yield RotateTo(-math.pi/4.0)
+            yield StartArmSequence('GrabBackModuleLeft')
+            yield MoveLineRelative(-recalibrate_dist)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
 
-            yield ArmSequence('GrabBackModuleLeft')
             yield ArmSequence('DropModuleFromStorage')
 
-            yield MoveLineRelative(-0.02)
-            yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
-            yield RotateTo(-math.pi/4.0)
+            yield StartArmSequence('GrabBackModuleRight')
+            yield MoveLineRelative(-recalibrate_dist)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
 
-            yield ArmSequence('GrabBackModuleRight')
             yield ArmSequence('DropModuleFromStorage')
 
         if self.robot.team == TEAM_RIGHT:
             yield ArmSequence('GrabBackModuleLeftFront')
             yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('GrabBackModuleRightFront')
+            yield StartArmSequence('GrabBackModuleRightFront')
+            yield MoveLineRelative(-recalibrate_dist)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
             yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('GrabBackModuleLeft')
+            yield StartArmSequence('GrabBackModuleLeft')
+            yield MoveLineRelative(-recalibrate_dist)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
             yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('GrabBackModuleRight')
+            yield StartArmSequence('GrabBackModuleRight')
+            yield MoveLineRelative(-recalibrate_dist)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
             yield ArmSequence('DropModuleFromStorage')
+
+        yield StartArmSequence('InitArm')
         #---
         if self.depl == True:
             yield MoveLineRelative(-0.05)
@@ -536,10 +562,10 @@ class StaticStrategy(State):
         yield MonoRocket(False)
 
         # Deplacement vers base lunaire centrale
-        yield MoveLineTo(1.210 + 0.02, 1.130 + 0.02)
+        yield MoveLineTo(1.260, 1.180)
         yield RotateTo(-math.pi/4.0)
-        yield MoveLineTo(1.238 + 0.02, 1.101 + 0.02)
-        yield RotateTo(-math.pi/4.0)
+        yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+        yield RotateTo(CENTRAL_BASE_ANGLE)
 
         # Depose des elements dans branche bleu base lunaire centrale
         yield CentralMoonBaseLatBranch(False)
