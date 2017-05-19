@@ -21,8 +21,8 @@ import statemachines.testscommon as testscommon
 import statemachines.testsmain as testsmain
 
 ARM_LEARNING = 0
-CENTRAL_BASE_X = 1.288
-CENTRAL_BASE_Y = 1.151
+CENTRAL_BASE_X = 1.288 + 0.007
+CENTRAL_BASE_Y = 1.151 - 0.007
 CENTRAL_BASE_ANGLE = -math.pi / 4.0
 RECALIBRATE_DIST = 0.02
 
