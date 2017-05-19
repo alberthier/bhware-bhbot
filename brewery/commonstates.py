@@ -246,7 +246,7 @@ class SetupTurret(statemachine.State):
 class WaitForOpponentLeave(statemachine.Timer):
 
     TIMEOUT       = 0
-    OPPONENT_LEFT = 1
+    OPPONENT_LEFT = 100
 
     def __init__(self, opponent, miliseconds, move_direction, retries):
         if miliseconds is None :
