@@ -401,12 +401,15 @@ class AbstractMove(statemachine.State):
                                                      self.packet.direction, self.opponent_handling_config.retries_count)
             reason = leave_state.exit_reason
             self.current_opponent = None
+            self.log("AbstractMove: handle_opponent_detected {} {}".format(reason, reason in (WaitForOpponentLeave.TIMEOUT, TRAJECTORY_BLOCKED)))
             if reason in (WaitForOpponentLeave.TIMEOUT, TRAJECTORY_BLOCKED) :
                 self.exit_reason = TRAJECTORY_OPPONENT_DETECTED
+                self.log("AbstractMove: handle_opponent_detected leaving state")
                 yield None
             else:
                 if point_index is not None:
                     self.packet.points = self.packet.points[point_index:]
+                self.log("AbstractMove: handle_opponent_detected replay")
                 self.send_packet(self.packet)
         else:
             self.log("Opponent detected, cancelling log")
