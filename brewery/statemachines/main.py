@@ -312,6 +312,8 @@ class PolyRocket(State):
         yield RotateTo(-math.pi/2.0)
         yield WaitForArmSequence()
 
+        yield None # Skip the rest
+
         yield StartArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=True)
         yield MoveLineTo(1.25, 0.3 + RECALIBRATE_DIST)
         yield MoveLineTo(1.25, 0.3 + shift_1)
