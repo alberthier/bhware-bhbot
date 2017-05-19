@@ -174,6 +174,10 @@ class Main(State):
             self.yield_at(89500, EndOfMatch())
             yield SpeedControl(88)
 
+            if self.robot.team == TEAM_RIGHT:
+                CENTRAL_BASE_X += 0.010
+                CENTRAL_BASE_Y -= 0.010
+
             if 1:
                 if self.cnt_arm_action == 0:
                     #~ yield InitArm()
