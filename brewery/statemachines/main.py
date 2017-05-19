@@ -536,9 +536,7 @@ class StoneDrop(State):
 class Initialize(State):
 
     def on_enter(self):
-        yield Timer(10)
         yield ArmSequence('InitArm')
-        yield ArmSequence('InitArmClear')
         yield Trigger(STORAGE_FINGER_RIGHT_INIT,
                         STORAGE_FINGER_RIGHT_FRONT_INIT,
                         STORAGE_FINGER_LEFT_FRONT_INIT,
@@ -582,7 +580,7 @@ class ReadArmServoPosition(State):
 
 class StaticStrategy(State):
     def on_enter(self):
-        yield StartArmSequence('ClearFirstModule')
+        yield ArmSequence('ClearFirstModule')
 
         # Deplacement vers fusee polychrome bleu
         yield MoveLineTo(0.927 - 0.05, 0.923 + 0.05)
