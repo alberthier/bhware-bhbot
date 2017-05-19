@@ -190,7 +190,7 @@ class Main(State):
                     #~ yield MoveLineTo(1.0, 0.0)
                     #~ yield RotateTo(-math.pi/2.0)
 
-                    yield StaticStrategy()
+                    yield StaticStrategy2()
 
 
                 elif self.cnt_arm_action == 1:
@@ -652,9 +652,9 @@ class StaticStrategy2(State):
         # Deplacement vers fusee bleu
         yield MoveLineTo(1.0, 1.150)
         yield RotateTo(math.pi)
-        yield StartArmSequence('InitGrabModuleFromInit')
         yield MoveLineTo(0.350 - 0.005, 1.150)
         yield RotateTo(math.pi)
+        yield StartArmSequence('InitGrabModuleFromInit')
         yield WaitForArmSequence()
 
         # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
