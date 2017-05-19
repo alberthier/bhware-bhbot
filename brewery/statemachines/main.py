@@ -363,13 +363,22 @@ class MonoRocket(State):
             yield MoveLineTo(0.350, 1.150)
         #---
         yield ArmSequence('GrabModuleFromInit')
-        yield ArmSequence('StockModuleFromGrabbedModuleRight')
-        yield ArmSequence('GrabModuleFromStorageReturn')
-        yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
-        yield ArmSequence('GrabModuleFromStorageReturn')
-        yield ArmSequence('StockModuleFromGrabbedModuleLeft')
-        yield ArmSequence('GrabModuleFromStorageReturn')
-        yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
+        if self.robot.team == TEAM_RIGHT:
+            yield ArmSequence('StockModuleFromGrabbedModuleRight')
+            yield ArmSequence('GrabModuleFromStorageReturn')
+            yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
+            yield ArmSequence('GrabModuleFromStorageReturn')
+            yield ArmSequence('StockModuleFromGrabbedModuleLeft')
+            yield ArmSequence('GrabModuleFromStorageReturn')
+            yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
+        else:
+            yield ArmSequence('StockModuleFromGrabbedModuleLeft')
+            yield ArmSequence('GrabModuleFromStorageReturn')
+            yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
+            yield ArmSequence('GrabModuleFromStorageReturn')
+            yield ArmSequence('StockModuleFromGrabbedModuleRight')
+            yield ArmSequence('GrabModuleFromStorageReturn')
+            yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
         yield StartArmSequence('InitArm')
         #---
         if self.depl == True:
