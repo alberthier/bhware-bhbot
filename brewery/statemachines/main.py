@@ -434,6 +434,7 @@ class CentralMoonBaseLatBranch(State):
             yield MoveLineTo(1.238, 1.101)
         #---
         if self.robot.team == TEAM_LEFT:
+            yield ArmSequence('GrabBackModuleLeftFront')
             yield ArmSequence('DropModuleFromStorage')
 
             yield StartArmSequence('GrabBackModuleLeft')
@@ -461,6 +462,7 @@ class CentralMoonBaseLatBranch(State):
             yield ArmSequence('DropModuleFromStorage')
 
         if self.robot.team == TEAM_RIGHT:
+            yield ArmSequence('GrabBackModuleRightFront')
             yield ArmSequence('DropModuleFromStorage')
 
             yield StartArmSequence('GrabBackModuleRight')
@@ -647,9 +649,14 @@ class StaticStrategy(State):
 
 class StaticStrategy2(State):
     def on_enter(self):
-        yield ArmSequence('ClearFirstModule')
-
         # Deplacement vers fusee bleu
+        yield ArmSequence('InitGrabModuleFromInit')
+        yield MoveLineTo(0.15 + 0.13, 0.923 + 0.03)
+        yield ArmSequence('GrabModuleFromInit')
+        if self.robot.team == TEAM_LEFT:
+            yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
+        else:
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
         yield MoveLineTo(0.7, 1.150)
         yield RotateTo(math.pi)
         yield MoveLineTo(0.350 - 0.005, 1.150)
