@@ -156,7 +156,14 @@ class Enum(object):
     def values(self):
         return self.lookup_by_name.values()
 
+# Rocket storage
 
+STORAGE_MODULE = Enum("Storage Module",
+    STORAGE_MODULE_LEFT = 1,
+    STORAGE_MODULE_LEFT_FRONT = 2,
+    STORAGE_MODULE_RIGHT = 1,
+    STORAGE_MODULE_RIGHT_FRONT = 2,
+)
 
 
 REMOTE_DEVICE = Enum("Remote hardware type",

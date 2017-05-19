@@ -358,6 +358,33 @@ class PolyRocket(State):
 
 
 
+class ReadModuleHolderPresence(State):
+    def on_enter(self):
+
+        self.robot.used_storage_spaces=[]
+
+        for label, position, storage_space in [    ("LEFT FRONT", STORAGE_FINGER_LEFT_FRONT_HOLD, STORAGE_MODULE_LEFT_FRONT),
+                                    ("LEFT", STORAGE_FINGER_LEFT_HOLD, STORAGE_MODULE_LEFT),
+                                    ("RIGHT FRONT", STORAGE_FINGER_RIGHT_FRONT_HOLD, STORAGE_MODULE_RIGHT_FRONT),
+                                    ("RIGHT", STORAGE_FINGER_RIGHT_HOLD, STORAGE_MODULE_RIGHT)
+                                ]:
+            logger.log("Read servo {} position {}")
+            srv_id = position[0] # type: int
+            expected_value = position[2] # type: int
+            real_value = (yield ReadServoPosition(srv_id)).value # type:int
+
+            delta = abs(expected_value - real_value) < 10
+
+            logger.log("Servo {} expected position: {} real position: {} delta: {}".format(label, expected_value, real_value, delta))
+
+            if delta < 10:
+                logger.log("Storage empty")
+            else:
+                logger.log("Storage used")
+                self.robot.used_storage_spaces.append(storage_space)
+
+        logger.log("Used storage spaces: {}".format(self.robot.used_storage_spaces))
+
 
 class MonoRocket(State):
     def __init__(self, depl = True):
@@ -423,6 +450,39 @@ class MonoRocket(State):
         yield None
 
 
+class PickNextModuleToDrop(State):
+    def on_enter(self):
+        self.module_to_drop = False
+
+        DROP_STATE_MAPPING = {
+            STORAGE_MODULE_LEFT: "GrabBackModuleLeft",
+            STORAGE_MODULE_LEFT_FRONT: "GrabBackModuleLeftFront"
+            STORAGE_MODULE_RIGHT: "GrabBackModuleRight"
+            STORAGE_MODULE_RIGHT_FRONT: "GrabBackModuleRightFront"
+        }
+
+
+        if self.robot.team == TEAM_LEFT:
+            DROP_ORDER = [STORAGE_MODULE_LEFT_FRONT, STORAGE_MODULE_LEFT, STORAGE_MODULE_RIGHT_FRONT, STORAGE_MODULE_RIGHT]
+        else:
+            DROP_ORDER = [STORAGE_MODULE_RIGHT_FRONT, STORAGE_MODULE_RIGHT, STORAGE_MODULE_LEFT_FRONT, STORAGE_MODULE_LEFT]
+
+        logger.log("Drop order: {}".format([STORAGE_MODULE.lookup_by_value[x] for x in DROP_ORDER)))
+
+        for storage_name in DROP_ORDER:
+            if storage_name in self.robot.used_storage_spaces:
+                storage_label = STORAGE_MODULE.lookup_by_value[storage_name]
+                logger.log("Storage {} is in use".format(storage_label))
+                state_to_use = DROP_STATE_MAPPING[storage_name]
+                yield StartArmSequence(state_to_use)
+                yield MoveLineRelative(-RECALIBRATE_DIST)
+                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+                yield RotateTo(CENTRAL_BASE_ANGLE)
+                yield WaitForArmSequence()
+
+                self.robot.used_storage_spaces.remove(storage_name)
+                self.module_to_drop = True
+
 
 class CentralMoonBaseLatBranch(State):
     def __init__(self, depl = True):
@@ -433,59 +493,98 @@ class CentralMoonBaseLatBranch(State):
             yield RotateTo(-math.pi/4.0)
             yield MoveLineTo(1.238, 1.101)
         #---
+
+        yield ArmSequence('DropModuleFromStorage')
+
+        for i in range(4):
+            if (yield PickNextModuleToDrop()).module_to_drop:
+                yield ArmSequence('DropModuleFromStorage')
+            else:
+                logger.log("No module to drop")
+
+        yield StartArmSequence('InitArm')
+        #---
+        if self.depl == True:
+            yield MoveLineRelative(-0.05)
+        self.exit_reason = GOAL_DONE
+        yield None
+
+
+
+class CentralMoonBaseLatBranchBackup(State):
+    def __init__(self, depl = True):
+        self.depl = depl
+
+    def on_enter(self):
+        if self.depl == True:
+            yield RotateTo(-math.pi/4.0)
+            yield MoveLineTo(1.238, 1.101)
+        #---
         if self.robot.team == TEAM_LEFT:
-            yield ArmSequence('DropModuleFromStorage')
 
-            yield StartArmSequence('GrabBackModuleLeft')
-            yield MoveLineRelative(-RECALIBRATE_DIST)
-            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            yield RotateTo(CENTRAL_BASE_ANGLE)
-            yield WaitForArmSequence()
+            #TODO: dynamic pick order
+            if self.robot.is_holding_module:
+                yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('DropModuleFromStorage')
+            if STORAGE_MODULE_LEFT in self.robot.used_storage_spaces:
+                yield StartArmSequence('GrabBackModuleLeft')
+                yield MoveLineRelative(-RECALIBRATE_DIST)
+                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+                yield RotateTo(CENTRAL_BASE_ANGLE)
+                yield WaitForArmSequence()
 
-            yield StartArmSequence('GrabBackModuleRightFront')
-            yield MoveLineRelative(-RECALIBRATE_DIST)
-            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            yield RotateTo(CENTRAL_BASE_ANGLE)
-            yield WaitForArmSequence()
+                yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('DropModuleFromStorage')
+            if STORAGE_MODULE_RIGHT_FRONT in self.robot.used_storage_spaces:
+                yield StartArmSequence('GrabBackModuleRightFront')
+                yield MoveLineRelative(-RECALIBRATE_DIST)
+                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+                yield RotateTo(CENTRAL_BASE_ANGLE)
+                yield WaitForArmSequence()
 
-            yield StartArmSequence('GrabBackModuleRight')
-            yield MoveLineRelative(-RECALIBRATE_DIST)
-            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            yield RotateTo(CENTRAL_BASE_ANGLE)
-            yield WaitForArmSequence()
+                yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('DropModuleFromStorage')
+            if STORAGE_MODULE_RIGHT in self.robot.used_storage_spaces:
+                yield StartArmSequence('GrabBackModuleRight')
+                yield MoveLineRelative(-RECALIBRATE_DIST)
+                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+                yield RotateTo(CENTRAL_BASE_ANGLE)
+                yield WaitForArmSequence()
+
+                yield ArmSequence('DropModuleFromStorage')
 
         if self.robot.team == TEAM_RIGHT:
-            yield ArmSequence('DropModuleFromStorage')
+            if self.robot.is_holding_module:
+                yield ArmSequence('DropModuleFromStorage')
 
-            yield StartArmSequence('GrabBackModuleRight')
-            yield MoveLineRelative(-RECALIBRATE_DIST)
-            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            yield RotateTo(CENTRAL_BASE_ANGLE)
-            yield WaitForArmSequence()
+            if STORAGE_MODULE_RIGHT in self.robot.used_storage_spaces:
 
-            yield ArmSequence('DropModuleFromStorage')
+                yield StartArmSequence('GrabBackModuleRight')
+                yield MoveLineRelative(-RECALIBRATE_DIST)
+                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+                yield RotateTo(CENTRAL_BASE_ANGLE)
+                yield WaitForArmSequence()
 
-            yield StartArmSequence('GrabBackModuleLeftFront')
-            yield MoveLineRelative(-RECALIBRATE_DIST)
-            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            yield RotateTo(CENTRAL_BASE_ANGLE)
-            yield WaitForArmSequence()
+                yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('DropModuleFromStorage')
+            if STORAGE_MODULE_LEFT_FRONT in self.robot.used_storage_spaces:
+                yield StartArmSequence('GrabBackModuleLeftFront')
+                yield MoveLineRelative(-RECALIBRATE_DIST)
+                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+                yield RotateTo(CENTRAL_BASE_ANGLE)
+                yield WaitForArmSequence()
 
-            yield StartArmSequence('GrabBackModuleLeft')
-            yield MoveLineRelative(-RECALIBRATE_DIST)
-            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            yield RotateTo(CENTRAL_BASE_ANGLE)
-            yield WaitForArmSequence()
+                yield ArmSequence('DropModuleFromStorage')
 
-            yield ArmSequence('DropModuleFromStorage')
+            if STORAGE_MODULE_LEFT in self.robot.used_storage_spaces:
+
+                yield StartArmSequence('GrabBackModuleLeft')
+                yield MoveLineRelative(-RECALIBRATE_DIST)
+                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+                yield RotateTo(CENTRAL_BASE_ANGLE)
+                yield WaitForArmSequence()
+
+                yield ArmSequence('DropModuleFromStorage')
 
         yield StartArmSequence('InitArm')
         #---
@@ -613,13 +712,15 @@ class StaticStrategy(State):
         yield MoveLineTo(1.260, 1.180)
         yield RotateTo(-math.pi/4.0)
         yield WaitForArmSequence()
-        if self.robot.team == TEAM_RIGHT:
-            yield StartArmSequence('GrabBackModuleRightFront')
-        else:
-            yield StartArmSequence('GrabBackModuleLeftFront')
-        yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-        yield RotateTo(CENTRAL_BASE_ANGLE)
-        yield WaitForArmSequence()
+        # if self.robot.team == TEAM_RIGHT:
+        #     yield StartArmSequence('GrabBackModuleRightFront')
+        # else:
+        #     yield StartArmSequence('GrabBackModuleLeftFront')
+        # yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+        # yield RotateTo(CENTRAL_BASE_ANGLE)
+        # yield WaitForArmSequence()
+
+        yield PickNextModuleToDrop()
 
         # Depose des elements dans branche bleu base lunaire centrale
         yield CentralMoonBaseLatBranch(False)

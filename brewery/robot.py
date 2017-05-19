@@ -22,12 +22,9 @@ class Robot(object):
         self.goal_manager = goalmanager.GoalManager(event_loop)
         self.goal_decider = goaldecider.GoalDecider(event_loop, self.goal_manager)
         self.locks = set()
-        #TODO: make dynamic
-        self.has_left_bulb=False
-        self.has_right_bulb=False
-        self.left_stand_count=0
-        self.right_stand_count=0
+        self.used_storage_spaces = []
         self.score=0
+        self.is_holding_module = True
 
 
     def is_looking_at(self, pose):
