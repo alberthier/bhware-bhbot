@@ -368,7 +368,7 @@ class MonoRocket(State):
             yield RotateTo(math.pi)
             yield MoveLineTo(0.350, 1.150)
         #---
-        yield ArmSequence('GrabModuleFromInit')
+        yield ArmSequence('GrabModuleFromStorageReturn')
         if self.robot.team == TEAM_RIGHT:
             yield StartArmSequence('StockModuleFromGrabbedModuleRight')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
@@ -666,7 +666,7 @@ class StaticStrategy2(State):
     def on_enter(self):
         # Deplacement vers fusee bleu
         yield ArmSequence('InitGrabModuleFromInit')
-        yield MoveLineTo(0.15 + 0.16, 0.923 + 0.03)
+        yield MoveLineTo(0.15 + 0.18, 0.923 + 0.03)
         yield ArmSequence('GrabModuleFromInit')
         if self.robot.team == TEAM_LEFT:
             yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
@@ -676,8 +676,6 @@ class StaticStrategy2(State):
         yield RotateTo(math.pi)
         yield MoveLineTo(0.350 - 0.005, 1.150)
         yield RotateTo(math.pi)
-        yield WaitForArmSequence()
-        yield StartArmSequence('InitGrabModuleFromInit')
         yield WaitForArmSequence()
 
         # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
