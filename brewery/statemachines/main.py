@@ -384,7 +384,7 @@ class MonoRocket(State):
             yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
             yield MoveLineTo(0.350 - 0.005, 1.150)
             yield RotateTo(math.pi)
@@ -407,7 +407,7 @@ class MonoRocket(State):
             yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleRight')
+            yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
             yield MoveLineTo(0.350 - 0.005, 1.150)
             yield RotateTo(math.pi)
@@ -667,9 +667,9 @@ class StaticStrategy2(State):
         yield MoveLineTo(0.15 + 0.18, 0.923 + 0.03)
         yield ArmSequence('GrabModuleFromInit')
         if self.robot.team == TEAM_LEFT:
-            yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
+            yield StartArmSequence('StockModuleFromGrabbedModuleRight')
         else:
-            yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
         yield MoveLineTo(0.7, 1.150)
         yield RotateTo(math.pi)
         yield MoveLineTo(0.350 - 0.005, 1.150)
