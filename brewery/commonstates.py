@@ -262,7 +262,7 @@ class WaitForOpponentLeave(statemachine.Timer):
 
     def on_enter(self):
         logger.log('WaitForOpponentLeave : time={}, retries={}'.format(self.wait_milis, self.retries))
-        Timer.on_enter(self)
+        statemachine.Timer.on_enter(self)
         self.goto_finished = False
         self.opponent_disappeared = False
         self.timer_expired = False
