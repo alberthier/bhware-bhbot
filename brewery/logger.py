@@ -90,9 +90,9 @@ def initialize(args = None):
 def set_team(team):
     global term_color
     if team == TEAM_RIGHT:
-        term_color = TERM_GREEN
-    else:
         term_color = TERM_YELLOW
+    else:
+        term_color = TERM_BLUE
 
 
 def close():
