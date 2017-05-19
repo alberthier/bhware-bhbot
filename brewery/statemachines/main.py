@@ -364,20 +364,50 @@ class MonoRocket(State):
         #---
         yield ArmSequence('GrabModuleFromInit')
         if self.robot.team == TEAM_RIGHT:
-            yield ArmSequence('StockModuleFromGrabbedModuleRight')
+            yield StartArmSequence('StockModuleFromGrabbedModuleRight')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
-            yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
+
+            yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
-            yield ArmSequence('StockModuleFromGrabbedModuleLeft')
+
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
+
             yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
         else:
-            yield ArmSequence('StockModuleFromGrabbedModuleLeft')
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
-            yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
+
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
-            yield ArmSequence('StockModuleFromGrabbedModuleRight')
+
+            yield StartArmSequence('StockModuleFromGrabbedModuleRight')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
+
             yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
         yield StartArmSequence('InitArm')
         #---
