@@ -114,7 +114,7 @@ else:
 LOG_DIR                                = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "logs")
 
 # Blocking opponent handling
-DEFAULT_OPPONENT_WAIT_MS               = 2000
+DEFAULT_OPPONENT_WAIT_MS               = 30000
 DEFAULT_OPPONENT_DISAPPEAR_RETRIES     = -1
 
 # Turret detection ranges

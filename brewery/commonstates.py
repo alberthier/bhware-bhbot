@@ -284,6 +284,7 @@ class WaitForOpponentLeave(statemachine.Timer):
 
 
     def on_timeout(self):
+        logger.log('WaitForOpponentLeave : on_timeout')
         self.timer_expired = True
         if self.exit_reason is None:
             self.exit_reason = self.TIMEOUT
@@ -291,11 +292,13 @@ class WaitForOpponentLeave(statemachine.Timer):
 
 
     def on_goto_finished(self, packet):
+        logger.log('WaitForOpponentLeave : on_goto_finished')
         self.goto_finished = True
         return self.try_leave()
 
 
     def on_opponent_disappeared(self, packet):
+        logger.log('WaitForOpponentLeave : on_opponent_disappeared {}'.format(packet.robot == self.opponent))
         if packet.robot == self.opponent:
             self.exit_reason = self.OPPONENT_LEFT
             self.opponent_disappeared = True
@@ -305,6 +308,7 @@ class WaitForOpponentLeave(statemachine.Timer):
 
 
     def try_leave(self):
+        logger.log('WaitForOpponentLeave : try_leave goto_finished={} timer_expired={} opponent_disappeared={}'.format(self.goto_finished, self.timer_expired, self.opponent_disappeared))
         if self.goto_finished and (self.timer_expired or self.opponent_disappeared):
             yield None
         if self.retries >= 0 :
@@ -316,6 +320,7 @@ class WaitForOpponentLeave(statemachine.Timer):
                     yield None
                 else :
                     logger.log('WaitForOpponentLeave : retries remaining = {}'.format(self.retries))
+        logger.log('WaitForOpponentLeave : not leaving')
 
 
 
@@ -340,8 +345,8 @@ class OpponentInTheWay(Exception):
 
 
 OPPONENT_HANDLING_NONE = OpponentHandlingConfig(False, False, False, None, None)
-OPPONENT_HANDLING_STOP = OpponentHandlingConfig(True, False, True, 0, 0)
-OPPONENT_HANDLING_RAISE = OpponentHandlingConfig(True, True, False, 0, 0)
+OPPONENT_HANDLING_STOP = OpponentHandlingConfig(True, False, True, 0, None)
+OPPONENT_HANDLING_RAISE = OpponentHandlingConfig(True, True, False, 0, None)
 
 
 
