@@ -251,6 +251,7 @@ class WaitForOpponentLeave(statemachine.Timer):
     def __init__(self, opponent, miliseconds, move_direction, retries):
         if miliseconds is None :
             miliseconds = DEFAULT_OPPONENT_WAIT_MS
+        self.wait_milis = miliseconds
         statemachine.Timer.__init__(self, miliseconds)
         self.opponent = opponent
         self.move_direction = move_direction
@@ -260,7 +261,7 @@ class WaitForOpponentLeave(statemachine.Timer):
 
 
     def on_enter(self):
-        logger.log('WaitForOpponentLeave : time={}, retries={}'.format(self.miliseconds, self.retries))
+        logger.log('WaitForOpponentLeave : time={}, retries={}'.format(self.wait_milis, self.retries))
         Timer.on_enter(self)
         self.goto_finished = False
         self.opponent_disappeared = False
