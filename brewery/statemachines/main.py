@@ -433,9 +433,8 @@ class CentralMoonBaseLatBranch(State):
             yield RotateTo(-math.pi/4.0)
             yield MoveLineTo(1.238, 1.101)
         #---
+        yield ArmSequence('DeposeFifthModule')
         if self.robot.team == TEAM_LEFT:
-            yield ArmSequence('DropModuleFromStorage')
-
             yield StartArmSequence('GrabBackModuleRightFront')
             yield MoveLineRelative(-RECALIBRATE_DIST)
             yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
@@ -468,8 +467,6 @@ class CentralMoonBaseLatBranch(State):
 
             yield ArmSequence('DropModuleFromStorage')
         if self.robot.team == TEAM_RIGHT:
-            yield ArmSequence('DropModuleFromStorage')
-
             yield StartArmSequence('GrabBackModuleLeftFront')
             yield MoveLineRelative(-RECALIBRATE_DIST)
             yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
