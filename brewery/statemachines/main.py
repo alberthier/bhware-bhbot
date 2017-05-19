@@ -450,8 +450,8 @@ class PickNextModuleToDrop(State):
 
         DROP_STATE_MAPPING = {
             STORAGE_MODULE_LEFT: "GrabBackModuleLeft",
-            STORAGE_MODULE_LEFT_FRONT: "GrabBackModuleLeftFront"
-            STORAGE_MODULE_RIGHT: "GrabBackModuleRight"
+            STORAGE_MODULE_LEFT_FRONT: "GrabBackModuleLeftFront",
+            STORAGE_MODULE_RIGHT: "GrabBackModuleRight",
             STORAGE_MODULE_RIGHT_FRONT: "GrabBackModuleRightFront"
         }
 
