@@ -650,7 +650,7 @@ class StaticStrategy2(State):
         yield ArmSequence('ClearFirstModule')
 
         # Deplacement vers fusee bleu
-        yield MoveLineTo(1.0, 1.150)
+        yield MoveLineTo(0.7, 1.150)
         yield RotateTo(math.pi)
         yield MoveLineTo(0.350 - 0.005, 1.150)
         yield RotateTo(math.pi)
@@ -677,8 +677,8 @@ class StaticStrategy2(State):
 
         # Deplacement vers fusee polychrome bleu
         yield MoveLineTo(1.260, 1.180)
-        yield LookAt(1.200, 0.750)
-        yield MoveLineTo(1.200, 0.750)
+        yield LookAt(1.080, 0.750)
+        yield MoveLineTo(1.080, 0.750)
         yield LookAt(1.250, 0.600)
         yield MoveLineTo(1.250, 0.600)
         yield RotateTo(-math.pi/2.0)
