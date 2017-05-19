@@ -461,7 +461,7 @@ class PickNextModuleToDrop(State):
         else:
             DROP_ORDER = [STORAGE_MODULE_LEFT_FRONT, STORAGE_MODULE_RIGHT_FRONT, STORAGE_MODULE_RIGHT, STORAGE_MODULE_LEFT]
 
-        logger.log("Drop order: {}".format([STORAGE_MODULE.lookup_by_value[x] for x in DROP_ORDER)))
+        logger.log("Drop order: {}".format([STORAGE_MODULE.lookup_by_value[x] for x in DROP_ORDER]))
 
         for storage_name in DROP_ORDER:
             if storage_name in self.robot.used_storage_spaces:
