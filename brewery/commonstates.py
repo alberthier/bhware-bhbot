@@ -339,7 +339,7 @@ class OpponentInTheWay(Exception):
 
 
 OPPONENT_HANDLING_NONE = OpponentHandlingConfig(False, False, False, None, None)
-OPPONENT_HANDLING_STOP = OpponentHandlingConfig(True, False, False, 0, 0)
+OPPONENT_HANDLING_STOP = OpponentHandlingConfig(True, False, True, 0, 0)
 OPPONENT_HANDLING_RAISE = OpponentHandlingConfig(True, True, False, 0, 0)
 
 
