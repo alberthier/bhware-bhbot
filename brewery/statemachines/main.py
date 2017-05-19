@@ -645,6 +645,54 @@ class StaticStrategy(State):
         yield None
 
 
+class StaticStrategy2(State):
+    def on_enter(self):
+        yield ArmSequence('ClearFirstModule')
+
+        # Deplacement vers fusee bleu
+        yield MoveLineTo(1.0, 1.150)
+        yield RotateTo(math.pi)
+        yield StartArmSequence('InitGrabModuleFromInit')
+        yield MoveLineTo(0.350 - 0.005, 1.150)
+        yield RotateTo(math.pi)
+        yield WaitForArmSequence()
+
+        # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
+        yield MonoRocket(False)
+
+        # Deplacement vers base lunaire centrale
+        yield MoveLineTo(1.260, 1.180)
+        yield RotateTo(-math.pi/4.0)
+        yield WaitForArmSequence()
+        if self.robot.team == TEAM_RIGHT:
+            yield StartArmSequence('GrabBackModuleRightFront')
+        else:
+            yield StartArmSequence('GrabBackModuleLeftFront')
+        yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+        yield RotateTo(CENTRAL_BASE_ANGLE)
+        yield WaitForArmSequence()
+
+        # Depose des elements dans branche bleu base lunaire centrale
+        yield CentralMoonBaseLatBranch(False)
+
+        # Deplacement vers fusee polychrome bleu
+        yield MoveLineTo(1.260, 1.180)
+        yield RotateTo(-math.pi/2.0)
+        yield MoveLineTo(1.260, 0.750)
+        yield LookAt(1.250, 0.600)
+        yield MoveLineTo(1.250, 0.600)
+        yield RotateTo(-math.pi/2.0)
+        yield StartArmSequence('InitGrabPolyModuleFromInit')
+        yield MoveLineTo(1.25, 0.3 -0.005)
+        yield RotateTo(-math.pi/2.0)
+        yield WaitForArmSequence()
+
+        # Travail sur fusee polychrome bleu pour dépose 4 elements
+        yield PolyRocket(False)
+
+        # Fin du match
+        yield None
+
 ##################################################
 # End of match
 
