@@ -483,7 +483,7 @@ class CentralMoonBaseLatBranch(State):
         self.depl = depl
 
     def on_enter(self):
-        if self.depl == True:
+        if self.depl:
             yield RotateTo(-math.pi/4.0)
             yield MoveLineTo(1.238, 1.101)
         #---
@@ -500,7 +500,7 @@ class CentralMoonBaseLatBranch(State):
 
         yield StartArmSequence('InitArm')
         #---
-        if self.depl == True:
+        if self.depl:
             yield MoveLineRelative(-0.05)
         self.exit_reason = GOAL_DONE
         yield None
