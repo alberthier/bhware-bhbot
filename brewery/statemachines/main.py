@@ -536,6 +536,7 @@ class StoneDrop(State):
 class Initialize(State):
 
     def on_enter(self):
+        yield Timer(10)
         yield ArmSequence('InitArm')
         yield ArmSequence('InitArmClear')
         yield Trigger(STORAGE_FINGER_RIGHT_INIT,
