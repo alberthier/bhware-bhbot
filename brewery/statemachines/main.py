@@ -175,6 +175,8 @@ class Main(State):
             yield SpeedControl(88)
 
             if self.robot.team == TEAM_RIGHT:
+                global CENTRAL_BASE_X
+                global CENTRAL_BASE_Y
                 CENTRAL_BASE_X += 0.010
                 CENTRAL_BASE_Y -= 0.010
 
