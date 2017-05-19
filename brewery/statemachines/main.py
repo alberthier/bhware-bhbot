@@ -434,7 +434,6 @@ class CentralMoonBaseLatBranch(State):
             yield MoveLineTo(1.238, 1.101)
         #---
         if self.robot.team == TEAM_LEFT:
-            yield ArmSequence('GrabBackModuleLeftFront')
             yield ArmSequence('DropModuleFromStorage')
 
             yield StartArmSequence('GrabBackModuleLeft')
@@ -461,8 +460,15 @@ class CentralMoonBaseLatBranch(State):
 
             yield ArmSequence('DropModuleFromStorage')
 
+            yield ArmSequence('GrabBackModuleLeftFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
         if self.robot.team == TEAM_RIGHT:
-            yield ArmSequence('GrabBackModuleRightFront')
             yield ArmSequence('DropModuleFromStorage')
 
             yield StartArmSequence('GrabBackModuleRight')
@@ -488,6 +494,15 @@ class CentralMoonBaseLatBranch(State):
             yield WaitForArmSequence()
 
             yield ArmSequence('DropModuleFromStorage')
+
+            yield ArmSequence('GrabBackModuleRightFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
 
         yield StartArmSequence('InitArm')
         #---
@@ -651,7 +666,7 @@ class StaticStrategy2(State):
     def on_enter(self):
         # Deplacement vers fusee bleu
         yield ArmSequence('InitGrabModuleFromInit')
-        yield MoveLineTo(0.15 + 0.13, 0.923 + 0.03)
+        yield MoveLineTo(0.15 + 0.16, 0.923 + 0.03)
         yield ArmSequence('GrabModuleFromInit')
         if self.robot.team == TEAM_LEFT:
             yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
@@ -661,6 +676,7 @@ class StaticStrategy2(State):
         yield RotateTo(math.pi)
         yield MoveLineTo(0.350 - 0.005, 1.150)
         yield RotateTo(math.pi)
+        yield WaitForArmSequence()
         yield StartArmSequence('InitGrabModuleFromInit')
         yield WaitForArmSequence()
 
