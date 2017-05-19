@@ -30,6 +30,7 @@ class Main(State):
 
     def on_arm_sequence_start(self, packet):
         state = getattr(sys.modules[__name__], packet.id)
+        state = None
         if not state:
             self.log("State not found: '{}'".format(packet.id))
         else:

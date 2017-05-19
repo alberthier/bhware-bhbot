@@ -385,13 +385,13 @@ class MonoRocket(State):
             yield ArmSequence('GrabModuleFromStorageReturn')
 
             yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
-            # yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            # yield MoveLineTo(0.350 - 0.005, 1.150)
-            # yield RotateTo(math.pi)
-            # yield WaitForArmSequence()
-            # yield ArmSequence('GrabModuleFromStorageReturn')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
+            yield ArmSequence('GrabModuleFromStorageReturn')
 
-            # yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
+            yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
         else:
             yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
@@ -408,13 +408,13 @@ class MonoRocket(State):
             yield ArmSequence('GrabModuleFromStorageReturn')
 
             yield StartArmSequence('StockModuleFromGrabbedModuleRight')
-            # yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            # yield MoveLineTo(0.350 - 0.005, 1.150)
-            # yield RotateTo(math.pi)
-            # yield WaitForArmSequence()
-            # yield ArmSequence('GrabModuleFromStorageReturn')
+            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+            yield MoveLineTo(0.350 - 0.005, 1.150)
+            yield RotateTo(math.pi)
+            yield WaitForArmSequence()
+            yield ArmSequence('GrabModuleFromStorageReturn')
 
-            # yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
+            yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
         yield StartArmSequence('InitArm')
         #---
         if self.depl == True:
@@ -444,13 +444,13 @@ class CentralMoonBaseLatBranch(State):
 
             yield ArmSequence('DropModuleFromStorage')
 
-            # yield StartArmSequence('GrabBackModuleRightFront')
-            # yield MoveLineRelative(-RECALIBRATE_DIST)
-            # yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            # yield RotateTo(CENTRAL_BASE_ANGLE)
-            # yield WaitForArmSequence()
+            yield StartArmSequence('GrabBackModuleRightFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
 
-            # yield ArmSequence('DropModuleFromStorage')
+            yield ArmSequence('DropModuleFromStorage')
 
             yield StartArmSequence('GrabBackModuleRight')
             yield MoveLineRelative(-RECALIBRATE_DIST)
@@ -471,13 +471,13 @@ class CentralMoonBaseLatBranch(State):
 
             yield ArmSequence('DropModuleFromStorage')
 
-            # yield StartArmSequence('GrabBackModuleLeftFront')
-            # yield MoveLineRelative(-RECALIBRATE_DIST)
-            # yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-            # yield RotateTo(CENTRAL_BASE_ANGLE)
-            # yield WaitForArmSequence()
+            yield StartArmSequence('GrabBackModuleLeftFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
 
-            # yield ArmSequence('DropModuleFromStorage')
+            yield ArmSequence('DropModuleFromStorage')
 
             yield StartArmSequence('GrabBackModuleLeft')
             yield MoveLineRelative(-RECALIBRATE_DIST)
@@ -677,8 +677,8 @@ class StaticStrategy2(State):
 
         # Deplacement vers fusee polychrome bleu
         yield MoveLineTo(1.260, 1.180)
-        yield RotateTo(-math.pi/2.0)
-        yield MoveLineTo(1.260, 0.750)
+        yield LookAt(1.200, 0.750)
+        yield MoveLineTo(1.200, 0.750)
         yield LookAt(1.250, 0.600)
         yield MoveLineTo(1.250, 0.600)
         yield RotateTo(-math.pi/2.0)
