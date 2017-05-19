@@ -720,6 +720,8 @@ class StaticStrategy(State):
         # yield RotateTo(CENTRAL_BASE_ANGLE)
         # yield WaitForArmSequence()
 
+        yield ReadModuleHolderPresence()
+
         yield PickNextModuleToDrop()
 
         # Depose des elements dans branche bleu base lunaire centrale
