@@ -174,12 +174,6 @@ class Main(State):
             self.yield_at(89500, EndOfMatch())
             yield SpeedControl(88)
 
-            if self.robot.team == TEAM_RIGHT:
-                global CENTRAL_BASE_X
-                global CENTRAL_BASE_Y
-                CENTRAL_BASE_X += 0.010
-                CENTRAL_BASE_Y -= 0.010
-
             if 1:
                 if self.cnt_arm_action == 0:
                     #~ yield InitArm()
@@ -190,7 +184,7 @@ class Main(State):
                     #~ yield MoveLineTo(1.0, 0.0)
                     #~ yield RotateTo(-math.pi/2.0)
 
-                    yield StaticStrategy()
+                    yield StaticStrategy2()
 
 
                 elif self.cnt_arm_action == 1:
@@ -312,13 +306,11 @@ class PolyRocket(State):
 
         yield ArmSequence('OutputPolyModuleFromRocket')
 
-        yield StartArmSequence('DropTurnedPolyModule', finalKick=True)
+        yield StartArmSequence('DropTurnedPolyModule', finalKick=False)
         yield MoveLineTo(1.25, 0.3 + RECALIBRATE_DIST)
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
         yield WaitForArmSequence()
-
-        yield None # Skip the rest
 
         yield StartArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=True)
         yield MoveLineTo(1.25, 0.3 + RECALIBRATE_DIST)
@@ -333,6 +325,8 @@ class PolyRocket(State):
         yield MoveLineTo(1.25, 0.3 + shift_1)
         yield RotateTo(-math.pi/2.0)
         yield WaitForArmSequence()
+
+        yield None # Skip the rest
 
         yield StartArmSequence('GrabPolyModuleFromDropZone', previousModuleTurned=False)
         yield MoveLineTo(1.25, 0.3 + RECALIBRATE_DIST)
@@ -395,7 +389,7 @@ class MonoRocket(State):
             yield RotateTo(math.pi)
             yield MoveLineTo(0.350, 1.150)
         #---
-        yield ArmSequence('GrabModuleFromInit')
+        yield ArmSequence('GrabModuleFromStorageReturn')
         if self.robot.team == TEAM_RIGHT:
             yield StartArmSequence('StockModuleFromGrabbedModuleRight')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
@@ -411,14 +405,14 @@ class MonoRocket(State):
             yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
             yield MoveLineTo(0.350 - 0.005, 1.150)
             yield RotateTo(math.pi)
             yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield ArmSequence('StockModuleFromGrabbedModuleLeftFront')
+            yield StartArmSequence('InitForMonoColorModuleToDrop')
         else:
             yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
@@ -434,15 +428,15 @@ class MonoRocket(State):
             yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleRight')
+            yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
             yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
             yield MoveLineTo(0.350 - 0.005, 1.150)
             yield RotateTo(math.pi)
             yield WaitForArmSequence()
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield ArmSequence('StockModuleFromGrabbedModuleRightFront')
-        yield StartArmSequence('InitArm')
+            yield StartArmSequence('InitForMonoColorModuleToDrop')
+        #yield StartArmSequence('InitArm')
         #---
         if self.depl == True:
             yield MoveLineRelative(-0.05)
@@ -463,9 +457,9 @@ class PickNextModuleToDrop(State):
 
 
         if self.robot.team == TEAM_LEFT:
-            DROP_ORDER = [STORAGE_MODULE_LEFT_FRONT, STORAGE_MODULE_LEFT, STORAGE_MODULE_RIGHT_FRONT, STORAGE_MODULE_RIGHT]
+            DROP_ORDER = [STORAGE_MODULE_RIGHT_FRONT, STORAGE_MODULE_LEFT_FRONT, STORAGE_MODULE_LEFT, STORAGE_MODULE_RIGHT]
         else:
-            DROP_ORDER = [STORAGE_MODULE_RIGHT_FRONT, STORAGE_MODULE_RIGHT, STORAGE_MODULE_LEFT_FRONT, STORAGE_MODULE_LEFT]
+            DROP_ORDER = [STORAGE_MODULE_LEFT_FRONT, STORAGE_MODULE_RIGHT_FRONT, STORAGE_MODULE_RIGHT, STORAGE_MODULE_LEFT]
 
         logger.log("Drop order: {}".format([STORAGE_MODULE.lookup_by_value[x] for x in DROP_ORDER)))
 
@@ -494,7 +488,9 @@ class CentralMoonBaseLatBranch(State):
             yield MoveLineTo(1.238, 1.101)
         #---
 
-        yield ArmSequence('DropModuleFromStorage')
+        yield ArmSequence('DeposeFifthModule')
+
+        yield ReadModuleHolderPresence()
 
         for i in range(4):
             if (yield PickNextModuleToDrop()).module_to_drop:
@@ -508,92 +504,6 @@ class CentralMoonBaseLatBranch(State):
             yield MoveLineRelative(-0.05)
         self.exit_reason = GOAL_DONE
         yield None
-
-
-
-class CentralMoonBaseLatBranchBackup(State):
-    def __init__(self, depl = True):
-        self.depl = depl
-
-    def on_enter(self):
-        if self.depl == True:
-            yield RotateTo(-math.pi/4.0)
-            yield MoveLineTo(1.238, 1.101)
-        #---
-        if self.robot.team == TEAM_LEFT:
-
-            #TODO: dynamic pick order
-            if self.robot.is_holding_module:
-                yield ArmSequence('DropModuleFromStorage')
-
-            if STORAGE_MODULE_LEFT in self.robot.used_storage_spaces:
-                yield StartArmSequence('GrabBackModuleLeft')
-                yield MoveLineRelative(-RECALIBRATE_DIST)
-                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-                yield RotateTo(CENTRAL_BASE_ANGLE)
-                yield WaitForArmSequence()
-
-                yield ArmSequence('DropModuleFromStorage')
-
-            if STORAGE_MODULE_RIGHT_FRONT in self.robot.used_storage_spaces:
-                yield StartArmSequence('GrabBackModuleRightFront')
-                yield MoveLineRelative(-RECALIBRATE_DIST)
-                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-                yield RotateTo(CENTRAL_BASE_ANGLE)
-                yield WaitForArmSequence()
-
-                yield ArmSequence('DropModuleFromStorage')
-
-            if STORAGE_MODULE_RIGHT in self.robot.used_storage_spaces:
-                yield StartArmSequence('GrabBackModuleRight')
-                yield MoveLineRelative(-RECALIBRATE_DIST)
-                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-                yield RotateTo(CENTRAL_BASE_ANGLE)
-                yield WaitForArmSequence()
-
-                yield ArmSequence('DropModuleFromStorage')
-
-        if self.robot.team == TEAM_RIGHT:
-            if self.robot.is_holding_module:
-                yield ArmSequence('DropModuleFromStorage')
-
-            if STORAGE_MODULE_RIGHT in self.robot.used_storage_spaces:
-
-                yield StartArmSequence('GrabBackModuleRight')
-                yield MoveLineRelative(-RECALIBRATE_DIST)
-                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-                yield RotateTo(CENTRAL_BASE_ANGLE)
-                yield WaitForArmSequence()
-
-                yield ArmSequence('DropModuleFromStorage')
-
-            if STORAGE_MODULE_LEFT_FRONT in self.robot.used_storage_spaces:
-                yield StartArmSequence('GrabBackModuleLeftFront')
-                yield MoveLineRelative(-RECALIBRATE_DIST)
-                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-                yield RotateTo(CENTRAL_BASE_ANGLE)
-                yield WaitForArmSequence()
-
-                yield ArmSequence('DropModuleFromStorage')
-
-            if STORAGE_MODULE_LEFT in self.robot.used_storage_spaces:
-
-                yield StartArmSequence('GrabBackModuleLeft')
-                yield MoveLineRelative(-RECALIBRATE_DIST)
-                yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
-                yield RotateTo(CENTRAL_BASE_ANGLE)
-                yield WaitForArmSequence()
-
-                yield ArmSequence('DropModuleFromStorage')
-
-        yield StartArmSequence('InitArm')
-        #---
-        if self.depl == True:
-            yield MoveLineRelative(-0.05)
-        self.exit_reason = GOAL_DONE
-        yield None
-
-
 
 
 class Crater(State):
@@ -635,7 +545,7 @@ class StoneDrop(State):
 class Initialize(State):
 
     def on_enter(self):
-        yield StartArmSequence('InitArm')
+        yield ArmSequence('InitArm')
         yield Trigger(STORAGE_FINGER_RIGHT_INIT,
                         STORAGE_FINGER_RIGHT_FRONT_INIT,
                         STORAGE_FINGER_LEFT_FRONT_INIT,
@@ -679,7 +589,7 @@ class ReadArmServoPosition(State):
 
 class StaticStrategy(State):
     def on_enter(self):
-        yield StartArmSequence('ClearFirstModule')
+        yield ArmSequence('ClearFirstModule')
 
         # Deplacement vers fusee polychrome bleu
         yield MoveLineTo(0.927 - 0.05, 0.923 + 0.05)
@@ -720,10 +630,6 @@ class StaticStrategy(State):
         # yield RotateTo(CENTRAL_BASE_ANGLE)
         # yield WaitForArmSequence()
 
-        yield ReadModuleHolderPresence()
-
-        yield PickNextModuleToDrop()
-
         # Depose des elements dans branche bleu base lunaire centrale
         yield CentralMoonBaseLatBranch(False)
 
@@ -747,6 +653,54 @@ class StaticStrategy(State):
         # Fin du match
         yield None
 
+
+class StaticStrategy2(State):
+    def on_enter(self):
+        # Deplacement vers fusee bleu
+        yield ArmSequence('InitGrabModuleFromInit')
+        yield MoveLineTo(0.15 + 0.18, 0.923 + 0.03)
+        yield ArmSequence('GrabModuleFromInit')
+        if self.robot.team == TEAM_LEFT:
+            yield StartArmSequence('StockModuleFromGrabbedModuleRight')
+        else:
+            yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
+        yield MoveLineTo(0.7, 1.150)
+        yield RotateTo(math.pi)
+        yield MoveLineTo(0.350 - 0.005, 1.150)
+        yield RotateTo(math.pi)
+        yield WaitForArmSequence()
+
+        # Travail sur fusee bleu pour stockage de 3 elements et prise de 1 element
+        yield MonoRocket(False)
+
+        # Deplacement vers base lunaire centrale
+        yield MoveLineTo(1.260, 1.180)
+        yield RotateTo(-math.pi/4.0)
+        yield WaitForArmSequence()
+        yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+        yield RotateTo(CENTRAL_BASE_ANGLE)
+        yield WaitForArmSequence()
+
+        # Depose des elements dans branche bleu base lunaire centrale
+        yield CentralMoonBaseLatBranch(False)
+
+        # Deplacement vers fusee polychrome bleu
+        yield MoveLineTo(1.260, 1.180)
+        yield LookAt(1.080, 0.750)
+        yield MoveLineTo(1.080, 0.750)
+        yield LookAt(1.250, 0.600)
+        yield MoveLineTo(1.250, 0.600)
+        yield RotateTo(-math.pi/2.0)
+        yield StartArmSequence('InitGrabPolyModuleFromInit')
+        yield MoveLineTo(1.25, 0.3 -0.005)
+        yield RotateTo(-math.pi/2.0)
+        yield WaitForArmSequence()
+
+        # Travail sur fusee polychrome bleu pour dépose 4 elements
+        yield PolyRocket(False)
+
+        # Fin du match
+        yield None
 
 ##################################################
 # End of match

@@ -300,7 +300,7 @@ class DropModuleFromStorage(State):
 class InitForMonoColorModuleToDrop(State):
     def on_enter(self):
         # Init for test
-        yield ArmSpeed(110)
+        yield ArmSpeed(150)
         arm_traj = [
         # Init en test
         #[[(1, 5), 423], [(1, 207), 415], [(1, 107), 448+30], [(0, 204), 500], [(0, 206), 414], [(0, 105), 523]]
@@ -309,8 +309,8 @@ class InitForMonoColorModuleToDrop(State):
         [[(1, 5), 405], [(1, 207), 321], [(1, 107), 402], [(0, 204), 495], [(0, 206), 532], [(0, 105), 541]]
         ]
         yield ReadArmTraj(arm_traj)
-        yield Timer(1000)
-        yield Trigger(ARM_7_OPEN)
+        #yield Timer(1000)
+        #yield Trigger(ARM_7_OPEN)
         yield None
 
 class InitArm(State):
@@ -965,12 +965,12 @@ class TestGrabModuleLeftFromInit(State):
 
 class ClearFirstModule(State):
     def on_enter(self):
-        yield ArmSpeed(250)
+        yield ArmSpeed(300)
         if self.robot.team == TEAM_RIGHT:
             arm_traj = [
-            [[(1, 5), 411], [(1, 207), 400], [(1, 107), 401 +45], [(0, 204), 495], [(0, 206), 427], [(0, 105), 540]],
-            [[(1, 5), 401], [(1, 207), 450], [(1, 107), 313 +45], [(0, 204), 495], [(0, 206), 237], [(0, 105), 540]],
-            [[(1, 5), 299], [(1, 207), 584], [(1, 107), 434 +45], [(0, 204), 435], [(0, 206), 228], [(0, 105), 764]]
+            [[(1, 5), 411], [(1, 207), 400], [(1, 107), 401 +45 + 80], [(0, 204), 495], [(0, 206), 427], [(0, 105), 540]],
+            [[(1, 5), 401], [(1, 207), 450], [(1, 107), 313 +45 + 150], [(0, 204), 495], [(0, 206), 237], [(0, 105), 540]],
+            [[(1, 5), 299 + 20], [(1, 207), 584], [(1, 107), 434 +45], [(0, 204), 435], [(0, 206), 228], [(0, 105), 764]]
             ]
             yield ReadArmTraj(arm_traj, delay=150)
         else:
@@ -981,4 +981,47 @@ class ClearFirstModule(State):
             ]
             yield ReadArmTraj(arm_traj, delay=150)
 
+        yield None
+
+
+class InitArmClear(State):
+    def on_enter(self):
+        yield ArmSpeed(100)
+        if self.robot.team == TEAM_RIGHT:
+            self.log("right ARM setup")
+            arm_traj = [
+            [[(1, 5), 414], [(1, 207), 365], [(1, 107), 436 + 20], [(0, 204), 496], [(0, 206), 503], [(0, 105), 525]],
+            [[(1, 5), 404], [(1, 207), 425], [(1, 107), 339 + 20], [(0, 204), 539], [(0, 206), 321], [(0, 105), 395]],
+            [[(1, 5), 397], [(1, 207), 472], [(1, 107), 349 + 20], [(0, 204), 592], [(0, 206), 260], [(0, 105), 195]],
+            [[(1, 5), 383], [(1, 207), 442], [(1, 107), 297 + 20], [(0, 204), 627], [(0, 206), 229], [(0, 105), 187]],
+            [[(1, 5), 414], [(1, 207), 434], [(1, 107), 281 + 20], [(0, 204), 710], [(0, 206), 217], [(0, 105), 163]],
+            [[(1, 5), 402], [(1, 207), 449], [(1, 107), 287 + 20], [(0, 204), 738], [(0, 206), 208], [(0, 105), 163]]
+            ]
+            yield ReadArmTraj(arm_traj, delay=1000)
+        else:
+            self.log("left ARM setup")
+            arm_traj = [
+            ]
+            yield ReadArmTraj(arm_traj, delay=150)
+
+        yield None
+
+
+class DeposeFifthModule(State):
+    def on_enter(self):
+        yield ArmSpeed(300)
+        arm_traj = [
+        [[(1, 5), 438], [(1, 207), 312], [(1, 107), 374 + 30], [(0, 204), 826], [(0, 206), 502], [(0, 105), 532]],
+        [[(1, 5), 436], [(1, 207), 379], [(1, 107), 443 + 30], [(0, 204), 816], [(0, 206), 500], [(0, 105), 435]],
+        ]
+        yield ReadArmTraj(arm_traj, delay=200)
+        yield Timer(300)
+        yield Trigger(ARM_7_OPEN)
+        yield Timer(300)
+        arm_traj = [
+        [[(1, 5), 436], [(1, 207), 401], [(1, 107), 511 + 30], [(0, 204), 819], [(0, 206), 500], [(0, 105), 447]],
+        [[(1, 5), 405], [(1, 207), 321], [(1, 107), 402], [(0, 204), 495], [(0, 206), 532], [(0, 105), 541]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=200)
+        yield Timer(200)
         yield None
