@@ -251,7 +251,7 @@ class WaitForOpponentLeave(statemachine.Timer):
     def __init__(self, opponent, miliseconds, move_direction, retries):
         if miliseconds is None :
             miliseconds = DEFAULT_OPPONENT_WAIT_MS
-        Timer.__init__(self, miliseconds)
+        statemachine.Timer.__init__(self, miliseconds)
         self.opponent = opponent
         self.move_direction = move_direction
         self.retries = retries
@@ -338,7 +338,7 @@ class OpponentInTheWay(Exception):
 
 
 
-OPPONENT_HANDLING_NONE = OpponentHandlingConfig(False, False, False, 0, 0)
+OPPONENT_HANDLING_NONE = OpponentHandlingConfig(False, False, False, None, None)
 OPPONENT_HANDLING_STOP = OpponentHandlingConfig(True, False, True, 0, 0)
 OPPONENT_HANDLING_RAISE = OpponentHandlingConfig(True, True, False, 0, 0)
 
