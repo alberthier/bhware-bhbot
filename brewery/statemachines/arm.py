@@ -988,6 +988,7 @@ class InitArmClear(State):
     def on_enter(self):
         yield ArmSpeed(100)
         if self.robot.team == TEAM_RIGHT:
+            self.log("right ARM setup")
             arm_traj = [
             [[(1, 5), 414], [(1, 207), 365], [(1, 107), 436 + 20], [(0, 204), 496], [(0, 206), 503], [(0, 105), 525]],
             [[(1, 5), 404], [(1, 207), 425], [(1, 107), 339 + 20], [(0, 204), 539], [(0, 206), 321], [(0, 105), 395]],
@@ -998,6 +999,7 @@ class InitArmClear(State):
             ]
             yield ReadArmTraj(arm_traj, delay=1000)
         else:
+            self.log("left ARM setup")
             arm_traj = [
             ]
             yield ReadArmTraj(arm_traj, delay=150)
