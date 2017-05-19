@@ -576,6 +576,7 @@ class StaticStrategy(State):
         # Deplacement vers base lunaire centrale
         yield MoveLineTo(1.260, 1.180)
         yield RotateTo(-math.pi/4.0)
+        yield WaitForArmSequence()
         if self.robot.team == TEAM_RIGHT:
             yield StartArmSequence('GrabBackModuleRightFront')
         else:
