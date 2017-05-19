@@ -1009,11 +1009,18 @@ class InitArmClear(State):
 
 class DeposeFifthModule(State):
     def on_enter(self):
-        yield ArmSpeed(100)
+        yield ArmSpeed(250)
         arm_traj = [
         [[(1, 5), 438], [(1, 207), 312], [(1, 107), 374 + 30], [(0, 204), 826], [(0, 206), 502], [(0, 105), 532]],
         [[(1, 5), 436], [(1, 207), 379], [(1, 107), 443 + 30], [(0, 204), 816], [(0, 206), 500], [(0, 105), 435]],
+        ]
+        yield ReadArmTraj(arm_traj, delay=200)
+        yield Timer(200)
+        yield Trigger(ARM_7_OPEN)
+        yield Timer(500)
+        arm_traj = [
         [[(1, 5), 436], [(1, 207), 401], [(1, 107), 511 + 30], [(0, 204), 819], [(0, 206), 500], [(0, 105), 447]]
         ]
-        yield ReadArmTraj(arm_traj, delay=1000)
+        yield ReadArmTraj(arm_traj, delay=200)
+        yield Timer(200)
         yield None
