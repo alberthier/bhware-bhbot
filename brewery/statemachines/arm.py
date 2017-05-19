@@ -964,4 +964,12 @@ class TestGrabModuleLeftFromInit(State):
 
 class ClearFirstModule(State):
     def on_enter(self):
+        yield ArmSpeed(200)
+        arm_traj = [
+        [[(1, 5), 411], [(1, 207), 400], [(1, 107), 401 +30], [(0, 204), 495], [(0, 206), 427], [(0, 105), 0]], 
+        [[(1, 5), 401], [(1, 207), 450], [(1, 107), 313 +30], [(0, 204), 495], [(0, 206), 237], [(0, 105), 0]], 
+        [[(1, 5), 299], [(1, 207), 584], [(1, 107), 434 +30], [(0, 204), 435], [(0, 206), 228], [(0, 105), 0]]
+        ]
+        yield ReadArmTraj(arm_traj, delay=300)
+
         yield None
