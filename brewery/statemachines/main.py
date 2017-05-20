@@ -524,7 +524,7 @@ class PickNextModuleToDrop(State):
         yield None
 
 
-class CentralMoonBaseLatBranch(State):
+class CentralMoonBaseLatBranch2(State):
     def __init__(self, depl = True):
         self.depl = depl
 
@@ -548,6 +548,88 @@ class CentralMoonBaseLatBranch(State):
         yield StartArmSequence('InitArm')
         #---
         if self.depl:
+            yield MoveLineRelative(-0.05)
+        self.exit_reason = GOAL_DONE
+        yield None
+
+class CentralMoonBaseLatBranch(State):
+    def __init__(self, depl = True):
+        self.depl = depl
+
+    def on_enter(self):
+        if self.depl == True:
+            yield RotateTo(-math.pi/4.0)
+            yield MoveLineTo(1.238, 1.101)
+        #---
+        yield ArmSequence('DeposeFifthModule')
+        if self.robot.team == TEAM_LEFT:
+            yield StartArmSequence('GrabBackModuleRightFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
+            yield ArmSequence('GrabBackModuleLeftFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
+            yield StartArmSequence('GrabBackModuleLeft')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
+            yield StartArmSequence('GrabBackModuleRight')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+        if self.robot.team == TEAM_RIGHT:
+            yield StartArmSequence('GrabBackModuleLeftFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
+            yield ArmSequence('GrabBackModuleRightFront')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
+            yield StartArmSequence('GrabBackModuleRight')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
+            yield StartArmSequence('GrabBackModuleLeft')
+            yield MoveLineRelative(-RECALIBRATE_DIST)
+            yield MoveLineTo(CENTRAL_BASE_X, CENTRAL_BASE_Y)
+            yield RotateTo(CENTRAL_BASE_ANGLE)
+            yield WaitForArmSequence()
+
+            yield ArmSequence('DropModuleFromStorage')
+
+        yield StartArmSequence('InitArm')
+        #---
+        if self.depl == True:
             yield MoveLineRelative(-0.05)
         self.exit_reason = GOAL_DONE
         yield None
