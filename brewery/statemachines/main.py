@@ -509,7 +509,7 @@ class PickNextModuleToDrop(State):
         logger.log("Drop order: {}".format([STORAGE_MODULE.lookup_by_value[x] for x in DROP_ORDER]))
 
         for storage_name in DROP_ORDER:
-            if storage_name in self.robot.used_storage_spaces:
+            if storage_name in self.robot.used_storage_spaces or True:
                 storage_label = STORAGE_MODULE.lookup_by_value[storage_name]
                 logger.log("Storage {} is in use".format(storage_label))
                 state_to_use = DROP_STATE_MAPPING[storage_name]
