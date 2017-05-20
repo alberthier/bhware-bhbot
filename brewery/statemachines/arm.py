@@ -356,7 +356,7 @@ class InitForMonoColorModuleToDrop(State):
         [[(1, 5), 405], [(1, 207), 321], [(1, 107), 402 + 10], [(0, 204), 495], [(0, 206), 532], [(0, 105), 541]]
         ]
         yield ReadArmTraj(arm_traj)
-        #yield Timer(1000)
+        yield Timer(200)
         #yield Trigger(ARM_7_OPEN)
         yield None
 
@@ -1056,6 +1056,8 @@ class InitArmClear(State):
 
 class DeposeFifthModule(State):
     def on_enter(self):
+        yield InitForMonoColorModuleToDrop()
+
         yield ArmSpeed(300)
 
         if self.robot.team == TEAM_LEFT:
