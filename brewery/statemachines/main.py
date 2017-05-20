@@ -396,7 +396,7 @@ class ReadModuleHolderPresence(State):
                 logger.log("Storage empty")
             else:
                 logger.log("Storage used")
-                self.robot.used_storage_spaces.append(storage_space)
+            self.robot.used_storage_spaces.append(storage_space)
 
         logger.log("Used storage spaces: {}".format(self.robot.used_storage_spaces))
         yield None
