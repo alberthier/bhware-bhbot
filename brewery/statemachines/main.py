@@ -420,6 +420,8 @@ class MonoRocket(State):
                 yield MoveLineTo(0.350 - 0.005, 1.150)
                 yield RotateTo(math.pi)
                 yield WaitForArmSequence()
+            else:
+                yield Trigger(ARM_7_OPEN)
 
             yield ArmSequence('GrabModuleFromStorageReturn')
 
@@ -429,6 +431,8 @@ class MonoRocket(State):
                 yield MoveLineTo(0.350 - 0.005, 1.150)
                 yield RotateTo(math.pi)
                 yield WaitForArmSequence()
+            else:
+                yield Trigger(ARM_7_OPEN)
 
             yield ArmSequence('GrabModuleFromStorageReturn')
 
@@ -438,6 +442,8 @@ class MonoRocket(State):
                 yield MoveLineTo(0.350 - 0.005, 1.150)
                 yield RotateTo(math.pi)
                 yield WaitForArmSequence()
+            else:
+                yield Trigger(ARM_7_OPEN)
 
             yield ArmSequence('GrabModuleFromStorageReturn')
             yield StartArmSequence('InitForMonoColorModuleToDrop')
@@ -448,6 +454,8 @@ class MonoRocket(State):
                 yield MoveLineTo(0.350 - 0.005, 1.150)
                 yield RotateTo(math.pi)
                 yield WaitForArmSequence()
+            else:
+                yield Trigger(ARM_7_OPEN)
 
             yield ArmSequence('GrabModuleFromStorageReturn')
 
@@ -457,6 +465,8 @@ class MonoRocket(State):
                 yield MoveLineTo(0.350 - 0.005, 1.150)
                 yield RotateTo(math.pi)
                 yield WaitForArmSequence()
+            else:
+                yield Trigger(ARM_7_OPEN)
 
             yield ArmSequence('GrabModuleFromStorageReturn')
 
@@ -466,6 +476,8 @@ class MonoRocket(State):
                 yield MoveLineTo(0.350 - 0.005, 1.150)
                 yield RotateTo(math.pi)
                 yield WaitForArmSequence()
+            else:
+                yield Trigger(ARM_7_OPEN)
 
             yield ArmSequence('GrabModuleFromStorageReturn')
             yield StartArmSequence('InitForMonoColorModuleToDrop')
