@@ -350,6 +350,8 @@ STONE_GUIDE         = (STONE_GUIDE_ID, 700)
 STONE_GUIDE_INIT    = makeServoMoveCommand(STONE_GUIDE, 846)
 STONE_GUIDE_HOLD    = makeServoMoveCommand(STONE_GUIDE, 563)
 
+ARM_1         = (ARM_1_ID, 700)
+
 ARM_7         = (ARM_7_ID, 700)
 ARM_7_INIT    = makeServoMoveCommand(ARM_7, 697)
 ARM_7_HOLD    = makeServoMoveCommand(ARM_7, 507+15-10)

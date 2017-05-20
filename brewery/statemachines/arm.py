@@ -1057,6 +1057,13 @@ class InitArmClear(State):
 class DeposeFifthModule(State):
     def on_enter(self):
         yield ArmSpeed(300)
+
+        if self.robot.team == TEAM_LEFT:
+            yield Trigger(makeServoMoveCommand(ARM_1, 438-30))
+            yield Timer(200)
+            yield Trigger(makeServoMoveCommand(ARM_1, 438))
+            yield Timer(200)
+
         arm_traj = [
         [[(1, 5), 438], [(1, 207), 312], [(1, 107), 374 + 30], [(0, 204), 826], [(0, 206), 502], [(0, 105), 532]],
         [[(1, 5), 436], [(1, 207), 379], [(1, 107), 443 + 30-20], [(0, 204), 816], [(0, 206), 500], [(0, 105), 435]],
