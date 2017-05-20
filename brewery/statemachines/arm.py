@@ -347,15 +347,17 @@ class DropModuleFromStorage(State):
 class InitForMonoColorModuleToDrop(State):
     def on_enter(self):
         # Init for test
-        yield ArmSpeed(150)
+        yield ArmSpeed(150+50)
         arm_traj = [
         # Init en test
         #[[(1, 5), 423], [(1, 207), 415], [(1, 107), 448+30], [(0, 204), 500], [(0, 206), 414], [(0, 105), 523]]
-
+        [[(0, 206), 159] ],
+        [[(1, 5), 430], [(1, 207), 470], [(1, 107), 389+30], [(0, 204), 510], [(0, 206), 320], [(0, 105), 512]],
+        [[(1, 5), 429], [(1, 207), 492], [(1, 107), 521+30], [(0, 204), 510], [(0, 206), 466], [(0, 105), 515]],
         # Init pour enchainement recup + drop
-        [[(1, 5), 405], [(1, 207), 321], [(1, 107), 402 + 10], [(0, 204), 495], [(0, 206), 532], [(0, 105), 541]]
+        [[(1, 5), 405], [(1, 207), 321], [(1, 107), 402 + 10], [(0, 204), 495], [(0, 206), 532], [(0, 105), 541]],
         ]
-        yield ReadArmTraj(arm_traj)
+        yield ReadArmTraj(arm_traj, delay=300)
         yield Timer(200)
         #yield Trigger(ARM_7_OPEN)
         yield None
