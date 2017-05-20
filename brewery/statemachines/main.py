@@ -533,8 +533,7 @@ class CentralMoonBaseLatBranch2(State):
             yield MoveLineTo(1.238, 1.101)
         #---
 
-        if (yield ReadModuleArmPresence()).value:
-            yield ArmSequence('DeposeFifthModule')
+        yield ArmSequence('DeposeFifthModule')
 
         yield ReadModuleHolderPresence()
 
