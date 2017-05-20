@@ -1060,11 +1060,11 @@ class DeposeFifthModule(State):
 
         yield ArmSpeed(300)
 
-        if self.robot.team == TEAM_LEFT:
-            yield Trigger(makeServoMoveCommand(ARM_1, 405-50))
-            yield Timer(200)
-            yield Trigger(makeServoMoveCommand(ARM_1, 405))
-            yield Timer(200)
+        # if self.robot.team == TEAM_LEFT:
+        #     yield Trigger(makeServoMoveCommand(ARM_1, 405-50))
+        #     yield Timer(200)
+        #     yield Trigger(makeServoMoveCommand(ARM_1, 405))
+        #     yield Timer(200)
 
         arm_traj = [
         [[(1, 5), 438], [(1, 207), 312], [(1, 107), 374 + 30], [(0, 204), 826], [(0, 206), 502], [(0, 105), 532]],
