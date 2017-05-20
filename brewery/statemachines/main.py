@@ -396,7 +396,7 @@ class ReadModuleHolderPresence(State):
                 logger.log("Storage empty")
             else:
                 logger.log("Storage used")
-            self.robot.used_storage_spaces.append(storage_space)
+                self.robot.used_storage_spaces.append(storage_space)
 
         logger.log("Used storage spaces: {}".format(self.robot.used_storage_spaces))
         yield None
@@ -509,7 +509,7 @@ class PickNextModuleToDrop(State):
         logger.log("Drop order: {}".format([STORAGE_MODULE.lookup_by_value[x] for x in DROP_ORDER]))
 
         for storage_name in DROP_ORDER:
-            if storage_name in self.robot.used_storage_spaces or True:
+            if storage_name in self.robot.used_storage_spaces:
                 storage_label = STORAGE_MODULE.lookup_by_value[storage_name]
                 logger.log("Storage {} is in use".format(storage_label))
                 state_to_use = DROP_STATE_MAPPING[storage_name]
@@ -521,6 +521,7 @@ class PickNextModuleToDrop(State):
 
                 self.robot.used_storage_spaces.remove(storage_name)
                 self.module_to_drop = True
+                break
         yield None
 
 
@@ -540,7 +541,9 @@ class CentralMoonBaseLatBranch2(State):
         yield ReadModuleHolderPresence()
 
         for i in range(4):
-            if (yield PickNextModuleToDrop()).module_to_drop or True:
+            pick = PickNextModuleToDrop()
+            yield pick
+            if pick.module_to_drop:
                 yield ArmSequence('DropModuleFromStorage')
             else:
                 logger.log("No module to drop")
@@ -551,6 +554,8 @@ class CentralMoonBaseLatBranch2(State):
             yield MoveLineRelative(-0.05)
         self.exit_reason = GOAL_DONE
         yield None
+
+
 
 class CentralMoonBaseLatBranch(State):
     def __init__(self, depl = True):
@@ -811,7 +816,7 @@ class StaticStrategy2(State):
         yield WaitForArmSequence()
 
         # Depose des elements dans branche bleu base lunaire centrale
-        yield CentralMoonBaseLatBranch(False)
+        yield CentralMoonBaseLatBranch2(False)
 
         # Deplacement vers fusee polychrome bleu
         yield MoveLineTo(1.260, 1.180)
