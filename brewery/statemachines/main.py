@@ -362,22 +362,23 @@ class ReadModuleHolderPresence(State):
                                     ("RIGHT FRONT", STORAGE_FINGER_RIGHT_FRONT_HOLD, STORAGE_MODULE_RIGHT_FRONT),
                                     ("RIGHT", STORAGE_FINGER_RIGHT_HOLD, STORAGE_MODULE_RIGHT)
                                 ]:
-            logger.log("Read servo {} position {}")
+            logger.log("Read servo {} position {}".format(label, position))
             srv_id = position[0] # type: int
             expected_value = position[2] # type: int
             real_value = (yield ReadServoPosition(srv_id)).value # type:int
 
-            delta = abs(expected_value - real_value) < 10
+            delta = abs(expected_value - real_value)
 
             logger.log("Servo {} expected position: {} real position: {} delta: {}".format(label, expected_value, real_value, delta))
 
-            if delta < 10:
+            if delta < 5:
                 logger.log("Storage empty")
             else:
                 logger.log("Storage used")
                 self.robot.used_storage_spaces.append(storage_space)
 
         logger.log("Used storage spaces: {}".format(self.robot.used_storage_spaces))
+        yield None
 
 
 class MonoRocket(State):
