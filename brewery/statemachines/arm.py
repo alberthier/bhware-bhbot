@@ -1058,7 +1058,7 @@ class InitArmClear(State):
 
 class DeposeFifthModule(State):
     def on_enter(self):
-        yield InitForMonoColorModuleToDrop()
+        #yield InitForMonoColorModuleToDrop()
 
         yield ArmSpeed(300)
 
