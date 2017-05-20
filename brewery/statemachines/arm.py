@@ -26,8 +26,7 @@ class Main(State):
         self.fsm.is_moving = False
 
     def on_start(self, packet):
-        #~ self.yield_at(89500, EndOfMatch())
-        pass
+        self.yield_at(89500, EndOfMatch())
 
     def on_arm_sequence_start(self, packet):
         state = getattr(sys.modules[__name__], packet.id)
