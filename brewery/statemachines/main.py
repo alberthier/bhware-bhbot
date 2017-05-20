@@ -540,7 +540,7 @@ class CentralMoonBaseLatBranch(State):
         yield ReadModuleHolderPresence()
 
         for i in range(4):
-            if (yield PickNextModuleToDrop()).module_to_drop:
+            if (yield PickNextModuleToDrop()).module_to_drop or True:
                 yield ArmSequence('DropModuleFromStorage')
             else:
                 logger.log("No module to drop")
