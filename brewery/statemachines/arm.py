@@ -243,7 +243,8 @@ class DropModuleFromStorage(State):
             [[(1, 5), 437], [(1, 207), 310], [(1, 107), 402 + 30], [(0, 204), 818], [(0, 206), 508], [(0, 105), 450]],
             [[(1, 5), 405], [(1, 207), 321], [(1, 107), 402 + 30], [(0, 204), 495], [(0, 206), 532], [(0, 105), 541]]
             ]
-            yield ReadArmTraj(arm_traj, delay=150)
+            yield ReadArmTraj(arm_traj, delay=300)
+            yield Timer(300)
             yield None
 
 
