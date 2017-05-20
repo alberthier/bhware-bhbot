@@ -350,6 +350,27 @@ class PolyRocket(State):
         self.exit_reason = GOAL_DONE
         yield None
 
+class ReadModuleArmPresence(State):
+    def on_enter(self):
+        self.value=False
+        label = "ARM HOLDER"
+        position = ARM_7_HOLD
+
+        logger.log("Read servo {} position {}".format(label, position))
+        srv_id = position[0] # type: int
+        expected_value = position[2] # type: int
+        real_value = (yield ReadServoPosition(srv_id)).value # type:int
+
+        delta = abs(expected_value - real_value)
+
+        logger.log("Servo {} expected position: {} real position: {} delta: {}".format(label, expected_value, real_value, delta))
+
+        if delta < 5:
+            logger.log("Arm empty")
+        else:
+            logger.log("Arm full")
+            self.value=True
+        yield None
 
 
 class ReadModuleHolderPresence(State):
@@ -392,50 +413,61 @@ class MonoRocket(State):
         #---
         yield ArmSequence('GrabModuleFromStorageReturn')
         if self.robot.team == TEAM_RIGHT:
-            yield StartArmSequence('StockModuleFromGrabbedModuleRight')
-            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            yield MoveLineTo(0.350 - 0.005, 1.150)
-            yield RotateTo(math.pi)
-            yield WaitForArmSequence()
+
+            if (yield ReadModuleArmPresence()).value:
+                yield StartArmSequence('StockModuleFromGrabbedModuleRight')
+                yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+                yield MoveLineTo(0.350 - 0.005, 1.150)
+                yield RotateTo(math.pi)
+                yield WaitForArmSequence()
+
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
-            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            yield MoveLineTo(0.350 - 0.005, 1.150)
-            yield RotateTo(math.pi)
-            yield WaitForArmSequence()
+            if (yield ReadModuleArmPresence()).value:
+                yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
+                yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+                yield MoveLineTo(0.350 - 0.005, 1.150)
+                yield RotateTo(math.pi)
+                yield WaitForArmSequence()
+
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
-            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            yield MoveLineTo(0.350 - 0.005, 1.150)
-            yield RotateTo(math.pi)
-            yield WaitForArmSequence()
-            yield ArmSequence('GrabModuleFromStorageReturn')
+            if (yield ReadModuleArmPresence()).value:
+                yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
+                yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+                yield MoveLineTo(0.350 - 0.005, 1.150)
+                yield RotateTo(math.pi)
+                yield WaitForArmSequence()
 
+            yield ArmSequence('GrabModuleFromStorageReturn')
             yield StartArmSequence('InitForMonoColorModuleToDrop')
         else:
-            yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
-            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            yield MoveLineTo(0.350 - 0.005, 1.150)
-            yield RotateTo(math.pi)
-            yield WaitForArmSequence()
+            if (yield ReadModuleArmPresence()).value:
+                yield StartArmSequence('StockModuleFromGrabbedModuleLeft')
+                yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+                yield MoveLineTo(0.350 - 0.005, 1.150)
+                yield RotateTo(math.pi)
+                yield WaitForArmSequence()
+
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
-            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            yield MoveLineTo(0.350 - 0.005, 1.150)
-            yield RotateTo(math.pi)
-            yield WaitForArmSequence()
+            if (yield ReadModuleArmPresence()).value:
+                yield StartArmSequence('StockModuleFromGrabbedModuleLeftFront')
+                yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+                yield MoveLineTo(0.350 - 0.005, 1.150)
+                yield RotateTo(math.pi)
+                yield WaitForArmSequence()
+
             yield ArmSequence('GrabModuleFromStorageReturn')
 
-            yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
-            yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
-            yield MoveLineTo(0.350 - 0.005, 1.150)
-            yield RotateTo(math.pi)
-            yield WaitForArmSequence()
-            yield ArmSequence('GrabModuleFromStorageReturn')
+            if (yield ReadModuleArmPresence()).value:
+                yield StartArmSequence('StockModuleFromGrabbedModuleRightFront')
+                yield MoveLineTo(0.350 - 0.005 + RECALIBRATE_DIST, 1.150)
+                yield MoveLineTo(0.350 - 0.005, 1.150)
+                yield RotateTo(math.pi)
+                yield WaitForArmSequence()
 
+            yield ArmSequence('GrabModuleFromStorageReturn')
             yield StartArmSequence('InitForMonoColorModuleToDrop')
         #yield StartArmSequence('InitArm')
         #---
@@ -477,6 +509,7 @@ class PickNextModuleToDrop(State):
 
                 self.robot.used_storage_spaces.remove(storage_name)
                 self.module_to_drop = True
+        yield None
 
 
 class CentralMoonBaseLatBranch(State):
@@ -489,7 +522,8 @@ class CentralMoonBaseLatBranch(State):
             yield MoveLineTo(1.238, 1.101)
         #---
 
-        yield ArmSequence('DeposeFifthModule')
+        if (yield ReadModuleArmPresence()).value:
+            yield ArmSequence('DeposeFifthModule')
 
         yield ReadModuleHolderPresence()
 
